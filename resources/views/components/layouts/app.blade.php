@@ -27,89 +27,136 @@
             font-family: 'Arial', sans-serif;
         }
 
-        /* Improved Floating Sidebar */
-        .sidebar {
+        /* New Navbar Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap');
+
+        body {
+            background: #eaeef6;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .navbar {
             position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background-color: #fff;
-            transition: width 0.3s ease;
-            width: 4rem;
-            overflow: hidden;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-
-        .sidebar:hover,
-        .sidebar.expanded {
-            width: 16rem;
-        }
-
-        .sidebar .icon {
-            font-size: 1.25rem;
-            color: var(--primary-color);
-            transition: transform 0.3s;
-        }
-
-        .sidebar-nav {
+            top: 50%;
+            left: 1rem;
+            transform: translateY(-50%);
+            background: #fff;
+            border-radius: 10px;
+            padding: 1rem 0;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.03);
             display: flex;
             flex-direction: column;
-            padding-top: 2rem;
         }
 
-        .sidebar-nav a {
-            color: var(--text-color);
-            text-decoration: none;
-            padding: 1rem;
-            transition: background-color 0.3s;
+        .navbar__menu {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar__item {
+            position: relative;
+        }
+
+        .navbar__link {
+            position: relative;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            justify-content: center;
+            height: 3.5rem;
+            width: 5.5rem;
+            color: #6a778e;
+            transition: 250ms ease all;
         }
 
-        .sidebar-nav a:hover {
-            background-color: var(--hover-color);
+        .navbar__link i {
+            font-size: 1.2rem;
         }
 
-        .sidebar-nav span {
+        .navbar__link:hover {
+            color: #fff;
+        }
+
+        .navbar__link span {
+            position: absolute;
+            left: 100%;
+            transform: translate(-3rem);
+            margin-left: 1rem;
             opacity: 0;
-            transition: opacity 0.3s;
+            pointer-events: none;
+            color: #406ff3;
+            background: #fff;
+            padding: 0.75rem;
+            transition: 250ms ease all;
+            border-radius: 17.5px;
         }
 
-        .sidebar:hover .sidebar-nav span,
-        .sidebar.expanded .sidebar-nav span {
+        .navbar__link:hover span {
             opacity: 1;
+            transform: translate(0);
         }
 
-        /* Main Content */
+        .navbar__menu {
+            position: relative;
+        }
+
+        .navbar__item {
+            position: relative;
+        }
+
+        .navbar__item:before {
+            content: '';
+            position: absolute;
+            opacity: 0;
+            z-index: -1;
+            top: 0;
+            left: 1rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            background: #406ff3;
+            border-radius: 17.5px;
+            transition: 250ms cubic-bezier(1, 0.2, 0.1, 1.2) all;
+        }
+
+        .navbar__item:hover:before {
+            opacity: 1;
+            animation: gooeyEffect 250ms 1;
+        }
+
+        .navbar__item:last-child:before {
+            content: none;
+        }
+
+        @keyframes gooeyEffect {
+            0% {
+                transform: scale(1, 1);
+            }
+
+            50% {
+                transform: scale(1.1, 1.1);
+            }
+
+            100% {
+                transform: scale(1, 1);
+            }
+        }
+
+        /* Adjust main content margin */
         main {
-            margin-left: 4rem;
+            margin-left: 7rem;
+            /* Adjust based on your navbar width */
             padding: 2rem;
-            transition: margin-left 0.3s ease;
         }
 
-        .sidebar:hover~main,
-        .sidebar.expanded~main {
-            margin-left: 16rem;
-        }
+        /* Responsive adjustments */
+        @media (max-height: 600px) {
+            .navbar {
+                padding: 0.5rem 0;
+            }
 
-        /* Topbar */
-        .topbar {
-            background-color: #fff;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            .navbar__link {
+                height: 2.5rem;
+            }
         }
-
-        .topbar h1 {
-            font-size: 1.5rem;
-            color: var(--primary-color);
-        }
-
-        /* Add more styles as needed */
     </style>
 
     @filamentStyles
@@ -120,38 +167,40 @@
 <body class="antialiased">
     @auth
     <div class="flex min-h-screen">
-        <!-- Improved Floating Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <nav class="sidebar-nav">
-                <a href="{{ route('dashboard') }}">
-                    <i class="fas fa-th-large icon"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#">
-                    <i class="fas fa-map-marker-alt icon"></i>
-                    <span>Location</span>
-                </a>
-                <a href="#">
-                    <i class="fas fa-chart-line icon"></i>
-                    <span>Analytics</span>
-                </a>
-                <a href="#">
-                    <i class="fas fa-calendar-alt icon"></i>
-                    <span>Calendar</span>
-                </a>
-                <a href="#">
-                    <i class="fas fa-cog icon"></i>
-                    <span>Settings</span>
-                </a>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <i class="fas fa-sign-out-alt icon"></i>
-                    <span>Logout</span>
-                </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                </form>
-            </nav>
-        </aside>
+        <!-- Updated Navbar -->
+        <nav class="navbar">
+            <ul class="navbar__menu">
+                <li class="navbar__item">
+                    <a href="{{ route('dashboard') }}" class="navbar__link"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                </li>
+                <li class="navbar__item">
+                    <a href="{{ route('waterlevel') }}" class="navbar__link"><i class="fas fa-map-marker-alt"></i><span>Water Level</span></a>
+                </li>
+                <li class="navbar__item">
+                    <a href="#" class="navbar__link"><i class="fas fa-users"></i><span>Customers</span></a>
+                </li>
+                <li class="navbar__item">
+                    <a href="#" class="navbar__link"><i class="fas fa-folder"></i><span>Projects</span></a>
+                </li>
+                <li class="navbar__item">
+                    <a href="#" class="navbar__link"><i class="fas fa-archive"></i><span>Resources</span></a>
+                </li>
+                <li class="navbar__item">
+                    <a href="#" class="navbar__link"><i class="fas fa-question-circle"></i><span>Help</span></a>
+                </li>
+                <li class="navbar__item">
+                    <a href="#" class="navbar__link"><i class="fas fa-cog"></i><span>Settings</span></a>
+                </li>
+                <li class="navbar__item">
+                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="navbar__link">
+                        <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+            @csrf
+        </form>
 
         <!-- Main Content -->
         <div class="flex-1">
@@ -173,39 +222,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.getElementById('sidebar');
-            const toggleSidebar = document.getElementById('toggleSidebar');
-
-            // Toggle sidebar on mobile
-            toggleSidebar.addEventListener('click', function() {
-                sidebar.classList.toggle('expanded');
-            });
-
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', function(event) {
-                if (!sidebar.contains(event.target) && !toggleSidebar.contains(event.target)) {
-                    sidebar.classList.remove('expanded');
-                }
-            });
-
-            // Add active class to current page link
-            const currentPath = window.location.pathname;
-            const navLinks = sidebar.querySelectorAll('a');
-            navLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('bg-blue-100', 'text-blue-600');
-                }
-            });
-
-            // Smooth scrolling for anchor links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                });
-            });
+            // Remove old sidebar-related JavaScript
+            // feather.replace();
         });
     </script>
 </body>
