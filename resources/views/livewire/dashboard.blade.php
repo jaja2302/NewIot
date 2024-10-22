@@ -1,4 +1,4 @@
-<div class="bg-gray-100 p-6">
+<div>
     <!-- Location Request Button -->
     <button id="requestLocation" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">
         Get My Location
@@ -23,7 +23,8 @@
         @if(!empty($weatherData))
         <div id="weather-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Current Weather -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-300 relative overflow-hidden">
+                <div class="weather-animation absolute inset-0 opacity-20"></div>
                 <h2 class="text-2xl font-bold mb-4 text-blue-600">Current Weather</h2>
                 <div class="flex items-center justify-between">
                     <div>
@@ -39,7 +40,7 @@
             </div>
 
             <!-- Location Info -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
                 <h2 class="text-2xl font-bold mb-4 text-blue-600">Location Info</h2>
                 <p><strong>Timezone:</strong> {{ $weatherData['timezone'] }}</p>
                 <p><strong>Elevation:</strong> {{ $weatherData['elevation'] }}m</p>
@@ -47,7 +48,7 @@
             </div>
 
             <!-- Today's Highlights -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
                 <h2 class="text-2xl font-bold mb-4 text-blue-600">Today's Highlights</h2>
                 <p><strong>UV Index:</strong> {{ $weatherData['daily']['uv_index_max'][0] }}</p>
                 <p><strong>Precipitation:</strong> {{ $weatherData['daily']['precipitation_sum'][0] }} mm</p>
@@ -56,7 +57,7 @@
             </div>
 
             <!-- 7-Day Forecast -->
-            <div class="bg-white rounded-lg shadow-lg p-6 col-span-full">
+            <div class="bg-white rounded-lg shadow-lg p-6 col-span-full transform hover:scale-105 transition-transform duration-300">
                 <h2 class="text-2xl font-bold mb-4 text-blue-600">7-Day Forecast</h2>
                 <div class="grid grid-cols-7 gap-4">
                     @foreach(range(0, 6) as $day)
@@ -70,7 +71,7 @@
             </div>
 
             <!-- Hourly Forecast -->
-            <div class="bg-white rounded-lg shadow-lg p-6 col-span-full">
+            <div class="bg-white rounded-lg shadow-lg p-6 col-span-full transform hover:scale-105 transition-transform duration-300">
                 <h2 class="text-2xl font-bold mb-4 text-blue-600">Hourly Forecast</h2>
                 <div class="overflow-x-auto">
                     <div class="inline-flex space-x-4">
@@ -90,6 +91,62 @@
         <p>No weather data available. Please try again later.</p>
         @endif
     </div>
+
+    <style>
+        @keyframes sunny {
+
+            0%,
+            100% {
+                background-color: rgba(255, 200, 0, 0.2);
+            }
+
+            50% {
+                background-color: rgba(255, 200, 0, 0.4);
+            }
+        }
+
+        @keyframes rainy {
+
+            0%,
+            100% {
+                background-image: linear-gradient(to bottom, rgba(100, 100, 255, 0.2) 0%, rgba(100, 100, 255, 0) 100%);
+            }
+
+            50% {
+                background-image: linear-gradient(to bottom, rgba(100, 100, 255, 0.4) 0%, rgba(100, 100, 255, 0) 100%);
+            }
+        }
+
+        @keyframes cloudy {
+
+            0%,
+            100% {
+                background-color: rgba(200, 200, 200, 0.2);
+            }
+
+            50% {
+                background-color: rgba(200, 200, 200, 0.4);
+            }
+        }
+
+        @keyframes snowy {
+
+            0%,
+            100% {
+                background-image: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 60%);
+            }
+
+            50% {
+                background-image: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 60%);
+            }
+        }
+
+        .weather-animation {
+            animation-duration: 3s;
+            animation-iteration-count: infinite;
+            animation-timing-function: ease-in-out;
+        }
+    </style>
 
     <script>
         function getLocation() {
@@ -140,6 +197,28 @@
             @this.setLocationError(errorMessage);
         }
 
+        function setWeatherAnimation() {
+            const weatherCode = @json($weatherData['current']['weather_code'] ?? 12);
+            const weatherAnimation = document.querySelector('.weather-animation');
+
+            if (weatherCode >= 0 && weatherCode <= 3) {
+                weatherAnimation.style.animationName = 'sunny';
+            } else if (weatherCode >= 51 && weatherCode <= 67) {
+                weatherAnimation.style.animationName = 'rainy';
+            } else if (weatherCode >= 71 && weatherCode <= 77) {
+                weatherAnimation.style.animationName = 'snowy';
+            } else {
+                weatherAnimation.style.animationName = 'cloudy';
+            }
+        }
+
         document.getElementById('requestLocation').addEventListener('click', getLocation);
+
+        document.addEventListener('livewire:load', function() {
+            setWeatherAnimation();
+            Livewire.hook('message.processed', (message, component) => {
+                setWeatherAnimation();
+            });
+        });
     </script>
 </div>

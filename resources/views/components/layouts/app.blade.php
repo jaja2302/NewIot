@@ -157,6 +157,37 @@
                 height: 2.5rem;
             }
         }
+
+        /* Logo and Company Name Styles */
+        .navbar__brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #eaeef6;
+        }
+
+        .navbar__logo {
+            width: 50px;
+            height: auto;
+            margin-bottom: 0.5rem;
+        }
+
+        .navbar__company-name {
+            font-size: 0.8rem;
+            color: #406ff3;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Adjust main content margin to account for taller navbar */
+        main {
+            margin-left: 7rem;
+            padding: 2rem;
+            padding-top: 3rem;
+            /* Increase top padding */
+        }
     </style>
 
     @filamentStyles
@@ -169,14 +200,20 @@
     <div class="flex min-h-screen">
         <!-- Updated Navbar -->
         <nav class="navbar">
+            <!-- Add logo and company name -->
+            <div class="navbar__brand">
+                <img src="{{ asset('/img/CBIpreview.png') }}" alt="Company Logo" class="navbar__logo">
+                <span class="navbar__company-name">SSMS</span>
+            </div>
+
             <ul class="navbar__menu">
                 <li class="navbar__item">
                     <a href="{{ route('dashboard') }}" class="navbar__link"><i class="fas fa-home"></i><span>Dashboard</span></a>
                 </li>
                 <li class="navbar__item">
-                    <a href="{{ route('waterlevel') }}" class="navbar__link"><i class="fas fa-map-marker-alt"></i><span>Water Level</span></a>
+                    <a href="{{ route('waterlevel') }}" class="navbar__link"><i class="fa fa-water fa-2x"></i><span>Water Level</span></a>
                 </li>
-                <li class="navbar__item">
+                <!-- <li class="navbar__item">
                     <a href="#" class="navbar__link"><i class="fas fa-users"></i><span>Customers</span></a>
                 </li>
                 <li class="navbar__item">
@@ -190,7 +227,7 @@
                 </li>
                 <li class="navbar__item">
                     <a href="#" class="navbar__link"><i class="fas fa-cog"></i><span>Settings</span></a>
-                </li>
+                </li> -->
                 <li class="navbar__item">
                     <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="navbar__link">
                         <i class="fas fa-sign-out-alt"></i><span>Logout</span>
@@ -205,7 +242,11 @@
         <!-- Main Content -->
         <div class="flex-1">
             <main>
-                {{ $slot }}
+                <div class="min-h-screen">
+                    <div class="container mx-auto px-4 py-8">
+                        {{ $slot }}
+                    </div>
+                </div>
             </main>
         </div>
     </div>
