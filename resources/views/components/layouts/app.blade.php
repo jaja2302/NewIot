@@ -193,6 +193,9 @@
     @filamentStyles
     @vite('resources/css/app.css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.14/lottie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lottie-web@latest"></script>
+
 </head>
 
 <body class="antialiased">

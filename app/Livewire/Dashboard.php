@@ -8,9 +8,11 @@ use Illuminate\Support\Facades\Http;
 class Dashboard extends Component
 {
     public $weatherData = [];
-    public $lat = '2.684546';
-    public $lon = '111.6302997';
+    public $lat = '-6.2088'; // Default to Jakarta
+    public $lon = '106.8456';
     public $locationError = null;
+    public $searchQuery = '';
+    public $searchResults = [];
 
     public function mount()
     {
@@ -87,5 +89,41 @@ class Dashboard extends Component
         ];
 
         return $icons[$code] ?? '❓';
+    }
+
+    public function updatedSearchQuery()
+    {
+        $this->searchCity();
+    }
+
+    public function searchCity()
+    {
+        if (strlen($this->searchQuery) < 3) {
+            $this->searchResults = [];
+            return;
+        }
+
+        $response = Http::get("https://api.opencagedata.com/geocode/v1/json", [
+            'q' => $this->searchQuery . ', Indonesia',
+            'key' => env('OPENCAGE_API_KEY'),
+            'language' => 'en',
+            'limit' => 5,
+        ]);
+
+        if ($response->successful()) {
+            $this->searchResults = $response->json()['results'];
+        } else {
+            $this->locationError = "Error searching for cities. Please try again.";
+        }
+    }
+
+    public function setLocation($lat, $lon, $cityName)
+    {
+        $this->lat = $lat;
+        $this->lon = $lon;
+        $this->locationError = null;
+        $this->searchQuery = $cityName;
+        $this->searchResults = [];
+        $this->fetchWeatherData();
     }
 }

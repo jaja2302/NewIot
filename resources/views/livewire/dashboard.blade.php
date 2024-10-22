@@ -1,14 +1,45 @@
 <div>
-    <!-- Location Request Button -->
-    <button id="requestLocation" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">
-        Get My Location
-    </button>
+    <!-- City Search Input -->
+    <div class="mb-4 relative">
+        <input type="text"
+            wire:model.defer="searchQuery"
+            wire:keydown.enter="searchCity"
+            placeholder="Search for an Indonesian city"
+            class="w-full px-4 py-2 border rounded-lg"
+            wire:loading.attr="disabled"
+            wire:target="searchCity">
+    </div>
+
+    <!-- Loading Indicator for City Search -->
+    <div wire:loading wire:target="searchCity" class="mb-4">
+        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+            <div class="nav-icon lottie-animation" data-animation-path="{{ asset('loading/loadingsanimate.json') }}">
+            </div>
+
+            <p class="mt-4 text-xl font-semibold text-gray-700">Searching for city...</p>
+        </div>
+    </div>
+
+
+
+    <!-- Search Results -->
+    @if(!empty($searchResults))
+    <div class="mb-4">
+        <ul class="bg-white border rounded-lg shadow-lg">
+            @foreach($searchResults as $result)
+            <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer" wire:click="setLocation('{{ $result['geometry']['lat'] }}', '{{ $result['geometry']['lng'] }}', '{{ $result['formatted'] }}')">
+                {{ $result['formatted'] }}
+            </li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
 
     <!-- Location Error Message -->
     @if($locationError)
     <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
         <p>{{ $locationError }}</p>
-        <p>Using default location: Latitude {{ $lat }}, Longitude {{ $lon }}</p>
+        <p>Using location: {{ $searchQuery ?: 'Default' }}</p>
     </div>
     @endif
 
@@ -23,7 +54,7 @@
         @if(!empty($weatherData))
         <div id="weather-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Current Weather -->
-            <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-300 relative overflow-hidden">
+            <div class="weather-card bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-300 relative overflow-hidden cursor-pointer" data-modal-target="current-weather">
                 <div class="weather-animation absolute inset-0 opacity-20"></div>
                 <h2 class="text-2xl font-bold mb-4 text-blue-600">Current Weather</h2>
                 <div class="flex items-center justify-between">
@@ -40,7 +71,7 @@
             </div>
 
             <!-- Location Info -->
-            <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+            <div class="weather-card bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-300 cursor-pointer" data-modal-target="location-info">
                 <h2 class="text-2xl font-bold mb-4 text-blue-600">Location Info</h2>
                 <p><strong>Timezone:</strong> {{ $weatherData['timezone'] }}</p>
                 <p><strong>Elevation:</strong> {{ $weatherData['elevation'] }}m</p>
@@ -48,7 +79,7 @@
             </div>
 
             <!-- Today's Highlights -->
-            <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+            <div class="weather-card bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-300 cursor-pointer" data-modal-target="todays-highlights">
                 <h2 class="text-2xl font-bold mb-4 text-blue-600">Today's Highlights</h2>
                 <p><strong>UV Index:</strong> {{ $weatherData['daily']['uv_index_max'][0] }}</p>
                 <p><strong>Precipitation:</strong> {{ $weatherData['daily']['precipitation_sum'][0] }} mm</p>
@@ -57,7 +88,7 @@
             </div>
 
             <!-- 7-Day Forecast -->
-            <div class="bg-white rounded-lg shadow-lg p-6 col-span-full transform hover:scale-105 transition-transform duration-300">
+            <div class="weather-card bg-white rounded-lg shadow-lg p-6 col-span-full transform hover:scale-105 transition-transform duration-300 cursor-pointer" data-modal-target="seven-day-forecast">
                 <h2 class="text-2xl font-bold mb-4 text-blue-600">7-Day Forecast</h2>
                 <div class="grid grid-cols-7 gap-4">
                     @foreach(range(0, 6) as $day)
@@ -71,7 +102,7 @@
             </div>
 
             <!-- Hourly Forecast -->
-            <div class="bg-white rounded-lg shadow-lg p-6 col-span-full transform hover:scale-105 transition-transform duration-300">
+            <div class="weather-card bg-white rounded-lg shadow-lg p-6 col-span-full transform hover:scale-105 transition-transform duration-300 cursor-pointer" data-modal-target="hourly-forecast">
                 <h2 class="text-2xl font-bold mb-4 text-blue-600">Hourly Forecast</h2>
                 <div class="overflow-x-auto">
                     <div class="inline-flex space-x-4">
@@ -90,6 +121,18 @@
         @else
         <p>No weather data available. Please try again later.</p>
         @endif
+    </div>
+
+    <!-- Modal -->
+    <div id="weather-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
+            <div id="modal-content"></div>
+            <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-600 hover:text-gray-800">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
     </div>
 
     <style>
@@ -146,57 +189,47 @@
             animation-iteration-count: infinite;
             animation-timing-function: ease-in-out;
         }
+
+        .modal-enter {
+            animation: modalEnter 0.3s ease-out;
+        }
+
+        .modal-exit {
+            animation: modalExit 0.3s ease-in;
+        }
+
+        @keyframes modalEnter {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes modalExit {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            to {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .weather-card {
+                transform: none !important;
+            }
+        }
     </style>
 
     <script>
-        function getLocation() {
-            if ("geolocation" in navigator) {
-                console.log("Geolocation is available");
-                navigator.permissions.query({
-                    name: 'geolocation'
-                }).then(function(result) {
-                    if (result.state == 'granted') {
-                        console.log("Permission is granted");
-                        navigator.geolocation.getCurrentPosition(showPosition, showError);
-                    } else if (result.state == 'prompt') {
-                        console.log("Permission has not been requested yet");
-                        navigator.geolocation.getCurrentPosition(showPosition, showError);
-                    } else if (result.state == 'denied') {
-                        console.log("Permission was denied");
-                        @this.setLocationError("Location access was denied. Using default location.");
-                    }
-                });
-            } else {
-                console.log("Geolocation is not supported by this browser");
-                @this.setLocationError("Geolocation is not supported by this browser. Using default location.");
-            }
-        }
-
-        function showPosition(position) {
-            let lat = position.coords.latitude;
-            let lon = position.coords.longitude;
-            @this.updateLocation(lat, lon);
-        }
-
-        function showError(error) {
-            let errorMessage;
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMessage = "Location access was denied. Using default location.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorMessage = "Location information is unavailable. Using default location.";
-                    break;
-                case error.TIMEOUT:
-                    errorMessage = "The request to get user location timed out. Using default location.";
-                    break;
-                case error.UNKNOWN_ERROR:
-                    errorMessage = "An unknown error occurred. Using default location.";
-                    break;
-            }
-            @this.setLocationError(errorMessage);
-        }
-
         function setWeatherAnimation() {
             const weatherCode = @json($weatherData['current']['weather_code'] ?? 12);
             const weatherAnimation = document.querySelector('.weather-animation');
@@ -212,12 +245,63 @@
             }
         }
 
-        document.getElementById('requestLocation').addEventListener('click', getLocation);
+        function openModal(cardId) {
+            const modal = document.getElementById('weather-modal');
+            const modalContent = document.getElementById('modal-content');
+            const card = document.querySelector(`[data-modal-target="${cardId}"]`);
+
+            modalContent.innerHTML = card.innerHTML;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            setTimeout(() => {
+                modal.querySelector('.bg-white').classList.add('modal-enter');
+            }, 10);
+
+            // Prevent scrolling on the body when modal is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('weather-modal');
+            const modalContent = modal.querySelector('.bg-white');
+
+            modalContent.classList.remove('modal-enter');
+            modalContent.classList.add('modal-exit');
+
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+                modalContent.classList.remove('modal-exit');
+                // Re-enable scrolling on the body
+                document.body.style.overflow = '';
+            }, 300);
+        }
 
         document.addEventListener('livewire:load', function() {
             setWeatherAnimation();
             Livewire.hook('message.processed', (message, component) => {
                 setWeatherAnimation();
+            });
+        });
+
+        // Close modal when clicking outside the content
+        document.getElementById('weather-modal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            var lottieElements = document.querySelectorAll('.lottie-animation');
+            lottieElements.forEach(function(element) {
+                var animationPath = element.getAttribute('data-animation-path');
+                lottie.loadAnimation({
+                    container: element,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: animationPath
+                });
             });
         });
     </script>
