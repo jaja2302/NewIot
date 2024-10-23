@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pengguna;
+use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
 {
@@ -39,6 +40,10 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        // Clear the user-specific cache
+        Cache::forget('user_location');
+        Cache::forget('weather_data_' . Auth::id());
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light">
 
 <head>
     <meta charset="utf-8" />
@@ -15,7 +15,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.14/lottie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lottie-web@latest"></script>
 
-
+    <script>
+        // Check for saved theme preference or use default (light)
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
 </head>
 
 <body class="antialiased">
@@ -32,7 +39,7 @@
 
     @auth
     <div class="flex min-h-screen">
-        <!-- Updated Navbar -->
+        <!-- Navbar -->
         <nav class="navbar">
             <!-- Add logo and company name -->
             <div class="navbar__brand">
@@ -75,6 +82,15 @@
 
         <!-- Main Content -->
         <div class="flex-1">
+            <!-- Add the scrolling information section here -->
+            <div class="bg-gray-100 p-4 mb-4 overflow-hidden">
+                <div class="scrolling-text-container">
+                    <p class="scrolling-text text-sm text-gray-700">
+                        IoT Weather Station dan Water Level: Sistem kami menyediakan data real-time dari sensor, menampilkan laporan komprehensif di dashboard, termasuk visualisasi grafik harian, mingguan, dan bulanan. Data tersedia dalam format Excel untuk kemudahan analisis.
+                    </p>
+                </div>
+            </div>
+
             <main>
                 <div class="min-h-screen">
                     <div class="container mx-auto px-4 py-8">
@@ -90,10 +106,83 @@
     </div>
     @endauth
 
+    <!-- Theme toggle button -->
+    <button id="theme-toggle">
+        <i class="fas fa-moon dark:hidden"></i>
+        <i class="fas fa-sun hidden dark:inline"></i>
+    </button>
+
     @livewire('notifications')
 
     @filamentScripts
 
+    <style>
+        .scrolling-text-container {
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .scrolling-text {
+            display: inline-block;
+            white-space: nowrap;
+            animation: scroll 30s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Light mode styles */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+        }
+
+        /* Dark mode styles */
+        .dark {
+            --bg-color: #1a202c;
+            --text-color: #e2e8f0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        /* Add more custom styles for dark mode as needed */
+
+        #theme-toggle {
+            transition: background-color 0.3s ease;
+        }
+
+        #theme-toggle:hover {
+            background-color: #e2e8f0;
+        }
+
+        .dark #theme-toggle:hover {
+            background-color: #4a5568;
+        }
+    </style>
+
+    <script>
+        const themeToggleBtn = document.getElementById('theme-toggle');
+
+        themeToggleBtn.addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark');
+
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.theme = 'dark';
+            } else {
+                localStorage.theme = 'light';
+            }
+        });
+    </script>
 </body>
 
 </html>

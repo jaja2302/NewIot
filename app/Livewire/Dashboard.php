@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class Dashboard extends Component
 {
@@ -17,23 +18,43 @@ class Dashboard extends Component
 
     public function mount()
     {
+        $this->loadCachedLocation();
         $this->fetchWeatherData();
-        // dd($this->weatherData);
+    }
+
+    private function loadCachedLocation()
+    {
+        $cachedLocation = Cache::get('user_location');
+        if ($cachedLocation) {
+            $this->lat = $cachedLocation['lat'];
+            $this->lon = $cachedLocation['lon'];
+            $this->searchQuery = $cachedLocation['city'];
+        }
     }
 
     public function fetchWeatherData()
     {
-        // Fetch weather data from Open-Meteo API
-        $response = Http::get("https://api.open-meteo.com/v1/forecast", [
-            'latitude' => $this->lat,
-            'longitude' => $this->lon,
-            'current' => 'temperature_2m,apparent_temperature,is_day',
-            'hourly' => 'temperature_2m,relative_humidity_2m,weather_code',
-            'daily' => 'weather_code,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,uv_index_clear_sky_max,precipitation_sum,rain_sum',
-            'timezone' => 'auto'
-        ]);
+        $cacheKey = "weather_data_{$this->lat}_{$this->lon}";
+        $cachedData = Cache::get($cacheKey);
 
-        $this->weatherData = $response->json();
+        if ($cachedData) {
+            $this->weatherData = $cachedData;
+        } else {
+            // Fetch weather data from Open-Meteo API
+            $response = Http::get("https://api.open-meteo.com/v1/forecast", [
+                'latitude' => $this->lat,
+                'longitude' => $this->lon,
+                'current' => 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
+                'hourly' => 'temperature_2m,relative_humidity_2m,weather_code',
+                'daily' => 'weather_code,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,uv_index_clear_sky_max,precipitation_sum,rain_sum',
+                'timezone' => 'auto'
+            ]);
+
+            $this->weatherData = $response->json();
+
+            // Cache the weather data for 1 hour
+            Cache::put($cacheKey, $this->weatherData, now()->addHour());
+        }
     }
 
     public function updateLocation($lat, $lon)
@@ -130,6 +151,50 @@ class Dashboard extends Component
         $this->locationError = null;
         $this->searchQuery = $cityName;
         $this->searchResults = [];
+
+        // Cache the user's location
+        Cache::put('user_location', [
+            'lat' => $lat,
+            'lon' => $lon,
+            'city' => $cityName
+        ], now()->addDays(30));
+
         $this->fetchWeatherData();
+    }
+
+    public function getWeatherDescription($code)
+    {
+        $descriptions = [
+            0 => 'Cerah',
+            1 => 'Sebagian cerah',
+            2 => 'Berawan sebagian',
+            3 => 'Berawan',
+            45 => 'Berkabut',
+            48 => 'Berkabut tebal',
+            51 => 'Gerimis ringan',
+            53 => 'Gerimis sedang',
+            55 => 'Gerimis lebat',
+            56 => 'Gerimis beku ringan',
+            57 => 'Gerimis beku lebat',
+            61 => 'Hujan ringan',
+            63 => 'Hujan sedang',
+            65 => 'Hujan lebat',
+            66 => 'Hujan beku ringan',
+            67 => 'Hujan beku lebat',
+            71 => 'Salju ringan',
+            73 => 'Salju sedang',
+            75 => 'Salju lebat',
+            77 => 'Butiran salju',
+            80 => 'Hujan ringan',
+            81 => 'Hujan sedang',
+            82 => 'Hujan lebat',
+            85 => 'Hujan salju ringan',
+            86 => 'Hujan salju lebat',
+            95 => 'Badai petir',
+            96 => 'Badai petir dengan hujan es ringan',
+            99 => 'Badai petir dengan hujan es lebat',
+        ];
+
+        return $descriptions[$code] ?? 'Tidak diketahui';
     }
 }
