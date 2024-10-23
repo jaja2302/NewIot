@@ -101,13 +101,14 @@
         </div>
     </div>
     @else
-    <div class="min-h-screen flex items-center justify-center">
+    <!-- Full-screen layout for non-authenticated users (like login page) -->
+    <div class="min-h-screen bg-gradient-to-b from-sky-200 to-sky-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
         {{ $slot }}
     </div>
     @endauth
 
-    <!-- Theme toggle button -->
-    <button id="theme-toggle">
+    <!-- Theme toggle button (moved outside of the auth check) -->
+    <button id="theme-toggle" class="fixed bottom-4 right-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700 z-50">
         <i class="fas fa-moon dark:hidden"></i>
         <i class="fas fa-sun hidden dark:inline"></i>
     </button>
@@ -115,74 +116,6 @@
     @livewire('notifications')
 
     @filamentScripts
-
-    <style>
-        .scrolling-text-container {
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .scrolling-text {
-            display: inline-block;
-            white-space: nowrap;
-            animation: scroll 30s linear infinite;
-        }
-
-        @keyframes scroll {
-            0% {
-                transform: translateX(100%);
-            }
-
-            100% {
-                transform: translateX(-100%);
-            }
-        }
-
-        /* Light mode styles */
-        :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-        }
-
-        /* Dark mode styles */
-        .dark {
-            --bg-color: #1a202c;
-            --text-color: #e2e8f0;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        /* Add more custom styles for dark mode as needed */
-
-        #theme-toggle {
-            transition: background-color 0.3s ease;
-        }
-
-        #theme-toggle:hover {
-            background-color: #e2e8f0;
-        }
-
-        .dark #theme-toggle:hover {
-            background-color: #4a5568;
-        }
-    </style>
-
-    <script>
-        const themeToggleBtn = document.getElementById('theme-toggle');
-
-        themeToggleBtn.addEventListener('click', function() {
-            document.documentElement.classList.toggle('dark');
-
-            if (document.documentElement.classList.contains('dark')) {
-                localStorage.theme = 'dark';
-            } else {
-                localStorage.theme = 'light';
-            }
-        });
-    </script>
 </body>
 
 </html>

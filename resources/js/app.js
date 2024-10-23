@@ -3,7 +3,18 @@ import $ from 'jquery';
 window.$ = $;
 window.jQuery = $;
 
-$(document).ready(function() {
+$(function() {
+    const $themeToggleBtn = $('#theme-toggle');
+
+    $themeToggleBtn.on('click', function() {
+        $('html').toggleClass('dark');
+
+        if ($('html').hasClass('dark')) {
+            localStorage.theme = 'dark';
+        } else {
+            localStorage.theme = 'light';
+        }
+    });
     // Lottie animations
     $('.lottie-animation').each(function() {
         var animationPath = $(this).data('animation-path');

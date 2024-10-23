@@ -337,3 +337,55 @@ main {
 .weather-card:hover {
     background-color: var(--hover-bg);
 }
+
+.scrolling-text-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.scrolling-text {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll 30s linear infinite;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+/* Light mode styles */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+}
+
+/* Dark mode styles */
+.dark {
+    --bg-color: #1a202c;
+    --text-color: #e2e8f0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Add more custom styles for dark mode as needed */
+
+#theme-toggle {
+    transition: background-color 0.3s ease;
+}
+
+#theme-toggle:hover {
+    background-color: #e2e8f0;
+}
+
+.dark #theme-toggle:hover {
+    background-color: #4a5568;
+}
