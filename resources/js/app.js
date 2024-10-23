@@ -4,6 +4,35 @@ window.$ = $;
 window.jQuery = $;
 
 $(function() {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const navbar = document.getElementById('navbar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+    function toggleSidebar() {
+        navbar.classList.toggle('hidden');
+        sidebarOverlay.classList.toggle('hidden');
+        document.body.classList.toggle('overflow-hidden');
+    }
+
+    function hideSidebar() {
+        navbar.classList.add('hidden');
+        sidebarOverlay.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    mobileMenuButton.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', hideSidebar);
+
+    // Hide sidebar when clicking a nav link on mobile
+    const navLinks = document.querySelectorAll('.navbar__link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                hideSidebar();
+            }
+        });
+    });
+
     const $themeToggleBtn = $('#theme-toggle');
 
     $themeToggleBtn.on('click', function() {

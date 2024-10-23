@@ -43,6 +43,7 @@ body {
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.03);
     display: flex;
     flex-direction: column;
+    z-index: 1000;
 }
 
 .navbar__menu {
@@ -139,19 +140,28 @@ body {
 
 /* Adjust main content margin */
 main {
-    margin-left: 7rem;
-    /* Adjust based on your navbar width */
+    margin-left: 0; /* Remove left margin */
     padding: 2rem;
+    padding-top: 3rem;
 }
 
 /* Responsive adjustments */
-@media (max-height: 600px) {
+@media (max-width: 768px) {
     .navbar {
-        padding: 0.5rem 0;
+        top: 0;
+        left: 0;
+        transform: translateX(-100%);
+        height: 100%;
+        width: 250px;
     }
 
-    .navbar__link {
-        height: 2.5rem;
+    .navbar:not(.hidden) {
+        transform: translateX(0);
+    }
+
+    main {
+        margin-left: 0;
+        padding-top: 4rem;
     }
 }
 
@@ -180,7 +190,7 @@ main {
 
 /* Adjust main content margin to account for taller navbar */
 main {
-    margin-left: 7rem;
+    margin-left: 0;
     padding: 2rem;
     padding-top: 3rem;
     /* Increase top padding */
@@ -341,6 +351,7 @@ main {
 .scrolling-text-container {
     width: 100%;
     overflow: hidden;
+    padding: 0 1rem; /* Add horizontal padding */
 }
 
 .scrolling-text {
@@ -389,3 +400,145 @@ body {
 .dark #theme-toggle:hover {
     background-color: #4a5568;
 }
+
+/* Responsive Navbar Styles */
+@media (max-width: 768px) {
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+        width: 250px;
+        height: 100%;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding: 1rem;
+        z-index: 1001;
+        background-color: white;
+        transition: transform 0.3s ease-in-out;
+        overflow-y: auto;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar:not(.hidden) {
+        transform: translateX(0);
+    }
+
+    .navbar__menu {
+        flex-direction: column;
+        margin-top: 2rem;
+    }
+
+    .navbar__item {
+        margin-bottom: 1rem;
+    }
+
+    .navbar__link {
+        width: 100%;
+        height: auto;
+        padding: 0.75rem;
+        justify-content: flex-start;
+    }
+
+    .navbar__link i {
+        margin-right: 1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .navbar__link span {
+        display: inline;
+        position: static;
+        opacity: 1;
+        transform: none;
+        margin-left: 0;
+        color: inherit;
+        background: none;
+        padding: 0;
+    }
+
+    .navbar__brand {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eaeef6;
+    }
+
+    .navbar__logo {
+        width: 40px;
+        height: auto;
+        margin-right: 1rem;
+        margin-bottom: 0;
+    }
+
+    .navbar__company-name {
+        font-size: 1.2rem;
+    }
+
+    main {
+        margin-left: 0;
+        padding-top: 4rem; /* Add space for the mobile menu button */
+    }
+
+    .navbar__item:before {
+        content: none;
+    }
+
+    .navbar__link:hover {
+        background-color: #f0f4f8;
+        border-radius: 8px;
+    }
+}
+
+/* Mobile menu button styles */
+#mobile-menu-button {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    #mobile-menu-button {
+        display: block;
+    }
+}
+
+/* Theme toggle button styles */
+#theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 2px solid var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+.dark #theme-toggle {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border-color: var(--text-color);
+}
+
+/* Adjust theme toggle position for mobile */
+@media (max-width: 768px) {
+    #theme-toggle {
+        bottom: 70px; /* Adjust this value as needed */
+    }
+}
+
+/* ... rest of the existing styles ... */
+

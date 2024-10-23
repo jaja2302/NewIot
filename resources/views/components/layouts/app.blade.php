@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="application-name" content="{{ config('app.name') }}" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
     <title>{{ config('app.name') }} - @yield('title', 'Welcome')</title>
 
@@ -38,9 +38,14 @@
     </div>
 
     @auth
-    <div class="flex min-h-screen">
+    <div class="flex flex-col md:flex-row min-h-screen overflow-x-hidden">
+        <!-- Mobile menu button -->
+        <button id="mobile-menu-button" class="md:hidden fixed top-4 left-4 z-50 p-2 mt-10 bg-white rounded-md shadow-md">
+            <i class="fas fa-bars"></i>
+        </button>
+
         <!-- Navbar -->
-        <nav class="navbar">
+        <nav id="navbar" class="navbar md:block hidden">
             <!-- Add logo and company name -->
             <div class="navbar__brand">
                 <img src="{{ asset('/img/CBIpreview.png') }}" alt="Company Logo" class="navbar__logo">
@@ -54,21 +59,6 @@
                 <li class="navbar__item">
                     <a href="{{ route('waterlevel') }}" class="navbar__link"><i class="fa fa-water fa-2x"></i><span>Water Level</span></a>
                 </li>
-                <!-- <li class="navbar__item">
-                    <a href="#" class="navbar__link"><i class="fas fa-users"></i><span>Customers</span></a>
-                </li>
-                <li class="navbar__item">
-                    <a href="#" class="navbar__link"><i class="fas fa-folder"></i><span>Projects</span></a>
-                </li>
-                <li class="navbar__item">
-                    <a href="#" class="navbar__link"><i class="fas fa-archive"></i><span>Resources</span></a>
-                </li>
-                <li class="navbar__item">
-                    <a href="#" class="navbar__link"><i class="fas fa-question-circle"></i><span>Help</span></a>
-                </li>
-                <li class="navbar__item">
-                    <a href="#" class="navbar__link"><i class="fas fa-cog"></i><span>Settings</span></a>
-                </li> -->
                 <li class="navbar__item">
                     <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="navbar__link">
                         <i class="fas fa-sign-out-alt"></i><span>Logout</span>
@@ -76,14 +66,17 @@
                 </li>
             </ul>
         </nav>
-        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
             @csrf
         </form>
 
+        <!-- Overlay for closing sidebar on mobile -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-40 hidden md:hidden"></div>
+
         <!-- Main Content -->
-        <div class="flex-1">
+        <div class="flex-1 w-full overflow-x-hidden">
             <!-- Add the scrolling information section here -->
-            <div class="bg-gray-100 p-4 mb-4 overflow-hidden">
+            <div class="bg-gray-100 p-4 mb-4 overflow-hidden w-full">
                 <div class="scrolling-text-container">
                     <p class="scrolling-text text-sm text-gray-700">
                         IoT Weather Station dan Water Level: Sistem kami menyediakan data real-time dari sensor, menampilkan laporan komprehensif di dashboard, termasuk visualisasi grafik harian, mingguan, dan bulanan. Data tersedia dalam format Excel untuk kemudahan analisis.
@@ -91,7 +84,7 @@
                 </div>
             </div>
 
-            <main>
+            <main class="p-4 w-full">
                 <div class="min-h-screen">
                     <div class="container mx-auto px-4 py-8">
                         {{ $slot }}
@@ -107,7 +100,7 @@
     </div>
     @endauth
 
-    <!-- Theme toggle button (moved outside of the auth check) -->
+    <!-- Theme toggle button -->
     <button id="theme-toggle" class="fixed bottom-4 right-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700 z-50">
         <i class="fas fa-moon dark:hidden"></i>
         <i class="fas fa-sun hidden dark:inline"></i>
@@ -116,6 +109,7 @@
     @livewire('notifications')
 
     @filamentScripts
+
 </body>
 
 </html>

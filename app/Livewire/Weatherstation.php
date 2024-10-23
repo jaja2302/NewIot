@@ -8,6 +8,7 @@ class Weatherstation extends Component
 {
     public function render()
     {
+
         return view('livewire.weatherstation');
     }
 }
