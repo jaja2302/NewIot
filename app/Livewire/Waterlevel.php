@@ -11,9 +11,13 @@ use App\Models\Waterlevellist;
 class Waterlevel extends Component
 {
     public $selectedWilayah;
+    public $selectedStation;
     public $stations = [];
     public $selectedDate;
     public $weatherstation;
+    public $latlon;
+
+
     public function render()
     {
         $wilayah = Wilayah::all();
@@ -24,14 +28,26 @@ class Waterlevel extends Component
 
     public function updateSelectedStation($wilayahId)
     {
+        $this->selectedWilayah = $wilayahId;
         $data = Estate::where('wil', $wilayahId)->pluck('est');
 
-        $liststation = Waterlevellist::where(function ($query) use ($data) {
+        $this->stations = Waterlevellist::where(function ($query) use ($data) {
             foreach ($data as $estate) {
                 $query->orWhere('location', 'like', $estate . '%');
             }
         })->get();
-        // dd($liststation);
-        $this->stations = $liststation;
+    }
+
+    public function onChangeStation($stationId)
+    {
+        $station = Waterlevellist::find($stationId);
+
+        if ($station) {
+            $this->latlon = [
+                'lat' => $station->lat,
+                'lon' => $station->lon
+            ];
+            $this->dispatch('updateMap', json_encode($this->latlon));
+        }
     }
 }

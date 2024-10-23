@@ -48,45 +48,40 @@
     <div wire:loading.remove wire:target="fetchWeatherData">
         @if(!empty($weatherData))
         <div id="weather-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Current Weather -->
-            <div class="weather-card rounded-lg shadow-lg p-4 transform hover:scale-105 transition-transform duration-300 relative overflow-hidden">
-                <div class="weather-animation absolute inset-0 opacity-20"></div>
-                <h2 class="text-lg font-semibold mb-1">Cuaca saat ini</h2>
-                <p class="text-xs opacity-75">{{ \Carbon\Carbon::parse($weatherData['current']['time'])->format('H:i') }}</p>
-                <div class="flex items-center justify-between mt-2">
-                    <div class="flex items-center">
-                        <div class="text-4xl font-bold mr-2">{{ round($weatherData['current']['temperature_2m']) }}°C</div>
-                        <div class="text-3xl">{{ $this->getWeatherIcon($weatherData['current']['weather_code']) }}</div>
+            <!-- Misol-like Weather Widget -->
+            <div class="weather-card rounded-lg shadow-lg p-4 transform hover:scale-105 transition-transform duration-300 relative overflow-hidden bg-black text-white">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-2">
+                        <div class="text-xl font-bold mb-2">{{ \Carbon\Carbon::now()->format('D, d M Y') }}</div>
+                        <div class="text-4xl font-bold">{{ \Carbon\Carbon::now()->format('H:i:s') }}</div>
                     </div>
                     <div class="text-right">
-                        <p class="text-sm">{{ $this->getWeatherDescription($weatherData['current']['weather_code']) }}</p>
-                        <p class="text-xs">Terasa seperti: {{ round($weatherData['current']['apparent_temperature']) }}°</p>
+                        <div class="text-5xl font-bold">{{ round($weatherData['current']['temperature_2m']) }}°C</div>
+                        <div class="text-lg">{{ $this->getWeatherIcon($weatherData['current']['weather_code']) }}</div>
                     </div>
                 </div>
-                <div class="grid grid-cols-3 gap-2 mt-2 text-xs">
-                    <div>
-                        <p class="opacity-75">Angin</p>
-                        <p class="font-semibold">{{ round($weatherData['current']['wind_speed_10m']) }} km/j</p>
+                <div class="grid grid-cols-3 gap-4 mt-4">
+                    <div class="text-center">
+                        <div class="text-yellow-400 text-2xl font-bold">{{ round($weatherData['current']['wind_speed_10m']) }}</div>
+                        <div class="text-sm">Wind km/h</div>
                     </div>
-                    <div>
-                        <p class="opacity-75">Kelembaban</p>
-                        <p class="font-semibold">{{ $weatherData['current']['relative_humidity_2m'] }}%</p>
+                    <div class="text-center">
+                        <div class="text-blue-400 text-2xl font-bold">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
+                        <div class="text-sm">Humidity</div>
                     </div>
-                    <div>
-                        <p class="opacity-75">Curah hujan</p>
-                        <p class="font-semibold">{{ $weatherData['current']['precipitation'] }} mm</p>
+                    <div class="text-center">
+                        <div class="text-green-400 text-2xl font-bold">{{ $weatherData['current']['precipitation'] }}</div>
+                        <div class="text-sm">Rain mm</div>
                     </div>
-                    <div>
-                        <p class="opacity-75">Tutupan awan</p>
-                        <p class="font-semibold">{{ $weatherData['current']['cloud_cover'] }}%</p>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between items-center">
+                        <span>Sunrise</span>
+                        <span>{{ \Carbon\Carbon::parse($weatherData['daily']['sunrise'][0])->format('H:i') }}</span>
                     </div>
-                    <div>
-                        <p class="opacity-75">Tekanan</p>
-                        <p class="font-semibold">{{ round($weatherData['current']['pressure_msl']) }} mb</p>
-                    </div>
-                    <div>
-                        <p class="opacity-75">Arah angin</p>
-                        <p class="font-semibold">{{ $weatherData['current']['wind_direction_10m'] }}°</p>
+                    <div class="flex justify-between items-center">
+                        <span>Sunset</span>
+                        <span>{{ \Carbon\Carbon::parse($weatherData['daily']['sunset'][0])->format('H:i') }}</span>
                     </div>
                 </div>
             </div>
