@@ -13,6 +13,7 @@ class Dashboard extends Component
     public $locationError = null;
     public $searchQuery = '';
     public $searchResults = [];
+    public $isSearching = false;
 
     public function mount()
     {
@@ -98,8 +99,11 @@ class Dashboard extends Component
 
     public function searchCity()
     {
+        $this->isSearching = true;
+
         if (strlen($this->searchQuery) < 3) {
             $this->searchResults = [];
+            $this->isSearching = false;
             return;
         }
 
@@ -115,6 +119,8 @@ class Dashboard extends Component
         } else {
             $this->locationError = "Error searching for cities. Please try again.";
         }
+
+        $this->isSearching = false;
     }
 
     public function setLocation($lat, $lon, $cityName)

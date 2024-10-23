@@ -9,196 +9,27 @@
 
     <title>{{ config('app.name') }} - @yield('title', 'Welcome')</title>
 
-    <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        :root {
-            --primary-color: #3B82F6;
-            --bg-color: #F0F9FF;
-            --text-color: #333;
-            --hover-color: #E6F3FF;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Arial', sans-serif;
-        }
-
-        /* New Navbar Styles */
-        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap');
-
-        body {
-            background: #eaeef6;
-            font-family: 'Open Sans', sans-serif;
-        }
-
-        .navbar {
-            position: fixed;
-            top: 50%;
-            left: 1rem;
-            transform: translateY(-50%);
-            background: #fff;
-            border-radius: 10px;
-            padding: 1rem 0;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.03);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .navbar__menu {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .navbar__item {
-            position: relative;
-        }
-
-        .navbar__link {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 3.5rem;
-            width: 5.5rem;
-            color: #6a778e;
-            transition: 250ms ease all;
-        }
-
-        .navbar__link i {
-            font-size: 1.2rem;
-        }
-
-        .navbar__link:hover {
-            color: #fff;
-        }
-
-        .navbar__link span {
-            position: absolute;
-            left: 100%;
-            transform: translate(-3rem);
-            margin-left: 1rem;
-            opacity: 0;
-            pointer-events: none;
-            color: #406ff3;
-            background: #fff;
-            padding: 0.75rem;
-            transition: 250ms ease all;
-            border-radius: 17.5px;
-        }
-
-        .navbar__link:hover span {
-            opacity: 1;
-            transform: translate(0);
-        }
-
-        .navbar__menu {
-            position: relative;
-        }
-
-        .navbar__item {
-            position: relative;
-        }
-
-        .navbar__item:before {
-            content: '';
-            position: absolute;
-            opacity: 0;
-            z-index: -1;
-            top: 0;
-            left: 1rem;
-            width: 3.5rem;
-            height: 3.5rem;
-            background: #406ff3;
-            border-radius: 17.5px;
-            transition: 250ms cubic-bezier(1, 0.2, 0.1, 1.2) all;
-        }
-
-        .navbar__item:hover:before {
-            opacity: 1;
-            animation: gooeyEffect 250ms 1;
-        }
-
-        .navbar__item:last-child:before {
-            content: none;
-        }
-
-        @keyframes gooeyEffect {
-            0% {
-                transform: scale(1, 1);
-            }
-
-            50% {
-                transform: scale(1.1, 1.1);
-            }
-
-            100% {
-                transform: scale(1, 1);
-            }
-        }
-
-        /* Adjust main content margin */
-        main {
-            margin-left: 7rem;
-            /* Adjust based on your navbar width */
-            padding: 2rem;
-        }
-
-        /* Responsive adjustments */
-        @media (max-height: 600px) {
-            .navbar {
-                padding: 0.5rem 0;
-            }
-
-            .navbar__link {
-                height: 2.5rem;
-            }
-        }
-
-        /* Logo and Company Name Styles */
-        .navbar__brand {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-bottom: 1px solid #eaeef6;
-        }
-
-        .navbar__logo {
-            width: 50px;
-            height: auto;
-            margin-bottom: 0.5rem;
-        }
-
-        .navbar__company-name {
-            font-size: 0.8rem;
-            color: #406ff3;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        /* Adjust main content margin to account for taller navbar */
-        main {
-            margin-left: 7rem;
-            padding: 2rem;
-            padding-top: 3rem;
-            /* Increase top padding */
-        }
-    </style>
-
     @filamentStyles
-    @vite('resources/css/app.css')
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.14/lottie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lottie-web@latest"></script>
 
+
 </head>
 
 <body class="antialiased">
+    <!-- Add this loading screen div -->
+    <div id="loading-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-90 hidden">
+        <div class="text-center">
+            <div class="nav-icon lottie-animation"
+                data-animation-path="{{ asset('loading/loadingsanimate.json') }}"
+                id="lottie-container"
+                style="width: 300px; height: 300px;">
+            </div>
+        </div>
+    </div>
+
     @auth
     <div class="flex min-h-screen">
         <!-- Updated Navbar -->
@@ -262,14 +93,7 @@
     @livewire('notifications')
 
     @filamentScripts
-    @vite('resources/js/app.js')
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Remove old sidebar-related JavaScript
-            // feather.replace();
-        });
-    </script>
 </body>
 
 </html>
