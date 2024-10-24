@@ -47,44 +47,83 @@
     <!-- Weather Content -->
     <div wire:loading.remove wire:target="fetchWeatherData">
         @if(!empty($weatherData))
-        <div id="weather-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Misol-like Weather Widget -->
-            <div class="weather-card rounded-lg shadow-lg p-4 transform hover:scale-105 transition-transform duration-300 relative overflow-hidden bg-black text-white">
-                <div class="grid grid-cols-3 gap-4">
-                    <div class="col-span-2">
-                        <div class="text-xl font-bold mb-2">{{ \Carbon\Carbon::now()->format('D, d M Y') }}</div>
-                        <div class="text-4xl font-bold">{{ \Carbon\Carbon::now()->format('H:i:s') }}</div>
+        <!-- Misol-like Weather Widget -->
+        <div class="mb-6">
+            <div class="weather-card rounded-lg shadow-lg p-4 sm:p-6 relative overflow-hidden bg-black text-white transform hover:scale-105 transition-transform duration-300">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <!-- Temperature circle -->
+                    <div class="relative w-full h-24 sm:w-24 sm:h-24">
+                        <div class="absolute inset-0 rounded-full border-yellow-400 circle-border spin-slow"></div>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="text-xs">11.2°</div>
+                            <div class="text-2xl sm:text-3xl font-bold text-yellow-400">10.5°</div>
+                            <div class="text-xs">9.8°</div>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <div class="text-5xl font-bold">{{ round($weatherData['current']['temperature_2m']) }}°C</div>
-                        <div class="text-lg">{{ $this->getWeatherIcon($weatherData['current']['weather_code']) }}</div>
+
+                    <!-- Wind circle -->
+                    <div class="relative w-full h-24 sm:w-24 sm:h-24">
+                        <div class="absolute inset-0 rounded-full border-blue-400 circle-border spin-slow"></div>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="text-xs">NNW 336°</div>
+                            <div class="text-2xl sm:text-3xl font-bold text-blue-400">5.2</div>
+                            <div class="text-xs">Gust 7.8</div>
+                        </div>
+                    </div>
+
+                    <!-- Temperature circle -->
+                    <div class="relative w-full h-24 sm:w-24 sm:h-24">
+                        <div class="absolute inset-0 rounded-full border-green-400 circle-border spin-slow"></div>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="text-xs">Temperature</div>
+                            <div class="text-2xl sm:text-3xl font-bold text-green-400">10.5°</div>
+                        </div>
+                    </div>
+
+                    <!-- Indoor Humidity circle -->
+                    <div class="relative w-full h-24 sm:w-24 sm:h-24">
+                        <div class="absolute inset-0 rounded-full border-purple-400 circle-border spin-slow"></div>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="text-xs">Humidity</div>
+                            <div class="text-2xl sm:text-3xl font-bold text-purple-400">65%</div>
+                        </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-3 gap-4 mt-4">
-                    <div class="text-center">
-                        <div class="text-yellow-400 text-2xl font-bold">{{ round($weatherData['current']['wind_speed_10m']) }}</div>
-                        <div class="text-sm">Wind km/h</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-blue-400 text-2xl font-bold">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
-                        <div class="text-sm">Humidity</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-green-400 text-2xl font-bold">{{ $weatherData['current']['precipitation'] }}</div>
-                        <div class="text-sm">Rain mm</div>
-                    </div>
+
+                <!-- Additional data -->
+                <div class="mt-4 grid grid-cols-3 sm:grid-cols-6 gap-2 text-xs">
+                    <div>FeelsLike<br>9.8°</div>
+                    <div>DewPoint<br>4.5°</div>
+                    <div>Humidity<br>65%</div>
+                    <div>10'Wind<br>NNW 5.2</div>
+                    <div>Rain/Day<br>0.2</div>
+                    <div>0.0<br>Hourly</div>
                 </div>
-                <div class="mt-4">
-                    <div class="flex justify-between items-center">
-                        <span>Sunrise</span>
-                        <span>{{ \Carbon\Carbon::parse($weatherData['daily']['sunrise'][0])->format('H:i') }}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span>Sunset</span>
-                        <span>{{ \Carbon\Carbon::parse($weatherData['daily']['sunset'][0])->format('H:i') }}</span>
-                    </div>
+
+                <!-- Rain and barometer -->
+                <div class="mt-4 flex flex-wrap justify-between items-center">
+                    <div class="text-blue-400 text-2xl">💧</div>
+                    <div class="text-sm">0.2<br>mm</div>
+                    <div class="text-sm text-center">Barometer Reading<br>ABS 1015.2 hPa</div>
+                    <div class="text-sm text-right">0.3<br>hpa</div>
+                </div>
+
+                <!-- Sunrise and Sunset -->
+                <div class="mt-4 flex flex-wrap justify-between items-center text-sm">
+                    <div>🌅 06:45</div>
+                    <div class="text-center">--------- UV Index 3 ---------</div>
+                    <div>🌇 18:30</div>
+                </div>
+
+                <!-- Date and Time -->
+                <div class="mt-4 text-right text-sm">
+                    <div>Wed, 26 Apr 2023</div>
+                    <div>14:30:00</div>
                 </div>
             </div>
+        </div>
+
+        <div id="weather-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
             <!-- Location Info -->
             <div class="weather-card rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">

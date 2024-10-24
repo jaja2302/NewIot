@@ -47,12 +47,13 @@
 
         <!-- Navbar -->
         <nav id="navbar" class="navbar md:block hidden">
-            <!-- Add logo and company name -->
+            <button id="sidebar-toggle" aria-label="Toggle Sidebar">
+                <i class="fas fa-chevron-left"></i>
+            </button>
             <div class="navbar__brand">
                 <img src="{{ asset('/img/CBIpreview.png') }}" alt="Company Logo" class="navbar__logo">
                 <span class="navbar__company-name">SSMS</span>
             </div>
-
             <ul class="navbar__menu">
                 <li class="navbar__item">
                     <a href="{{ route('dashboard') }}" class="navbar__link"><i class="fas fa-home"></i><span>Dashboard</span></a>
