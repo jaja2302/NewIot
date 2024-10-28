@@ -123,16 +123,18 @@
 
         // Listen for Livewire events
         document.addEventListener('livewire:initialized', () => {
-            Livewire.on('updateMapMarker', (data) => {
-                console.log('Received data:', data); // Debug log
+            Livewire.on('updateMapMarker', (eventData) => {
+                // Debug logging
+                console.log('Raw event data:', eventData);
 
-                // Extract coordinates from the nested structure
+                // Extract data from the first element if it's an array
+                const data = Array.isArray(eventData) ? eventData[0] : eventData;
+                console.log('Processed data:', data);
+
                 const coordinates = data.coordinates;
                 const station = data.station;
 
                 if (coordinates && coordinates.lat && coordinates.lon) {
-                    // console.log('Processing coordinates:', coordinates); // Debug log
-
                     // Clear previous markers
                     layerGroup.clearLayers();
 
@@ -157,6 +159,8 @@
                     // Fit bounds with padding
                     map.setView([coordinates.lat, coordinates.lon], 15);
                     marker.openPopup();
+                } else {
+                    console.error('Invalid coordinates:', coordinates);
                 }
             });
             Livewire.on('updateChartData', (data) => {
@@ -298,7 +302,4 @@
             }
         });
     </script>
-
-
-
 </div>
