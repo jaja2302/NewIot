@@ -17,6 +17,8 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\WaterlevelExcel;
 
 class Waterlevel extends Component implements HasForms, HasTable
 {
@@ -177,9 +179,17 @@ class Waterlevel extends Component implements HasForms, HasTable
                     ->openUrlInNewTab()
             ])
             ->bulkActions([
-                BulkAction::make('delete')
-                    ->requiresConfirmation()
-                    ->action(fn(Collection $records) => $records->each->delete())
+                // BulkAction::make('delete')
+                //     ->requiresConfirmation()
+                //     ->action(fn(Collection $records) => $records->each->delete()),
+                BulkAction::make('export')
+                    ->label('Export to Excel')
+                    ->action(function (Collection $records) {
+                        return Excel::download(
+                            new WaterlevelExcel($records),
+                            'waterlevel-data-' . now()->format('Y-m-d') . '.xlsx'
+                        );
+                    })
             ]);
     }
 }
