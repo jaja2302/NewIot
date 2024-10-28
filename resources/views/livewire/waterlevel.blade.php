@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+<div>
     <div class="container mx-auto px-4">
         <!-- Page Title -->
         <div class="mb-8">
@@ -125,11 +125,11 @@
         document.addEventListener('livewire:initialized', () => {
             Livewire.on('updateMapMarker', (eventData) => {
                 // Debug logging
-                console.log('Raw event data:', eventData);
+                // console.log('Raw event data:', eventData);
 
                 // Extract data from the first element if it's an array
                 const data = Array.isArray(eventData) ? eventData[0] : eventData;
-                console.log('Processed data:', data);
+                // console.log('Processed data:', data);
 
                 const coordinates = data.coordinates;
                 const station = data.station;
@@ -298,6 +298,9 @@
                 }
             },
             credits: {
+                enabled: false
+            },
+            accessibility: {
                 enabled: false
             }
         });

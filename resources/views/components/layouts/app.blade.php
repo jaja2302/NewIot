@@ -58,6 +58,9 @@
                     <a href="{{ route('waterlevel') }}" class="navbar__link"><i class="fa fa-water fa-2x"></i><span>Water Level</span></a>
                 </li>
                 <li class="navbar__item">
+                    <a href="{{ route('dashboardaws') }}" class="navbar__link"><i class="fa-solid fa-cloud"></i><span>Aws</span></a>
+                </li>
+                <li class="navbar__item">
                     <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="navbar__link">
                         <i class="fas fa-sign-out-alt"></i><span>Logout</span>
                     </a>
