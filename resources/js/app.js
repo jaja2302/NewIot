@@ -7,6 +7,9 @@ $(function() {
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const navbar = document.getElementById('navbar');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const $navbar = $('.navbar');
+    const $sidebarToggle = $('#sidebar-toggle');
+    const $main = $('main');
 
     function toggleSidebar() {
         navbar.classList.toggle('hidden');
@@ -20,8 +23,49 @@ $(function() {
         document.body.classList.remove('overflow-hidden');
     }
 
+    function toggleDesktopSidebar() {
+        $navbar.toggleClass('collapsed');
+        $main.toggleClass('sidebar-collapsed');
+    }
+
     mobileMenuButton.addEventListener('click', toggleSidebar);
     sidebarOverlay.addEventListener('click', hideSidebar);
+
+    $sidebarToggle.on('click', function() {
+        if (window.innerWidth <= 768) {
+            toggleSidebar();
+        } else {
+            toggleDesktopSidebar();
+        }
+    });
+
+    // Function to handle resize events
+    function handleResize() {
+        if (window.innerWidth > 768) {
+            navbar.classList.remove('hidden');
+            sidebarOverlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            // Preserve desktop sidebar state
+            if ($navbar.hasClass('collapsed')) {
+                $main.addClass('sidebar-collapsed');
+            } else {
+                $main.removeClass('sidebar-collapsed');
+            }
+        } else {
+            // Always hide sidebar in mobile view
+            navbar.classList.add('hidden');
+            sidebarOverlay.classList.add('hidden');
+            // Remove desktop-specific classes
+            $navbar.removeClass('collapsed');
+            $main.removeClass('sidebar-collapsed');
+        }
+    }
+
+    // Add resize event listener
+    window.addEventListener('resize', handleResize);
+
+    // Initial call to set correct state
+    handleResize();
 
     // Hide sidebar when clicking a nav link on mobile
     const navLinks = document.querySelectorAll('.navbar__link');
@@ -85,4 +129,6 @@ $(function() {
             $loadingScreen.addClass('hidden');
         });
     });
+
+    
 });

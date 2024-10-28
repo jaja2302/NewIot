@@ -15,6 +15,7 @@
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.5",
+        "maatwebsite/excel": "^3.1",
         "opencage/geocode": "^3.3"
     },
     "require-dev": {

@@ -14,8 +14,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.14/lottie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lottie-web@latest"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script> -->
     <script>
         // Check for saved theme preference or use default (light)
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -24,6 +24,11 @@
             document.documentElement.classList.remove('dark')
         }
     </script>
+
+    <!-- Add these in the head section of your layout or at the top of this file -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
 </head>
 
 <body class="antialiased">
@@ -46,10 +51,7 @@
         </button>
 
         <!-- Navbar -->
-        <nav id="navbar" class="navbar md:block hidden">
-            <button id="sidebar-toggle" aria-label="Toggle Sidebar">
-                <i class="fas fa-chevron-left"></i>
-            </button>
+        <nav id="navbar" class="navbar md:block">
             <div class="navbar__brand">
                 <img src="{{ asset('/img/CBIpreview.png') }}" alt="Company Logo" class="navbar__logo">
                 <span class="navbar__company-name">SSMS</span>
@@ -67,6 +69,9 @@
                     </a>
                 </li>
             </ul>
+            <button id="sidebar-toggle" aria-label="Toggle Sidebar" class="absolute top-1/2 -right-4 transform -translate-y-1/2">
+                <i class="fas fa-chevron-left"></i>
+            </button>
         </nav>
         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
             @csrf

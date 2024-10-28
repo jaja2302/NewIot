@@ -1,131 +1,205 @@
-<div class="flex h-screen">
-    <!-- Leaflet Map Background -->
-    <div id="map" class="flex-grow z-0 h-3/4"></div>
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="container mx-auto px-4">
+        <!-- Page Title -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Water Level Monitoring</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Real-time water level monitoring and analysis dashboard</p>
+        </div>
 
-    <!-- Right Sidebar -->
-    <div class="w-80 bg-white shadow-lg z-10 flex flex-col h-3/4 overflow-y-auto">
-        <!-- Filter Controls -->
-        <div class="p-4">
-            <h3 class="text-lg font-semibold mb-3">Filters</h3>
-            <div class="space-y-3">
-                <div>
-                    <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
-                    <input type="date" id="date" wire:model="selectedDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+        <!-- Top Grid: Filters and Map -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <!-- Filters Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-filter mr-2"></i>Filters
+                    </h2>
+
+                    <!-- Loading States -->
+                    <div wire:loading wire:target="updateSelectedStation"
+                        class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+                            <span class="text-sm text-blue-600 dark:text-blue-400">Loading stations...</span>
+                        </div>
+                    </div>
+
+                    <div wire:loading wire:target="onChangeStation"
+                        class="mb-4 p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="animate-spin rounded-full h-4 w-4 border-2 border-green-500 border-t-transparent"></div>
+                            <span class="text-sm text-green-600 dark:text-green-400">Loading map marker...</span>
+                        </div>
+                    </div>
+
+                    <!-- Filter Controls -->
+                    <div class="space-y-4">
+                        <div>
+                            <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                            <input type="date" id="date"
+                                wire:model.live="selectedDate"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="wilayah" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Wilayah</label>
+                            <select id="wilayah" wire:model="selectedWilayah" wire:change="updateSelectedStation($event.target.value)"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Wilayah</option>
+                                @foreach($wilayah as $wil)
+                                <option value="{{ $wil->id }}">{{ $wil->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="station" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Station</label>
+                            <select id="station" wire:model="selectedStation" wire:change="onChangeStation($event.target.value)"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Station</option>
+                                @foreach($stations as $station)
+                                <option value="{{ $station->id }}">{{ $station->location }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label for="wilayah" class="block text-sm font-medium text-gray-700">Wilayah</label>
-                    <select id="wilayah" wire:model="selectedWilayah" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" wire:change="updateSelectedStation($event.target.value)">
-                        <option value="">Select Wilayah</option>
-                        @foreach($wilayah as $wil)
-                        <option value="{{ $wil->id }}">{{ $wil->nama }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label for="station" class="block text-sm font-medium text-gray-700">Station</label>
-                    <select id="station" wire:model="selectedStation" wire:change="onChangeStation($event.target.value)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                        <option value="">Select Station</option>
-                        @foreach($stations as $station)
-                        <option value="{{ $station->id }}">{{ $station->location }}</option>
-                        @endforeach
-                    </select>
+            </div>
+
+            <!-- Map Container -->
+            <div class="lg:col-span-2">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                    <div wire:ignore id="map" class="w-full rounded-lg" style="min-height: 400px;"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Divider -->
-        <hr class="border-gray-200">
-
-        <!-- Water Level IoT Details -->
-        <div class="p-4">
-            <h2 class="text-2xl font-bold mb-2">Water Level IoT</h2>
-            <p class="text-sm mb-4">Portal website ini digunakan untuk memonitoring data dari proses pemantuan ketinggian air di</p>
-            <p class="text-sm mb-4">Update data device terakhir pada</p>
-
-            <!-- Latest Levels -->
-            <div class="mb-4">
-                <h3 class="font-semibold mb-2">Level In Terakhir</h3>
-                <h3 class="font-semibold mb-2">Level Out Terakhir</h3>
-                <h3 class="font-semibold mb-2">Level Actual Terakhir</h3>
+        <!-- Bottom Grid: Chart and Table -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Chart Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-chart-line mr-2"></i>Water Level Trend
+                    </h2>
+                    <div class="w-full" style="height: 300px;">
+                        <canvas id="waterLevelChart" class="w-full h-full"></canvas>
+                    </div>
+                </div>
             </div>
 
-            <!-- Average Levels -->
-            <div class="mb-4">
-                <h3 class="font-semibold mb-2 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zM8 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1H9a1 1 0 01-1-1V4zM15 3a1 1 0 00-1 1v12a1 1 0 001 1h2a1 1 0 001-1V4a1 1 0 00-1-1h-2z" />
-                    </svg>
-                    Rata rata Level In
-                </h3>
-                <h3 class="font-semibold mb-2 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zM8 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1H9a1 1 0 01-1-1V4zM15 3a1 1 0 00-1 1v12a1 1 0 001 1h2a1 1 0 001-1V4a1 1 0 00-1-1h-2z" />
-                    </svg>
-                    Rata rata Level Out
-                </h3>
-                <h3 class="font-semibold mb-2 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4zM8 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1H9a1 1 0 01-1-1V4zM15 3a1 1 0 00-1 1v12a1 1 0 001 1h2a1 1 0 001-1V4a1 1 0 00-1-1h-2z" />
-                    </svg>
-                    Rata rata Level Actual
-                </h3>
-            </div>
-
-            <!-- Water Limits -->
-            <div>
-                <h3 class="font-semibold mb-2 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M14.763 3.398a.75.75 0 01.79.067l4.264 3.262a.75.75 0 010 1.179l-4.264 3.262a.75.75 0 01-1.18-.617V8.25h-1.5A3.75 3.75 0 009.123 12v1.5h2.25a.75.75 0 010 1.5h-3a.75.75 0 01-.75-.75V12a5.25 5.25 0 015.25-5.25h1.5V4.015a.75.75 0 01.39-.617z" clip-rule="evenodd" />
-                    </svg>
-                    Batas Atas Air
-                </h3>
-                <h3 class="font-semibold mb-2 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5.237 3.398a.75.75 0 01.79.067l4.264 3.262a.75.75 0 010 1.179l-4.264 3.262a.75.75 0 01-1.18-.617V8.25H3.347A3.75 3.75 0 00.597 12v1.5h2.25a.75.75 0 010 1.5h-3a.75.75 0 01-.75-.75V12a5.25 5.25 0 015.25-5.25h1.5V4.015a.75.75 0 01.39-.617z" clip-rule="evenodd" />
-                    </svg>
-                    Batas Bawah Air
-                </h3>
+            <!-- Table Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-table mr-2"></i>Recent Measurements
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <div>
+                            {{ $this->table }}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        let map;
-        let marker;
-
-        document.addEventListener('livewire:load', function() {
-            initMap();
-
-            Livewire.on('updateMap', (data) => {
-                console.log("updateMap event received", data);
-                const latlon = JSON.parse(data);
-                updateMarker(latlon);
-            });
-        });
-
-        function initMap() {
-            map = L.map('map', {
-                preferCanvas: true,
-            }).setView([-2.2745234, 111.61404248], 13);
-
-            L.tileLayer('http://{s}.google.com/vt?lyrs=s&x={x}&y={y}&z={z}', {
-                maxZoom: 20,
-                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-            }).addTo(map);
-
-            console.log("Map initialized");
-        }
-
-        function updateMarker(latlon) {
-            const newLatLng = [parseFloat(latlon.lat), parseFloat(latlon.lon)];
-
-            if (marker) {
-                map.removeLayer(marker);
+    <!-- Styles -->
+    <style>
+        @keyframes loading {
+            0% {
+                width: 0%;
             }
 
-            marker = L.marker(newLatLng).addTo(map);
-            map.setView(newLatLng, 13);
+            100% {
+                width: 100%;
+            }
         }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Card Hover Effects */
+        .bg-white {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .bg-white:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+
+    <script type="module">
+        // Move map initialization outside document.ready
+        let map = L.map('map', {
+            preferCanvas: true,
+        }).setView([-2.2745234, 111.61404248], 13);
+
+        // Add tile layer
+        L.tileLayer('http://{s}.google.com/vt?lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+
+        // Initialize layerGroup
+        let layerGroup = L.layerGroup().addTo(map);
+
+        // Listen for Livewire events
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('updateMapMarker', (data) => {
+                console.log('Received data:', data); // Debug log
+
+                // Extract coordinates from the nested structure
+                const coordinates = data.coordinates;
+                const station = data.station;
+
+                if (coordinates && coordinates.lat && coordinates.lon) {
+                    // console.log('Processing coordinates:', coordinates); // Debug log
+
+                    // Clear previous markers
+                    layerGroup.clearLayers();
+
+                    // Create marker with popup
+                    const marker = L.marker([coordinates.lat, coordinates.lon], {
+                        title: station.location
+                    }).bindPopup(`
+                        <b>Water Station: ${station.location}</b><br>
+                        Level In Terakhir: ${station.level_in}<br>
+                        Level Out Terakhir: ${station.level_out}<br>
+                        Level Actual Terakhir: ${station.level_actual}<br>
+                        Rata rata Level In: ${station.level_in_avg}<br>
+                        Rata rata Level Out: ${station.level_out_avg}<br>
+                        Rata rata Level Actual: ${station.level_actual_avg}<br>
+                        Batas Atas Air: ${station.batas_atas_air}<br>
+                        Batas Bawah Air: ${station.batas_bawah_air} 
+                    `);
+
+                    // Add marker to layer group
+                    layerGroup.addLayer(marker);
+
+                    // Fit bounds with padding
+                    map.setView([coordinates.lat, coordinates.lon], 15);
+                    marker.openPopup();
+                }
+            });
+        });
     </script>
+
+
 
 </div>
