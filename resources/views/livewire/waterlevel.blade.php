@@ -73,15 +73,19 @@
         </div>
 
         <!-- Bottom Grid: Chart and Table -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 gap-6">
             <!-- Chart Card -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                 <div class="p-6">
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                         <i class="fas fa-chart-line mr-2"></i>Water Level Trend
                     </h2>
-                    <div class="w-full" style="height: 300px;">
-                        <canvas id="waterLevelChart" class="w-full h-full"></canvas>
+                    <!-- Add a wrapper div with scrolling -->
+                    <div class="overflow-x-auto">
+                        <div class="w-full" style="height: 400px;">
+                            <!-- Set minimum width for the chart container -->
+                            <div wire:ignore id="container" style="min-width: 1200px; width: 100%;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -101,48 +105,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Styles -->
-    <style>
-        @keyframes loading {
-            0% {
-                width: 0%;
-            }
-
-            100% {
-                width: 100%;
-            }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Card Hover Effects */
-        .bg-white {
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .bg-white:hover {
-            transform: translateY(-2px);
-        }
-    </style>
 
     <script type="module">
         // Move map initialization outside document.ready
@@ -197,6 +159,143 @@
                     marker.openPopup();
                 }
             });
+            Livewire.on('updateChartData', (data) => {
+                // console.log('Received data:', data); // Debug log
+
+                // Format the data for Highcharts
+                const formattedData = data[0]; // Since your data is in an array
+                const timestamps = formattedData.datetime.map(time => {
+                    // Convert time string to timestamp
+                    const today = new Date();
+                    const [hours, minutes, seconds] = time.split(':');
+                    today.setHours(hours, minutes, seconds);
+                    return today.getTime();
+                });
+
+                // Create series data arrays
+                const levelInData = timestamps.map((time, index) => [time, formattedData.levelIn[index]]);
+                const levelOutData = timestamps.map((time, index) => [time, formattedData.levelOut[index]]);
+                const levelActualData = timestamps.map((time, index) => [time, formattedData.levelActual[index]]);
+
+                // Update each series with new data
+                chart.series[0].setData(levelInData, false);
+                chart.series[1].setData(levelOutData, false);
+                chart.series[2].setData(levelActualData, true); // true to redraw chart once after all series are updated
+            });
+        });
+
+        // Initialize the chart with proper configuration
+        const chart = Highcharts.chart('container', {
+            chart: {
+                type: 'line',
+                height: 400,
+                zoomType: 'x', // Adds horizontal zoom capability
+                panning: true,
+                panKey: 'shift', // Enable panning while holding shift key
+                style: {
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutBounce'
+                },
+                reflow: true
+            },
+            title: {
+                text: 'Water Level Measurements',
+                style: {
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: {
+                    format: '{value:%Y-%m-%d %H:%M}',
+                    rotation: -45,
+                    align: 'right'
+                },
+                title: {
+                    text: 'Date & Time'
+                },
+                gridLineWidth: 1,
+                tickInterval: 3600 * 1000, // Show ticks every hour
+                scrollbar: {
+                    enabled: true // Adds a scrollbar to the x-axis
+                },
+                min: null, // Allow dynamic range
+                max: null
+            },
+            yAxis: {
+                title: {
+                    text: 'Water Level (m)'
+                },
+                gridLineWidth: 1
+            },
+            series: [{
+                name: 'Level In',
+                data: [],
+                color: '#2196F3',
+                marker: {
+                    enabled: true,
+                    radius: 4
+                }
+            }, {
+                name: 'Level Out',
+                data: [],
+                color: '#4CAF50',
+                marker: {
+                    enabled: true,
+                    radius: 4
+                }
+            }, {
+                name: 'Level Actual',
+                data: [],
+                color: '#FFC107',
+                marker: {
+                    enabled: true,
+                    radius: 4
+                }
+            }],
+            tooltip: {
+                shared: true,
+                crosshairs: true,
+                formatter: function() {
+                    let tooltip = '<b>' + Highcharts.dateFormat('%Y-%m-%d %H:%M', this.x) + '</b><br/>';
+                    this.points.forEach(function(point) {
+                        tooltip += '<span style="color:' + point.series.color + '">●</span> ' +
+                            point.series.name + ': <b>' + point.y.toFixed(2) + ' m</b><br/>';
+                    });
+                    return tooltip;
+                }
+            },
+            legend: {
+                enabled: true,
+                align: 'center',
+                verticalAlign: 'bottom'
+            },
+            plotOptions: {
+                series: {
+                    animation: {
+                        duration: 1500,
+                        // Custom animation for each line
+                        events: {
+                            afterAnimate: function() {
+                                // Optional: Add any post-animation effects here
+                            }
+                        }
+                    },
+                    lineWidth: 2,
+                    // Add line drawing animation
+                    animation: {
+                        duration: 1500,
+                        defer: 500 // Delay between series
+                    }
+                }
+            },
+            credits: {
+                enabled: false
+            }
         });
     </script>
 

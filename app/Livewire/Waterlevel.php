@@ -19,6 +19,7 @@ use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\WaterlevelExcel;
+use Illuminate\Support\Carbon;
 
 class Waterlevel extends Component implements HasForms, HasTable
 {
@@ -93,12 +94,18 @@ class Waterlevel extends Component implements HasForms, HasTable
                     'lon' => (float)$station->lon,
                 ];
 
+                // Get data and sort by datetime
                 $waterlevel = ModelsWaterlevel::where('idwl', $stationId)
                     ->where('datetime', 'like', $this->selectedDate . '%')
-                    ->limit(10)
+                    ->orderBy('datetime', 'asc') // Add this line to sort
+                    // ->limit(10)
                     ->get();
 
-                // Initialize variables for manual average calculation
+                // Initialize arrays
+                $levelIn = [];
+                $levelOut = [];
+                $levelActual = [];
+                $datetime = [];
                 $stationData = [
                     'location' => $station->location,
                     'level_in' => 0,
@@ -121,6 +128,10 @@ class Waterlevel extends Component implements HasForms, HasTable
                         $sumlvl_in += $item->lvl_in;
                         $sumlvl_out += $item->lvl_out;
                         $sumlvl_act += $item->lvl_act;
+                        $levelIn[] = $item->lvl_in;
+                        $levelOut[] = $item->lvl_out;
+                        $levelActual[] = $item->lvl_act;
+                        $datetime[] = Carbon::parse($item->datetime)->format('H:i:s');
                     }
 
                     // Calculate averages
@@ -138,11 +149,18 @@ class Waterlevel extends Component implements HasForms, HasTable
                     }
                 }
 
-                $this->dispatch(
-                    'updateMapMarker',
-                    coordinates: $coordinates,
-                    station: $stationData
-                );
+                // Dispatch both map and chart data
+                $this->dispatch('updateMapMarker', [
+                    'coordinates' => $coordinates,
+                    'station' => $stationData
+                ]);
+
+                $this->dispatch('updateChartData', [
+                    'levelIn' => $levelIn,
+                    'levelOut' => $levelOut,
+                    'datetime' => $datetime,
+                    'levelActual' => $levelActual
+                ]);
             }
         } finally {
             $this->isLoadingMapMarker = false;
@@ -174,9 +192,9 @@ class Waterlevel extends Component implements HasForms, HasTable
                 // ...
             ])
             ->actions([
-                Action::make('edit')
-                    // ->url(fn(ModelsWaterlevel $record): string => route('waterlevel.edit', $record))
-                    ->openUrlInNewTab()
+                // Action::make('edit')
+                //     // ->url(fn(ModelsWaterlevel $record): string => route('waterlevel.edit', $record))
+                //     ->openUrlInNewTab()
             ])
             ->bulkActions([
                 // BulkAction::make('delete')

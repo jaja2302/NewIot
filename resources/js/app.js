@@ -5,8 +5,8 @@ window.jQuery = $;
 import L from 'leaflet';
 window.L = L;
 import 'leaflet/dist/leaflet.css';
-
-
+import Highcharts from 'highcharts';
+window.Highcharts = Highcharts;
 $(function() {
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const navbar = document.getElementById('navbar');
