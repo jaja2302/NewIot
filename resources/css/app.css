@@ -3,6 +3,7 @@
 @tailwind utilities;
 @tailwind variants;
 
+
 [x-cloak] {
     display: none !important;
 }
@@ -686,4 +687,5 @@ main.sidebar-collapsed {
         transform: translateX(-100%);
     }
 }
+
 

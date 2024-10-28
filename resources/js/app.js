@@ -2,6 +2,10 @@
 import $ from 'jquery';
 window.$ = $;
 window.jQuery = $;
+import L from 'leaflet';
+window.L = L;
+import 'leaflet/dist/leaflet.css';
+
 
 $(function() {
     const mobileMenuButton = document.getElementById('mobile-menu-button');
