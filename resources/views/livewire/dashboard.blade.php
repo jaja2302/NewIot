@@ -50,12 +50,13 @@
             <!-- Weather Content -->
             <div wire:loading.remove wire:target="fetchWeatherData">
                 @if(!empty($weatherData))
+
                 <div class="weather-card mb-6 rounded-lg shadow-lg p-6 bg-black text-white">
+                    <!-- Circle car-->
                     <div class="flex flex-wrap justify-center">
-                        <div class="flex flex-col items-center justify-center mb-4 md:mb-0">
-                            <div class="flex items-center justify-center">
-                                <!-- Feels Like Temperature -->
-                                <div class="flex flex-col items-center mx-2">
+                        <div class="flex flex-col items-center justify-center w-1/2">
+                            <div class="flex items-center justify-center w-full">
+                                <div class="flex flex-col items-center w-1/2">
                                     <div class="relative w-32 h-32 rounded-full border-8 border-yellow-400 flex items-center justify-center">
                                         <div class="text-center">
                                             <div class="text-xs text-yellow-300">Feels Like</div>
@@ -64,7 +65,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex flex-col items-center mx-2">
+                                <div class="flex flex-col items-center w-1/2">
                                     <div class="relative w-32 h-32 rounded-full border-8 border-blue-400 flex items-center justify-center">
                                         <div class="text-center">
                                             <div class="text-xs text-blue-300">Wind</div>
@@ -74,9 +75,7 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Additional Metrics Section -->
-                            <div class="mt-6 grid grid-cols-2 gap-4 text-center text-xs">
+                            <div class="mt-4 grid grid-cols-2 gap-2 text-center text-xs w-full">
                                 <div class="flex flex-col">
                                     <span>10' Wind</span>
                                     <span class="text-lg">{{ $weatherData['current']['wind_speed_10m'] ?? 'N/A' }} km/h</span>
@@ -87,10 +86,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex flex-col items-center justify-center mb-4 md:mb-0">
-                            <div class="flex items-center justify-center">
-                                <!-- Temperature -->
-                                <div class="flex flex-col items-center mx-2">
+                        <div class="flex flex-col items-center justify-center w-1/2">
+                            <div class="flex items-center justify-center w-full">
+                                <div class="flex flex-col items-center w-1/2">
                                     <div class="relative w-32 h-32 rounded-full border-8 border-green-400 flex items-center justify-center">
                                         <div class="text-center">
                                             <div class="text-xs text-green-300">Temperature</div>
@@ -98,27 +96,27 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex flex-col items-center mx-2">
-                                    <div class="relative w-32 h-32 rounded-full border-8 border-purple-400 flex items-center justify-center">
-                                        <div class="text-center">
+                                <div class="flex flex-col items-center w-1/2">
+                                    <div class="relative w-32 h-32 rounded-full border-8 border-purple-400 flex items-center justify-center overflow-hidden">
+                                        <div class="absolute bottom-0 left-0 right-0 bg-purple-400/40 transition-all duration-500" style="height: {{ $weatherData['current']['relative_humidity_2m'] }}%; transform-origin: bottom;">
+                                            <div class="absolute top-0 left-0 right-0 h-2 bg-purple-200/30 animate-wave"></div>
+                                            <div class="absolute top-1 left-1 right-1 h-1 bg-purple-100/20 animate-wave-delayed"></div>
+                                        </div>
+                                        <div class="text-center relative z-10">
                                             <div class="text-xs text-purple-300">Humidity</div>
                                             <div class="text-3xl font-bold text-purple-400">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Rain and Barometer -->
-                            <div class="mt-6 flex justify-between items-center text-sm">
-                                <div class="text-blue-400 text-xl">💧</div>
+                            <div class="mt-4 grid grid-cols-2 gap-2 text-center text-xs w-full">
                                 <div>Barometer<br><span class="text-lg">ABS {{ $weatherData['current']['pressure_msl'] ?? 'N/A' }} hPa</span></div>
                                 <div class="text-right">Pressure<br><span class="text-lg">{{ ($weatherData['current']['pressure_msl'] ?? 0) - 1013.25 }} hPa</span></div>
                             </div>
-
                         </div>
                     </div>
 
-
+                    <!-- Sunrise Info -->
                     <div class="mt-4 relative">
                         <div class="sun-path">
                             @php
