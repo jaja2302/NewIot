@@ -197,4 +197,20 @@ class Dashboard extends Component
 
         return $descriptions[$code] ?? 'Tidak diketahui';
     }
+
+    public function calculateSunPosition()
+    {
+        $now = now(); // Current time
+        $sunrise = isset($this->weatherData['daily']['sunrise'][0]) ? \Carbon\Carbon::parse($this->weatherData['daily']['sunrise'][0]) : null;
+        $sunset = isset($this->weatherData['daily']['sunset'][0]) ? \Carbon\Carbon::parse($this->weatherData['daily']['sunset'][0]) : null;
+
+        if (!$sunrise || !$sunset || $now < $sunrise || $now > $sunset) {
+            return 0; // Sun is not visible
+        }
+
+        $totalDuration = $sunset->diffInSeconds($sunrise);
+        $elapsed = $now->diffInSeconds($sunrise);
+        $position = ($elapsed / $totalDuration) * 100; // Percentage of the sun's path
+        return $position;
+    }
 }

@@ -48,79 +48,94 @@
     <!-- Weather Content -->
     <div wire:loading.remove wire:target="fetchWeatherData">
         @if(!empty($weatherData))
-        <!-- Misol-like Weather Widget -->
-        <div class="weather-card mb-6 rounded-lg shadow-lg p-4 sm:p-6 relative overflow-hidden bg-black text-white">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <!-- Temperature circle -->
-                <div class="relative w-full h-24 sm:w-24 sm:h-24">
-                    <div class="absolute inset-0 rounded-full border-yellow-400 circle-border spin-slow"></div>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <div class="text-xs">{{ $weatherData['current']['apparent_temperature'] }}°</div>
-                        <div class="text-2xl sm:text-3xl font-bold text-yellow-400">{{ $weatherData['current']['temperature_2m'] }}°</div>
-                        <div class="text-xs">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
+        <div class="weather-card mb-6 rounded-lg shadow-lg p-6 bg-black text-white">
+            <div class="flex flex-wrap justify-center">
+                <div class="flex flex-col items-center justify-center mb-4 md:mb-0">
+                    <div class="flex items-center justify-center">
+                        <!-- Feels Like Temperature -->
+                        <div class="flex flex-col items-center mx-2">
+                            <div class="relative w-32 h-32 rounded-full border-8 border-yellow-400 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="text-xs text-yellow-300">Feels Like</div>
+                                    <div class="text-3xl font-bold text-yellow-400">{{ $weatherData['current']['apparent_temperature'] }}°</div>
+                                    <div class="text-xs text-yellow-300">Actual: {{ $weatherData['current']['temperature_2m'] }}°</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center mx-2">
+                            <div class="relative w-32 h-32 rounded-full border-8 border-blue-400 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="text-xs text-blue-300">Wind</div>
+                                    <div class="text-3xl font-bold text-blue-400">{{ $weatherData['current']['wind_speed_10m'] }} m/s</div>
+                                    <div class="text-xs text-blue-300">Dir: {{ $weatherData['current']['wind_direction_10m'] }}°</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Metrics Section -->
+                    <div class="mt-6 grid grid-cols-2 gap-4 text-center text-xs">
+                        <div class="flex flex-col">
+                            <span>10' Wind</span>
+                            <span class="text-lg">{{ $weatherData['current']['wind_speed_10m'] ?? 'N/A' }} km/h</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span>Rain/Day</span>
+                            <span class="text-lg">{{ $weatherData['daily']['precipitation_sum'][0] ?? 'N/A' }} mm</span>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Wind circle -->
-                <div class="relative w-full h-24 sm:w-24 sm:h-24">
-                    <div class="absolute inset-0 rounded-full border-blue-400 circle-border spin-slow"></div>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <div class="text-xs">NNW {{ $weatherData['current']['wind_direction_10m'] }}°</div>
-                        <div class="text-2xl sm:text-3xl font-bold text-blue-400">{{ $weatherData['current']['wind_speed_10m'] }}</div>
-                        <div class="text-xs">Gust {{ $weatherData['current']['wind_gusts_10m'] }}</div>
+                <div class="flex flex-col items-center justify-center mb-4 md:mb-0">
+                    <div class="flex items-center justify-center">
+                        <!-- Temperature -->
+                        <div class="flex flex-col items-center mx-2">
+                            <div class="relative w-32 h-32 rounded-full border-8 border-green-400 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="text-xs text-green-300">Temperature</div>
+                                    <div class="text-3xl font-bold text-green-400">{{ $weatherData['current']['temperature_2m'] }}°</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center mx-2">
+                            <div class="relative w-32 h-32 rounded-full border-8 border-purple-400 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="text-xs text-purple-300">Humidity</div>
+                                    <div class="text-3xl font-bold text-purple-400">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Temperature circle -->
-                <div class="relative w-full h-24 sm:w-24 sm:h-24">
-                    <div class="absolute inset-0 rounded-full border-green-400 circle-border spin-slow"></div>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <div class="text-xs">Temperature</div>
-                        <div class="text-2xl sm:text-3xl font-bold text-green-400">{{ $weatherData['current']['temperature_2m'] }}°</div>
+                    <!-- Rain and Barometer -->
+                    <div class="mt-6 flex justify-between items-center text-sm">
+                        <div class="text-blue-400 text-xl">💧</div>
+                        <div>Barometer<br><span class="text-lg">ABS {{ $weatherData['current']['pressure_msl'] ?? 'N/A' }} hPa</span></div>
+                        <div class="text-right">Pressure<br><span class="text-lg">{{ ($weatherData['current']['pressure_msl'] ?? 0) - 1013.25 }} hPa</span></div>
                     </div>
-                </div>
 
-                <!-- Indoor Humidity circle -->
-                <div class="relative w-full h-24 sm:w-24 sm:h-24">
-                    <div class="absolute inset-0 rounded-full border-purple-400 circle-border spin-slow"></div>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <div class="text-xs">Humidity</div>
-                        <div class="text-2xl sm:text-3xl font-bold text-purple-400">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
-                    </div>
                 </div>
             </div>
 
-            <!-- Additional data -->
-            <div class="mt-4 grid grid-cols-3 sm:grid-cols-6 gap-2 text-xs">
-                <div>FeelsLike<br>{{ $weatherData['current']['apparent_temperature'] ?? 'N/A' }}°</div>
-                <div>DewPoint<br>{{ 'Not Available' }}</div>
-                <div>Humidity<br>{{ $weatherData['current']['relative_humidity_2m'] ?? 'N/A' }}%</div>
-                <div>10'Wind<br>{{ $weatherData['current']['wind_direction_10m'] ?? 'N/A' }} {{ $weatherData['current']['wind_speed_10m'] ?? 'N/A' }} km/h</div>
-                <div>Rain/Day<br>{{ $weatherData['daily']['precipitation_sum'][0] ?? 'N/A' }} mm</div>
-                <div>{{ $weatherData['current']['precipitation'] ?? 'N/A' }}<br>Hourly</div>
-            </div>
 
-            <!-- Rain and barometer -->
-            <div class="mt-4 flex flex-wrap justify-between items-center">
-                <div class="text-blue-400 text-2xl">💧</div>
-                <div class="text-sm">{{ $weatherData['current']['precipitation'] ?? 'N/A' }}<br>mm</div>
-                <div class="text-sm text-center">Barometer Reading<br>ABS {{ $weatherData['current']['pressure_msl'] ?? 'N/A' }} hPa</div>
-                <div class="text-sm text-right">{{ ($weatherData['current']['pressure_msl'] ?? 0) - 1013.25 }}<br>hPa</div>
+            <div class="mt-4 relative">
+                <div class="sun-path">
+                    <div class="sun" style="left: {{ $this->calculateSunPosition() }}%;">
+                        <span class="sun-icon">🌞</span>
+                    </div>
+                </div>
+                <div class="time-labels">
+                    <div>🌅 {{ isset($weatherData['daily']['sunrise'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunrise'][0])->format('H:i') : 'N/A' }}</div>
+                    <div>UV Index: {{ $weatherData['daily']['uv_index_max'][0] ?? 'N/A' }}</div>
+                    <div>🌇 {{ isset($weatherData['daily']['sunset'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunset'][0])->format('H:i') : 'N/A' }}</div>
+                </div>
             </div>
-
-            <!-- Sunrise and Sunset -->
-            <div class="mt-4 flex flex-wrap justify-between items-center text-sm">
-                <div>🌅 {{ isset($weatherData['daily']['sunrise'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunrise'][0])->format('H:i') : 'N/A' }}</div>
-                <div class="text-center">--------- UV Index {{ $weatherData['daily']['uv_index_max'][0] ?? 'N/A' }} ---------</div>
-                <div>🌇 {{ isset($weatherData['daily']['sunset'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunset'][0])->format('H:i') : 'N/A' }}</div>
-            </div>
-
             <!-- Date and Time -->
             <div class="mt-4 text-right text-sm">
                 <div>{{ isset($weatherData['current']['time']) ? \Carbon\Carbon::parse($weatherData['current']['time'])->format('D, d M Y') : 'N/A' }}</div>
                 <div>{{ isset($weatherData['current']['time']) ? \Carbon\Carbon::parse($weatherData['current']['time'])->format('H:i:s') : 'N/A' }}</div>
             </div>
         </div>
+
 
         <div id="weather-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
@@ -185,6 +200,88 @@
     <div class="scroll-indicator scroll-down">
         <i class="fas fa-chevron-down"></i>
     </div>
+
+
+    <style>
+        .sun-path {
+            position: relative;
+            height: 50px;
+            background: linear-gradient(to right, #87CEFA, #FFD700);
+            border-radius: 25px;
+            margin: 10px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .sun {
+            position: absolute;
+            bottom: 0;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ffeb3b, #fbc02d);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            transition: left 0.5s ease-in-out, transform 0.5s ease-in-out;
+            box-shadow: 0 0 10px rgba(255, 223, 0, 0.8);
+            animation: float 3s ease-in-out infinite alternate;
+        }
+
+        .sun-icon {
+            font-size: 24px;
+            animation: rotate 10s linear infinite;
+        }
+
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+    <script>
+        function calculateSunPosition() {
+            const now = new Date();
+            const sunrise = new Date("{{ isset($weatherData['daily']['sunrise'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunrise'][0])->format('Y-m-d H:i:s') : 'N/A' }}");
+            const sunset = new Date("{{ isset($weatherData['daily']['sunset'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunset'][0])->format('Y-m-d H:i:s') : 'N/A' }}");
+
+            if (now < sunrise || now > sunset) {
+                return 0; // Sun is not visible
+            }
+
+            const totalDuration = sunset - sunrise;
+            const elapsed = now - sunrise;
+            const position = (elapsed / totalDuration) * 100; // Percentage of the sun's path
+            return position;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sunPosition = calculateSunPosition();
+            document.querySelector('.sun').style.left = sunPosition + '%';
+        });
+    </script>
 
     <!-- <script type="module">
         initializeScrollNavigation(
