@@ -152,7 +152,6 @@ function initializeScrollNavigation(upRoute, downRoute, options = {}) {
     }
 }
 
-
 $(function() {
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const navbar = document.getElementById('navbar');
@@ -161,40 +160,27 @@ $(function() {
     const $sidebarToggle = $('#sidebar-toggle');
     const $main = $('main');
 
-    // Only initialize sidebar functionality if elements exist
-    if (mobileMenuButton && navbar && sidebarOverlay) {
-        function toggleSidebar() {
-            navbar.classList.toggle('hidden');
-            sidebarOverlay.classList.toggle('hidden');
-            document.body.classList.toggle('overflow-hidden');
-            mobileMenuButton.classList.toggle('menu-open');
-        }
+    function toggleSidebar() {
+        navbar.classList.toggle('hidden');
+        sidebarOverlay.classList.toggle('hidden');
+        document.body.classList.toggle('overflow-hidden');
+        mobileMenuButton.classList.toggle('menu-open');
+    }
 
-        function hideSidebar() {
-            navbar.classList.add('hidden');
-            sidebarOverlay.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-            mobileMenuButton.classList.remove('menu-open');
-        }
-
-        mobileMenuButton.addEventListener('click', toggleSidebar);
-        sidebarOverlay.addEventListener('click', hideSidebar);
-
-        // Initialize nav links click handlers only if sidebar exists
-        const navLinks = document.querySelectorAll('.navbar__link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    hideSidebar();
-                }
-            });
-        });
+    function hideSidebar() {
+        navbar.classList.add('hidden');
+        sidebarOverlay.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        mobileMenuButton.classList.remove('menu-open');
     }
 
     function toggleDesktopSidebar() {
         $navbar.toggleClass('collapsed');
         $main.toggleClass('sidebar-collapsed');
     }
+
+    mobileMenuButton.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', hideSidebar);
 
     $sidebarToggle.on('click', function() {
         if (window.innerWidth <= 768) {
@@ -206,37 +192,41 @@ $(function() {
 
     // Function to handle resize events
     function handleResize() {
-        // Only proceed if navbar and overlay elements exist
-        if (navbar && sidebarOverlay) {
-            if (window.innerWidth > 768) {
-                navbar.classList.remove('hidden');
-                sidebarOverlay.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-                // Preserve desktop sidebar state
-                if ($navbar.hasClass('collapsed')) {
-                    $main.addClass('sidebar-collapsed');
-                } else {
-                    $main.removeClass('sidebar-collapsed');
-                }
+        if (window.innerWidth > 768) {
+            navbar.classList.remove('hidden');
+            sidebarOverlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            // Preserve desktop sidebar state
+            if ($navbar.hasClass('collapsed')) {
+                $main.addClass('sidebar-collapsed');
             } else {
-                // Always hide sidebar in mobile view
-                navbar.classList.add('hidden');
-                sidebarOverlay.classList.add('hidden');
-                // Remove desktop-specific classes
-                $navbar.removeClass('collapsed');
                 $main.removeClass('sidebar-collapsed');
             }
+        } else {
+            // Always hide sidebar in mobile view
+            navbar.classList.add('hidden');
+            sidebarOverlay.classList.add('hidden');
+            // Remove desktop-specific classes
+            $navbar.removeClass('collapsed');
+            $main.removeClass('sidebar-collapsed');
         }
     }
 
-    // Only add resize event listener if sidebar elements exist
-    if (navbar && sidebarOverlay) {
-        // Add resize event listener
-        window.addEventListener('resize', handleResize);
+    // Add resize event listener
+    window.addEventListener('resize', handleResize);
 
-        // Initial call to set correct state
-        handleResize();
-    }
+    // Initial call to set correct state
+    handleResize();
+
+    // Hide sidebar when clicking a nav link on mobile
+    const navLinks = document.querySelectorAll('.navbar__link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                hideSidebar();
+            }
+        });
+    });
 
     const $themeToggleBtn = $('#theme-toggle');
     const $html = $('html');

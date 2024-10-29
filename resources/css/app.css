@@ -26,102 +26,130 @@ body {
     overflow: hidden;
     height: 100vh;
 }
+@keyframes bounceDown {
 
-.navbar {
-    position: fixed;
-    top: 50%;
-    left: 1rem;
-    transform: translateY(-50%);
-    background: #fff;
-    border-radius: 10px;
-    padding: 1rem 0;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.03);
-    display: flex;
-    flex-direction: column;
-    z-index: 1000;
-    transition: transform 0.3s ease-in-out;
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0) translateX(-50%);
+    }
+
+    40% {
+        transform: translateY(-20px) translateX(-50%);
+    }
+
+    60% {
+        transform: translateY(-10px) translateX(-50%);
+    }
 }
 
-.navbar.collapsed {
-    transform: translateX(-100%);
+@keyframes bounceUp {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0) translateX(-50%);
+    }
+
+    40% {
+        transform: translateY(20px) translateX(-50%);
+    }
+
+    60% {
+        transform: translateY(10px) translateX(-50%);
+    }
 }
 
-.navbar__menu {
-    display: flex;
-    flex-direction: column;
+/* Add these styles to fix the select dropdown issue */
+.weather-card {
+    /* Remove or modify the transform on hover for cards containing select elements */
+    &:has(select) {
+        transform: none !important;
+    }
+
+    /* Create a specific container for the select elements */
+    .select-container {
+        position: relative;
+        z-index: 50; /* Ensure dropdown appears above other elements */
+    }
+
+    select {
+        position: relative;
+        z-index: 2; /* Higher than the card's hover effects */
+        transform: none !important; /* Prevent inheritance of card transforms */
+    }
 }
 
-.navbar__item {
+/* Modify the hover effect for cards containing selects */
+.weather-card:has(select):hover {
+    transform: none !important;
+}
+
+/* Optional: Add a subtle hover effect that won't break the select */
+.weather-card:has(select):hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.sun-path {
     position: relative;
+    height: 50px;
+    background: linear-gradient(to right, #87CEFA, #FFD700);
+    border-radius: 25px;
+    margin: 10px 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
 }
 
-.navbar__link {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 3.5rem;
-    width: 5.5rem;
-    color: #6a778e;
-    transition: 250ms ease all;
-}
-
-.navbar__link i {
-    font-size: 1.2rem;
-}
-
-.navbar__link:hover {
-    color: #fff;
-}
-
-.navbar__link span {
+.sun {
     position: absolute;
-    left: 100%;
-    transform: translate(-3rem);
-    margin-left: 1rem;
-    opacity: 0;
-    pointer-events: none;
-    color: #406ff3;
-    background: #fff;
-    padding: 0.75rem;
-    transition: 250ms ease all;
-    border-radius: 17.5px;
+    bottom: 0;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, #ffeb3b, #fbc02d);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 40px;
+    transition: left 0.5s ease-in-out, transform 0.5s ease-in-out;
+    box-shadow: 0 0 10px rgba(255, 223, 0, 0.8);
+    animation: float 3s ease-in-out infinite alternate;
 }
 
-.navbar__link:hover span {
-    opacity: 1;
-    transform: translate(0);
+.sun-icon {
+    font-size: 24px;
+    animation: rotate 10s linear infinite;
 }
 
-.navbar__menu {
-    position: relative;
+.time-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #333;
+    margin-top: 5px;
 }
 
-.navbar__item {
-    position: relative;
+@keyframes float {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-5px);
+    }
 }
 
-.navbar__item:before {
-    content: '';
-    position: absolute;
-    opacity: 0;
-    z-index: -1;
-    top: 0;
-    left: 1rem;
-    width: 3.5rem;
-    height: 3.5rem;
-    background: #406ff3;
-    border-radius: 17.5px;
-    transition: 250ms cubic-bezier(1, 0.2, 0.1, 1.2) all;
-}
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
 
-.navbar__item:hover:before {
-    opacity: 1;
-    animation: gooeyEffect 250ms 1;
-}
-
-.navbar__item:last-child:before {
-    content: none;
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes gooeyEffect {
@@ -149,123 +177,6 @@ main {
     scroll-behavior: smooth;
 }
 
-main.sidebar-collapsed {
-    margin-left: 30px; /* Width of the toggle button */
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .navbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        transform: translateX(-100%);
-        width: 250px;
-        height: 100%;
-        flex-direction: column;
-        justify-content: flex-start;
-        padding: 1rem;
-        z-index: 1001;
-        background-color: var(--card-bg);
-        transition: transform 0.3s ease-in-out;
-        overflow-y: auto;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .navbar:not(.hidden) {
-        transform: translateX(0);
-    }
-
-    .navbar__menu {
-        flex-direction: column;
-        margin-top: 2rem;
-    }
-
-    .navbar__item {
-        margin-bottom: 1rem;
-    }
-
-    .navbar__link {
-        width: 100%;
-        height: auto;
-        padding: 0.75rem;
-        justify-content: flex-start;
-    }
-
-    .navbar__link i {
-        margin-right: 1rem;
-        width: 20px;
-        text-align: center;
-    }
-
-    .navbar__link span {
-        display: inline;
-        position: static;
-        opacity: 1;
-        transform: none;
-        margin-left: 0;
-        color: inherit;
-        background: none;
-        padding: 0;
-    }
-
-    .navbar__brand {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #4d689e;
-    }
-
-    .navbar__logo {
-        width: 40px;
-        height: auto;
-        margin-right: 1rem;
-        margin-bottom: 0;
-    }
-
-    .navbar__company-name {
-        font-size: 1.2rem;
-    }
-
-    main {
-        margin-left: 0;
-        padding-top: 4rem; /* Add space for the mobile menu button */
-    }
-
-    .navbar__item:before {
-        content: none;
-    }
-
-    .navbar__link:hover {
-        background-color: #419df8;
-        border-radius: 8px;
-    }
-}
-
-/* Logo and Company Name Styles */
-.navbar__brand {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #eaeef6;
-}
-
-.navbar__logo {
-    width: 50px;
-    height: auto;
-    margin-bottom: 0.5rem;
-}
-
-.navbar__company-name {
-    font-size: 0.8rem;
-    color: #406ff3;
-    text-align: center;
-    font-weight: bold;
-}
 
 /* Adjust main content margin to account for taller navbar */
 main {
@@ -480,97 +391,6 @@ body {
     background-color: #4a5568;
 }
 
-/* Responsive Navbar Styles */
-@media (max-width: 768px) {
-    .navbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        transform: translateX(-100%);
-        width: 250px;
-        height: 100%;
-        flex-direction: column;
-        justify-content: flex-start;
-        padding: 1rem;
-        z-index: 1001;
-        background-color: rgb(255, 255, 255);
-        transition: transform 0.3s ease-in-out;
-        overflow-y: auto;
-        box-shadow: 2px 0 10px rgba(110, 109, 109, 0.1);
-    }
-
-    .navbar:not(.hidden) {
-        transform: translateX(0);
-    }
-
-    .navbar__menu {
-        flex-direction: column;
-        margin-top: 2rem;
-    }
-
-    .navbar__item {
-        margin-bottom: 1rem;
-    }
-
-    .navbar__link {
-        width: 100%;
-        height: auto;
-        padding: 0.75rem;
-        justify-content: flex-start;
-    }
-
-    .navbar__link i {
-        margin-right: 1rem;
-        width: 20px;
-        text-align: center;
-    }
-
-    .navbar__link span {
-        display: inline;
-        position: static;
-        opacity: 1;
-        transform: none;
-        margin-left: 0;
-        color: inherit;
-        background: none;
-        padding: 0;
-    }
-
-    .navbar__brand {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #eaeef6;
-    }
-
-    .navbar__logo {
-        width: 40px;
-        height: auto;
-        margin-right: 1rem;
-        margin-bottom: 0;
-    }
-
-    .navbar__company-name {
-        font-size: 1.2rem;
-    }
-
-    main {
-        margin-left: 0;
-        padding-top: 4rem; /* Add space for the mobile menu button */
-    }
-
-    .navbar__item:before {
-        content: none;
-    }
-
-    .navbar__link:hover {
-        background-color: #4b82b9;
-        border-radius: 8px;
-    }
-}
-
 /* Mobile menu button styles */
 #mobile-menu-button {
     display: none;
@@ -591,21 +411,6 @@ body {
     visibility: hidden;
 }
 
-@media (max-width: 768px) {
-    #mobile-menu-button {
-        display: block;
-    }
-
-    .navbar {
-        width: 250px;
-        /* ... existing navbar styles ... */
-    }
-
-    /* Ensure navbar items don't overlap with menu button */
-    .navbar__menu {
-        margin-top: 3.5rem; /* Increased top margin */
-    }
-}
 
 /* Theme toggle button styles */
 #theme-toggle {
@@ -663,53 +468,6 @@ body {
     border-width: 4px;
     box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1) inset;
 }
-
-/* Add these new styles */
-.navbar {
-    transition: transform 0.3s ease-in-out;
-}
-
-.navbar.collapsed {
-    transform: translateX(-100%);
-}
-
-#sidebar-toggle {
-    position: absolute;
-    top: 10px;
-    right: -30px;
-    background: #fff;
-    border: none;
-    border-radius: 0 5px 5px 0;
-    padding: 5px 10px;
-    cursor: pointer;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    z-index: 1001;
-}
-
-#sidebar-toggle i {
-    transition: transform 0.3s ease-in-out;
-}
-
-.navbar.collapsed #sidebar-toggle i {
-    transform: rotate(180deg);
-}
-
-/* Adjust main content margin */
-main {
-    transition: margin-left 0.3s ease-in-out;
-}
-
-main.sidebar-collapsed {
-    margin-left: 30px; /* Width of the toggle button */
-}
-
-/* Add this new style for mobile view */
-@media (max-width: 768px) {
-    .navbar.collapsed {
-        transform: translateX(-100%);
-    }
-}
-
 
 
 @keyframes loading {
@@ -1029,128 +787,3 @@ body {
     animation: bounceDown 2s infinite;
 }
 
-@keyframes bounceDown {
-
-    0%,
-    20%,
-    50%,
-    80%,
-    100% {
-        transform: translateY(0) translateX(-50%);
-    }
-
-    40% {
-        transform: translateY(-20px) translateX(-50%);
-    }
-
-    60% {
-        transform: translateY(-10px) translateX(-50%);
-    }
-}
-
-@keyframes bounceUp {
-
-    0%,
-    20%,
-    50%,
-    80%,
-    100% {
-        transform: translateY(0) translateX(-50%);
-    }
-
-    40% {
-        transform: translateY(20px) translateX(-50%);
-    }
-
-    60% {
-        transform: translateY(10px) translateX(-50%);
-    }
-}
-
-/* Add these styles to fix the select dropdown issue */
-.weather-card {
-    /* Remove or modify the transform on hover for cards containing select elements */
-    &:has(select) {
-        transform: none !important;
-    }
-
-    /* Create a specific container for the select elements */
-    .select-container {
-        position: relative;
-        z-index: 50; /* Ensure dropdown appears above other elements */
-    }
-
-    select {
-        position: relative;
-        z-index: 2; /* Higher than the card's hover effects */
-        transform: none !important; /* Prevent inheritance of card transforms */
-    }
-}
-
-/* Modify the hover effect for cards containing selects */
-.weather-card:has(select):hover {
-    transform: none !important;
-}
-
-/* Optional: Add a subtle hover effect that won't break the select */
-.weather-card:has(select):hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-                0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.sun-path {
-    position: relative;
-    height: 50px;
-    background: linear-gradient(to right, #87CEFA, #FFD700);
-    border-radius: 25px;
-    margin: 10px 0;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-}
-
-.sun {
-    position: absolute;
-    bottom: 0;
-    width: 40px;
-    height: 40px;
-    background: radial-gradient(circle, #ffeb3b, #fbc02d);
-    border-radius: 50%;
-    text-align: center;
-    line-height: 40px;
-    transition: left 0.5s ease-in-out, transform 0.5s ease-in-out;
-    box-shadow: 0 0 10px rgba(255, 223, 0, 0.8);
-    animation: float 3s ease-in-out infinite alternate;
-}
-
-.sun-icon {
-    font-size: 24px;
-    animation: rotate 10s linear infinite;
-}
-
-.time-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    color: #333;
-    margin-top: 5px;
-}
-
-@keyframes float {
-    0% {
-        transform: translateY(0);
-    }
-
-    100% {
-        transform: translateY(-5px);
-    }
-}
-
-@keyframes rotate {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
