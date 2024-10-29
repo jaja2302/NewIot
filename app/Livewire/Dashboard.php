@@ -51,7 +51,7 @@ class Dashboard extends Component
             ]);
 
             $this->weatherData = $response->json();
-
+            // dd($this->weatherData);
             // Cache the weather data for 1 hour
             Cache::put($cacheKey, $this->weatherData, now()->addHour());
         }

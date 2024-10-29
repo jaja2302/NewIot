@@ -55,9 +55,9 @@
                 <div class="relative w-full h-24 sm:w-24 sm:h-24">
                     <div class="absolute inset-0 rounded-full border-yellow-400 circle-border spin-slow"></div>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <div class="text-xs">11.2°</div>
-                        <div class="text-2xl sm:text-3xl font-bold text-yellow-400">10.5°</div>
-                        <div class="text-xs">9.8°</div>
+                        <div class="text-xs">{{ $weatherData['current']['apparent_temperature'] }}°</div>
+                        <div class="text-2xl sm:text-3xl font-bold text-yellow-400">{{ $weatherData['current']['temperature_2m'] }}°</div>
+                        <div class="text-xs">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
                     </div>
                 </div>
 
@@ -65,9 +65,9 @@
                 <div class="relative w-full h-24 sm:w-24 sm:h-24">
                     <div class="absolute inset-0 rounded-full border-blue-400 circle-border spin-slow"></div>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <div class="text-xs">NNW 336°</div>
-                        <div class="text-2xl sm:text-3xl font-bold text-blue-400">5.2</div>
-                        <div class="text-xs">Gust 7.8</div>
+                        <div class="text-xs">NNW {{ $weatherData['current']['wind_direction_10m'] }}°</div>
+                        <div class="text-2xl sm:text-3xl font-bold text-blue-400">{{ $weatherData['current']['wind_speed_10m'] }}</div>
+                        <div class="text-xs">Gust {{ $weatherData['current']['wind_gusts_10m'] }}</div>
                     </div>
                 </div>
 
@@ -76,7 +76,7 @@
                     <div class="absolute inset-0 rounded-full border-green-400 circle-border spin-slow"></div>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                         <div class="text-xs">Temperature</div>
-                        <div class="text-2xl sm:text-3xl font-bold text-green-400">10.5°</div>
+                        <div class="text-2xl sm:text-3xl font-bold text-green-400">{{ $weatherData['current']['temperature_2m'] }}°</div>
                     </div>
                 </div>
 
@@ -85,40 +85,40 @@
                     <div class="absolute inset-0 rounded-full border-purple-400 circle-border spin-slow"></div>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                         <div class="text-xs">Humidity</div>
-                        <div class="text-2xl sm:text-3xl font-bold text-purple-400">65%</div>
+                        <div class="text-2xl sm:text-3xl font-bold text-purple-400">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
                     </div>
                 </div>
             </div>
 
             <!-- Additional data -->
             <div class="mt-4 grid grid-cols-3 sm:grid-cols-6 gap-2 text-xs">
-                <div>FeelsLike<br>9.8°</div>
-                <div>DewPoint<br>4.5°</div>
-                <div>Humidity<br>65%</div>
-                <div>10'Wind<br>NNW 5.2</div>
-                <div>Rain/Day<br>0.2</div>
-                <div>0.0<br>Hourly</div>
+                <div>FeelsLike<br>{{ $weatherData['current']['apparent_temperature'] ?? 'N/A' }}°</div>
+                <div>DewPoint<br>{{ 'Not Available' }}</div>
+                <div>Humidity<br>{{ $weatherData['current']['relative_humidity_2m'] ?? 'N/A' }}%</div>
+                <div>10'Wind<br>{{ $weatherData['current']['wind_direction_10m'] ?? 'N/A' }} {{ $weatherData['current']['wind_speed_10m'] ?? 'N/A' }} km/h</div>
+                <div>Rain/Day<br>{{ $weatherData['daily']['precipitation_sum'][0] ?? 'N/A' }} mm</div>
+                <div>{{ $weatherData['current']['precipitation'] ?? 'N/A' }}<br>Hourly</div>
             </div>
 
             <!-- Rain and barometer -->
             <div class="mt-4 flex flex-wrap justify-between items-center">
                 <div class="text-blue-400 text-2xl">💧</div>
-                <div class="text-sm">0.2<br>mm</div>
-                <div class="text-sm text-center">Barometer Reading<br>ABS 1015.2 hPa</div>
-                <div class="text-sm text-right">0.3<br>hpa</div>
+                <div class="text-sm">{{ $weatherData['current']['precipitation'] ?? 'N/A' }}<br>mm</div>
+                <div class="text-sm text-center">Barometer Reading<br>ABS {{ $weatherData['current']['pressure_msl'] ?? 'N/A' }} hPa</div>
+                <div class="text-sm text-right">{{ ($weatherData['current']['pressure_msl'] ?? 0) - 1013.25 }}<br>hPa</div>
             </div>
 
             <!-- Sunrise and Sunset -->
             <div class="mt-4 flex flex-wrap justify-between items-center text-sm">
-                <div>🌅 06:45</div>
-                <div class="text-center">--------- UV Index 3 ---------</div>
-                <div>🌇 18:30</div>
+                <div>🌅 {{ isset($weatherData['daily']['sunrise'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunrise'][0])->format('H:i') : 'N/A' }}</div>
+                <div class="text-center">--------- UV Index {{ $weatherData['daily']['uv_index_max'][0] ?? 'N/A' }} ---------</div>
+                <div>🌇 {{ isset($weatherData['daily']['sunset'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunset'][0])->format('H:i') : 'N/A' }}</div>
             </div>
 
             <!-- Date and Time -->
             <div class="mt-4 text-right text-sm">
-                <div>Wed, 26 Apr 2023</div>
-                <div>14:30:00</div>
+                <div>{{ isset($weatherData['current']['time']) ? \Carbon\Carbon::parse($weatherData['current']['time'])->format('D, d M Y') : 'N/A' }}</div>
+                <div>{{ isset($weatherData['current']['time']) ? \Carbon\Carbon::parse($weatherData['current']['time'])->format('H:i:s') : 'N/A' }}</div>
             </div>
         </div>
 
@@ -186,10 +186,10 @@
         <i class="fas fa-chevron-down"></i>
     </div>
 
-    <script type="module">
+    <!-- <script type="module">
         initializeScrollNavigation(
             "{{ route('dashboardaws') }}", // Up route
             "{{ route('waterlevel') }}" // Down route
         );
-    </script>
+    </script> -->
 </div>
