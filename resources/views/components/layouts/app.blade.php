@@ -64,7 +64,7 @@
                     </a>
                 </li>
             </ul>
-            <button id="sidebar-toggle" aria-label="Toggle Sidebar" class="absolute top-1/2 -right-4 transform -translate-y-1/2">
+            <button id="sidebar-toggle" aria-label="Toggle Sidebar" class="dark:text-black absolute top-1/2 -right-4 transform -translate-y-1/2">
                 <i class="fas fa-chevron-left"></i>
             </button>
         </nav>

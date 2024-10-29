@@ -1,6 +1,4 @@
 <div class="min-h-screen">
-
-
     <div class="scroll-section">
         <div class="container mx-auto px-4 py-6">
             <!-- Header Section -->
@@ -220,6 +218,18 @@
                         </div>
                     </div>
 
+                </div>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4">
+                <div class="w-full lg:w-64 select-container">
+                    <label for="station" class="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Table Data</label>
+
+                    <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
+                        {{$this->table}}
+                    </div>
                 </div>
             </div>
         </div>

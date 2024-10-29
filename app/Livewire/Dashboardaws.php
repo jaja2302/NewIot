@@ -2,12 +2,23 @@
 
 namespace App\Livewire;
 
+use App\Exports\WeatherstationExcel;
 use Livewire\Component;
 use App\Models\WeatherStation;
 use App\Models\Weatherstationdata;
 use Carbon\Carbon;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Facades\Excel;
 
-class Dashboardaws extends Component
+class Dashboardaws extends Component implements HasForms, HasTable
 {
     public $list_station;
     public $weather_data;
@@ -15,6 +26,9 @@ class Dashboardaws extends Component
     public $tempChartData;
     public $rainChartData;
     public $selectedDate; // Remove the initialization here
+    use InteractsWithTable;
+    use InteractsWithForms;
+
 
     public function mount()
     {
@@ -219,5 +233,49 @@ class Dashboardaws extends Component
     {
         // You can implement your own logic here based on temperature, humidity, etc.
         return 'Partly Cloudy'; // Placeholder
+    }
+
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->query(function () {
+                $data = Weatherstationdata::query()->where('idws', $this->selectedstation);
+                return $data;
+            })
+            ->columns([
+                TextColumn::make('weatherstation.loc'),
+                TextColumn::make('date'),
+                TextColumn::make('temp_out'),
+                TextColumn::make('hum_out'),
+                TextColumn::make('windspeedkmh'),
+                TextColumn::make('winddir'),
+            ])
+            ->filters([
+                // ...
+            ])
+            ->actions([
+                // ...
+            ])
+            ->bulkActions([
+                BulkAction::make('delete')
+                    ->label('Delete')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(function (Collection $records) {
+                        $records->each(function (Weatherstationdata $record) {
+                            $record->delete();
+                        });
+                    }),
+                BulkAction::make('export')
+                    ->label('Export to Excel')
+                    ->action(function (Collection $records) {
+                        return Excel::download(
+                            new WeatherstationExcel($records),
+                            'Weatherdata-data-' . now()->format('Y-m-d') . '.xlsx'
+                        );
+                    })
+            ]);
     }
 }

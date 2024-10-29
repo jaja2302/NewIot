@@ -31,10 +31,10 @@ body {
 .navbar {
     position: fixed;
     top: 50%;
-    left: 1rem;
+    left: 0;
     transform: translateY(-50%);
     background: #fff;
-    border-radius: 10px;
+    border-radius: 0 10px 10px 0;
     padding: 1rem 0;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.03);
     display: flex;
@@ -44,7 +44,7 @@ body {
 }
 
 .navbar.collapsed {
-    transform: translateX(-100%);
+    transform: translate(-100%, -50%);
 }
 
 .navbar__menu {
@@ -141,7 +141,7 @@ body {
 
 /* Adjust main content margin */
 main {
-    margin-left: 0; /* Remove left margin */
+    margin-left: 7rem;
     padding: 2rem;
     padding-top: 3rem;
     transition: margin-left 0.3s ease-in-out;
@@ -151,7 +151,7 @@ main {
 }
 
 main.sidebar-collapsed {
-    margin-left: 30px; /* Width of the toggle button */
+    margin-left: 0;
 }
 
 /* Responsive adjustments */
@@ -676,8 +676,9 @@ body {
 
 #sidebar-toggle {
     position: absolute;
-    top: 10px;
+    top: 50%;
     right: -30px;
+    transform: translateY(-50%);
     background: #fff;
     border: none;
     border-radius: 0 5px 5px 0;
@@ -701,7 +702,7 @@ main {
 }
 
 main.sidebar-collapsed {
-    margin-left: 30px; /* Width of the toggle button */
+    margin-left: 0;
 }
 
 /* Add this new style for mobile view */
