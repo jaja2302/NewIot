@@ -1,267 +1,222 @@
 <div class="min-h-screen">
+    <div class="scroll-section">
+        <div class="container mx-auto px-4 py-6">
 
-    <!-- City Search Input -->
-    <div class="mb-4 relative">
-        <input type="text"
-            wire:model.defer="searchQuery"
-            wire:keydown.enter="searchCity"
-            placeholder="Cari kota di Indonesia"
-            class="w-full px-4 py-2 border rounded-lg"
-            wire:loading.attr="disabled"
-            wire:target="searchCity">
-    </div>
+            <!-- City Search Input -->
+            <div class="mb-4 relative">
+                <input type="text"
+                    wire:model.defer="searchQuery"
+                    wire:keydown.enter="searchCity"
+                    placeholder="Cari kota di Indonesia"
+                    class="w-full px-4 py-2 border rounded-lg dark:text-black"
+                    wire:loading.attr="disabled"
+                    wire:target="searchCity">
+            </div>
 
-    <!-- Loading Indicator for City Search -->
-    <div wire:loading wire:target="searchCity">
-        <div class="mb-4">
-            <p class="text-center">Memuat...</p>
-        </div>
-    </div>
-
-    <!-- Search Results -->
-    @if(!empty($searchResults))
-    <div class="mb-4">
-        <ul class="bg-white border rounded-lg shadow-lg">
-            @foreach($searchResults as $result)
-            <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer" wire:click="setLocation('{{ $result['geometry']['lat'] }}', '{{ $result['geometry']['lng'] }}', '{{ $result['formatted'] }}')">
-                {{ $result['formatted'] }}
-            </li>
-            @endforeach
-        </ul>
-    </div>
-    @endif
-
-    <!-- Location Error Message -->
-    @if($locationError)
-    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
-        <p>{{ $locationError }}</p>
-        <p>Menggunakan lokasi: {{ $searchQuery ?: 'Default' }}</p>
-    </div>
-    @endif
-
-    <!-- Loading Indicator -->
-    <div wire:loading wire:target="fetchWeatherData" class="text-center py-8">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-        <p class="mt-2 text-gray-600">Memuat data cuaca...</p>
-    </div>
-
-    <!-- Weather Content -->
-    <div wire:loading.remove wire:target="fetchWeatherData">
-        @if(!empty($weatherData))
-        <div class="weather-card mb-6 rounded-lg shadow-lg p-6 bg-black text-white">
-            <div class="flex flex-wrap justify-center">
-                <div class="flex flex-col items-center justify-center mb-4 md:mb-0">
-                    <div class="flex items-center justify-center">
-                        <!-- Feels Like Temperature -->
-                        <div class="flex flex-col items-center mx-2">
-                            <div class="relative w-32 h-32 rounded-full border-8 border-yellow-400 flex items-center justify-center">
-                                <div class="text-center">
-                                    <div class="text-xs text-yellow-300">Feels Like</div>
-                                    <div class="text-3xl font-bold text-yellow-400">{{ $weatherData['current']['apparent_temperature'] }}°</div>
-                                    <div class="text-xs text-yellow-300">Actual: {{ $weatherData['current']['temperature_2m'] }}°</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex flex-col items-center mx-2">
-                            <div class="relative w-32 h-32 rounded-full border-8 border-blue-400 flex items-center justify-center">
-                                <div class="text-center">
-                                    <div class="text-xs text-blue-300">Wind</div>
-                                    <div class="text-3xl font-bold text-blue-400">{{ $weatherData['current']['wind_speed_10m'] }} m/s</div>
-                                    <div class="text-xs text-blue-300">Dir: {{ $weatherData['current']['wind_direction_10m'] }}°</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Additional Metrics Section -->
-                    <div class="mt-6 grid grid-cols-2 gap-4 text-center text-xs">
-                        <div class="flex flex-col">
-                            <span>10' Wind</span>
-                            <span class="text-lg">{{ $weatherData['current']['wind_speed_10m'] ?? 'N/A' }} km/h</span>
-                        </div>
-                        <div class="flex flex-col">
-                            <span>Rain/Day</span>
-                            <span class="text-lg">{{ $weatherData['daily']['precipitation_sum'][0] ?? 'N/A' }} mm</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex flex-col items-center justify-center mb-4 md:mb-0">
-                    <div class="flex items-center justify-center">
-                        <!-- Temperature -->
-                        <div class="flex flex-col items-center mx-2">
-                            <div class="relative w-32 h-32 rounded-full border-8 border-green-400 flex items-center justify-center">
-                                <div class="text-center">
-                                    <div class="text-xs text-green-300">Temperature</div>
-                                    <div class="text-3xl font-bold text-green-400">{{ $weatherData['current']['temperature_2m'] }}°</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex flex-col items-center mx-2">
-                            <div class="relative w-32 h-32 rounded-full border-8 border-purple-400 flex items-center justify-center">
-                                <div class="text-center">
-                                    <div class="text-xs text-purple-300">Humidity</div>
-                                    <div class="text-3xl font-bold text-purple-400">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Rain and Barometer -->
-                    <div class="mt-6 flex justify-between items-center text-sm">
-                        <div class="text-blue-400 text-xl">💧</div>
-                        <div>Barometer<br><span class="text-lg">ABS {{ $weatherData['current']['pressure_msl'] ?? 'N/A' }} hPa</span></div>
-                        <div class="text-right">Pressure<br><span class="text-lg">{{ ($weatherData['current']['pressure_msl'] ?? 0) - 1013.25 }} hPa</span></div>
-                    </div>
-
+            <!-- Loading Indicator for City Search -->
+            <div wire:loading wire:target="searchCity">
+                <div class="mb-4">
+                    <p class="text-center">Memuat...</p>
                 </div>
             </div>
 
-
-            <div class="mt-4 relative">
-                <div class="sun-path">
-                    <div class="sun" style="left: {{ $this->calculateSunPosition() }}%;">
-                        <span class="sun-icon">🌞</span>
-                    </div>
-                </div>
-                <div class="time-labels">
-                    <div>🌅 {{ isset($weatherData['daily']['sunrise'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunrise'][0])->format('H:i') : 'N/A' }}</div>
-                    <div>UV Index: {{ $weatherData['daily']['uv_index_max'][0] ?? 'N/A' }}</div>
-                    <div>🌇 {{ isset($weatherData['daily']['sunset'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunset'][0])->format('H:i') : 'N/A' }}</div>
-                </div>
-            </div>
-            <!-- Date and Time -->
-            <div class="mt-4 text-right text-sm">
-                <div>{{ isset($weatherData['current']['time']) ? \Carbon\Carbon::parse($weatherData['current']['time'])->format('D, d M Y') : 'N/A' }}</div>
-                <div>{{ isset($weatherData['current']['time']) ? \Carbon\Carbon::parse($weatherData['current']['time'])->format('H:i:s') : 'N/A' }}</div>
-            </div>
-        </div>
-
-
-        <div id="weather-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            <!-- Location Info -->
-            <div class="weather-card rounded-lg shadow-lg p-6">
-                <h2 class="text-2xl font-bold mb-4">Informasi Lokasi</h2>
-                <p><strong>Zona Waktu:</strong> {{ $weatherData['timezone'] }}</p>
-                <p><strong>Ketinggian:</strong> {{ $weatherData['elevation'] }}m</p>
-                <p><strong>Koordinat:</strong> {{ $weatherData['latitude'] }}°LU, {{ $weatherData['longitude'] }}°BT</p>
-            </div>
-
-            <!-- Today's Highlights -->
-            <div class="weather-card rounded-lg shadow-lg p-6">
-                <h2 class="text-2xl font-bold mb-4">Sorotan Hari Ini</h2>
-                <p><strong>Indeks UV:</strong> {{ $weatherData['daily']['uv_index_max'][0] }}</p>
-                <p><strong>Curah Hujan:</strong> {{ $weatherData['daily']['precipitation_sum'][0] }} mm</p>
-                <p><strong>Matahari Terbit:</strong> {{ \Carbon\Carbon::parse($weatherData['daily']['sunrise'][0])->format('H:i') }}</p>
-                <p><strong>Matahari Terbenam:</strong> {{ \Carbon\Carbon::parse($weatherData['daily']['sunset'][0])->format('H:i') }}</p>
-            </div>
-
-            <!-- 7-Day Forecast -->
-            <div class="weather-card rounded-lg shadow-lg p-6 col-span-full">
-                <h2 class="text-2xl font-bold mb-4">Prakiraan 7 Hari</h2>
-                <div class="grid grid-cols-7 gap-4">
-                    @foreach(range(0, 6) as $day)
-                    <div class="text-center">
-                        <p class="font-bold">{{ \Carbon\Carbon::parse($weatherData['daily']['time'][$day])->format('D') }}</p>
-                        <p>{{ $this->getWeatherIcon($weatherData['daily']['weather_code'][$day]) }}</p>
-                        <p class="text-sm">{{ round($weatherData['daily']['precipitation_sum'][$day]) }} mm</p>
-                    </div>
+            <!-- Search Results -->
+            @if(!empty($searchResults))
+            <div class="mb-4">
+                <ul class="bg-white border rounded-lg shadow-lg">
+                    @foreach($searchResults as $result)
+                    <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer" wire:click="setLocation('{{ $result['geometry']['lat'] }}', '{{ $result['geometry']['lng'] }}', '{{ $result['formatted'] }}')">
+                        {{ $result['formatted'] }}
+                    </li>
                     @endforeach
-                </div>
+                </ul>
+            </div>
+            @endif
+
+            <!-- Location Error Message -->
+            @if($locationError)
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+                <p>{{ $locationError }}</p>
+                <p>Menggunakan lokasi: {{ $searchQuery ?: 'Default' }}</p>
+            </div>
+            @endif
+
+            <!-- Loading Indicator -->
+            <div wire:loading wire:target="fetchWeatherData" class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                <p class="mt-2 text-gray-600">Memuat data cuaca...</p>
             </div>
 
-            <!-- Hourly Forecast -->
-            <div class="weather-card rounded-lg shadow-lg p-6 col-span-full">
-                <h2 class="text-2xl font-bold mb-4">Prakiraan Per Jam</h2>
-                <div class="overflow-x-auto">
-                    <div class="inline-flex space-x-4">
-                        @foreach(range(0, 23) as $hour)
-                        <div class="text-center">
-                            <p class="font-bold">{{ \Carbon\Carbon::parse($weatherData['hourly']['time'][$hour])->format('H:i') }}</p>
-                            <p>{{ round($weatherData['hourly']['temperature_2m'][$hour]) }}°C</p>
-                            <p>{{ $weatherData['hourly']['relative_humidity_2m'][$hour] }}%</p>
-                            <p>{{ $this->getWeatherIcon($weatherData['hourly']['weather_code'][$hour]) }}</p>
+            <!-- Weather Content -->
+            <div wire:loading.remove wire:target="fetchWeatherData">
+                @if(!empty($weatherData))
+                <div class="weather-card mb-6 rounded-lg shadow-lg p-6 bg-black text-white">
+                    <div class="flex flex-wrap justify-center">
+                        <div class="flex flex-col items-center justify-center mb-4 md:mb-0">
+                            <div class="flex items-center justify-center">
+                                <!-- Feels Like Temperature -->
+                                <div class="flex flex-col items-center mx-2">
+                                    <div class="relative w-32 h-32 rounded-full border-8 border-yellow-400 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-xs text-yellow-300">Feels Like</div>
+                                            <div class="text-3xl font-bold text-yellow-400">{{ $weatherData['current']['apparent_temperature'] }}°</div>
+                                            <div class="text-xs text-yellow-300">Actual: {{ $weatherData['current']['temperature_2m'] }}°</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center mx-2">
+                                    <div class="relative w-32 h-32 rounded-full border-8 border-blue-400 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-xs text-blue-300">Wind</div>
+                                            <div class="text-3xl font-bold text-blue-400">{{ $weatherData['current']['wind_speed_10m'] }} m/s</div>
+                                            <div class="text-xs text-blue-300">Dir: {{ $weatherData['current']['wind_direction_10m'] }}°</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Metrics Section -->
+                            <div class="mt-6 grid grid-cols-2 gap-4 text-center text-xs">
+                                <div class="flex flex-col">
+                                    <span>10' Wind</span>
+                                    <span class="text-lg">{{ $weatherData['current']['wind_speed_10m'] ?? 'N/A' }} km/h</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span>Rain/Day</span>
+                                    <span class="text-lg">{{ $weatherData['daily']['precipitation_sum'][0] ?? 'N/A' }} mm</span>
+                                </div>
+                            </div>
                         </div>
-                        @endforeach
+                        <div class="flex flex-col items-center justify-center mb-4 md:mb-0">
+                            <div class="flex items-center justify-center">
+                                <!-- Temperature -->
+                                <div class="flex flex-col items-center mx-2">
+                                    <div class="relative w-32 h-32 rounded-full border-8 border-green-400 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-xs text-green-300">Temperature</div>
+                                            <div class="text-3xl font-bold text-green-400">{{ $weatherData['current']['temperature_2m'] }}°</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center mx-2">
+                                    <div class="relative w-32 h-32 rounded-full border-8 border-purple-400 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-xs text-purple-300">Humidity</div>
+                                            <div class="text-3xl font-bold text-purple-400">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rain and Barometer -->
+                            <div class="mt-6 flex justify-between items-center text-sm">
+                                <div class="text-blue-400 text-xl">💧</div>
+                                <div>Barometer<br><span class="text-lg">ABS {{ $weatherData['current']['pressure_msl'] ?? 'N/A' }} hPa</span></div>
+                                <div class="text-right">Pressure<br><span class="text-lg">{{ ($weatherData['current']['pressure_msl'] ?? 0) - 1013.25 }} hPa</span></div>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                    <div class="mt-4 relative">
+                        <div class="sun-path">
+                            @php
+                            $sunPosition = $this->calculateSunPosition();
+                            @endphp
+                            @if ($sunPosition >= 0)
+                            <div class="sun" style="left: {{ $sunPosition }}%;">
+                                <span class="sun-icon">🌞</span>
+                            </div>
+                            @else
+                            <div class="moon" style="left: 50%;"> <!-- Centered for nighttime -->
+                                <span class="moon-icon">🌙</span>
+                            </div>
+                            @endif
+                        </div>
+                        <div class="time-labels dark:text-white">
+                            <div>🌅 {{ isset($weatherData['daily']['sunrise'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunrise'][0])->format('H:i') : 'N/A' }}</div>
+                            <div>UV Index: {{ $weatherData['daily']['uv_index_max'][0] ?? 'N/A' }}</div>
+                            <div>{{ isset($weatherData['current']['time']) ? \Carbon\Carbon::parse($weatherData['current']['time'])->format('D, d M Y') : 'N/A' }}</div>
+                            <div>{{ isset($weatherData['current']['time']) ? \Carbon\Carbon::parse($weatherData['current']['time'])->format('H:i:s') : 'N/A' }}</div>
+                            <div>🌇 {{ isset($weatherData['daily']['sunset'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunset'][0])->format('H:i') : 'N/A' }}</div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div id="weather-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <!-- Location Info -->
+                    <div class="weather-card rounded-lg shadow-lg p-6">
+                        <h2 class="text-2xl font-bold mb-4">Informasi Lokasi</h2>
+                        <p><strong>Zona Waktu:</strong> {{ $weatherData['timezone'] }}</p>
+                        <p><strong>Ketinggian:</strong> {{ $weatherData['elevation'] }}m</p>
+                        <p><strong>Koordinat:</strong> {{ $weatherData['latitude'] }}°LU, {{ $weatherData['longitude'] }}°BT</p>
+                    </div>
+
+                    <!-- Today's Highlights -->
+                    <div class="weather-card rounded-lg shadow-lg p-6">
+                        <h2 class="text-2xl font-bold mb-4">Sorotan Hari Ini</h2>
+                        <p><strong>Indeks UV:</strong> {{ $weatherData['daily']['uv_index_max'][0] }}</p>
+                        <p><strong>Curah Hujan:</strong> {{ $weatherData['daily']['precipitation_sum'][0] }} mm</p>
+                        <p><strong>Matahari Terbit:</strong> {{ \Carbon\Carbon::parse($weatherData['daily']['sunrise'][0])->format('H:i') }}</p>
+                        <p><strong>Matahari Terbenam:</strong> {{ \Carbon\Carbon::parse($weatherData['daily']['sunset'][0])->format('H:i') }}</p>
+                    </div>
+
+                    <!-- 7-Day Forecast -->
+                    <div class="weather-card rounded-lg shadow-lg p-6 col-span-full">
+                        <h2 class="text-2xl font-bold mb-4">Prakiraan 7 Hari</h2>
+                        <div class="grid grid-cols-7 gap-4">
+                            @foreach(range(0, 6) as $day)
+                            <div class="text-center">
+                                <p class="font-bold">{{ \Carbon\Carbon::parse($weatherData['daily']['time'][$day])->format('D') }}</p>
+                                <p>{{ $this->getWeatherIcon($weatherData['daily']['weather_code'][$day]) }}</p>
+                                <p class="text-sm">{{ round($weatherData['daily']['precipitation_sum'][$day]) }} mm</p>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Hourly Forecast -->
+                    <div class="weather-card rounded-lg shadow-lg p-6 col-span-full">
+                        <h2 class="text-2xl font-bold mb-4">Prakiraan Per Jam</h2>
+                        <div class="overflow-x-auto">
+                            <div class="inline-flex space-x-4">
+                                @foreach(range(0, 23) as $hour)
+                                <div class="text-center">
+                                    <p class="font-bold">{{ \Carbon\Carbon::parse($weatherData['hourly']['time'][$hour])->format('H:i') }}</p>
+                                    <p>{{ round($weatherData['hourly']['temperature_2m'][$hour]) }}°C</p>
+                                    <p>{{ $weatherData['hourly']['relative_humidity_2m'][$hour] }}%</p>
+                                    <p>{{ $this->getWeatherIcon($weatherData['hourly']['weather_code'][$hour]) }}</p>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
+                @else
+                <p>Data cuaca tidak tersedia. Silakan coba lagi nanti.</p>
+                @endif
             </div>
+
         </div>
-        @else
-        <p>Data cuaca tidak tersedia. Silakan coba lagi nanti.</p>
-        @endif
+
     </div>
 
 
+    <!-- 
     <div class="scroll-indicator scroll-up">
         <i class="fas fa-chevron-up"></i>
     </div>
 
     <div class="scroll-indicator scroll-down">
         <i class="fas fa-chevron-down"></i>
-    </div>
+    </div> -->
 
 
-    <style>
-        .sun-path {
-            position: relative;
-            height: 50px;
-            background: linear-gradient(to right, #87CEFA, #FFD700);
-            border-radius: 25px;
-            margin: 10px 0;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
-
-        .sun {
-            position: absolute;
-            bottom: 0;
-            width: 40px;
-            height: 40px;
-            background: radial-gradient(circle, #ffeb3b, #fbc02d);
-            border-radius: 50%;
-            text-align: center;
-            line-height: 40px;
-            transition: left 0.5s ease-in-out, transform 0.5s ease-in-out;
-            box-shadow: 0 0 10px rgba(255, 223, 0, 0.8);
-            animation: float 3s ease-in-out infinite alternate;
-        }
-
-        .sun-icon {
-            font-size: 24px;
-            animation: rotate 10s linear infinite;
-        }
-
-        .time-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            color: #333;
-            margin-top: 5px;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(0);
-            }
-
-            100% {
-                transform: translateY(-5px);
-            }
-        }
-
-        @keyframes rotate {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
-
-    <script>
+    <script type="module">
         function calculateSunPosition() {
             const now = new Date();
             const sunrise = new Date("{{ isset($weatherData['daily']['sunrise'][0]) ? \Carbon\Carbon::parse($weatherData['daily']['sunrise'][0])->format('Y-m-d H:i:s') : 'N/A' }}");
@@ -277,9 +232,9 @@
             return position;
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
             const sunPosition = calculateSunPosition();
-            document.querySelector('.sun').style.left = sunPosition + '%';
+            $('.sun').css('left', sunPosition + '%');
         });
     </script>
 

@@ -204,8 +204,12 @@ class Dashboard extends Component
         $sunrise = isset($this->weatherData['daily']['sunrise'][0]) ? \Carbon\Carbon::parse($this->weatherData['daily']['sunrise'][0]) : null;
         $sunset = isset($this->weatherData['daily']['sunset'][0]) ? \Carbon\Carbon::parse($this->weatherData['daily']['sunset'][0]) : null;
 
-        if (!$sunrise || !$sunset || $now < $sunrise || $now > $sunset) {
-            return 0; // Sun is not visible
+        if (!$sunrise || !$sunset) {
+            return 0; // No sunrise/sunset data available
+        }
+
+        if ($now < $sunrise || $now > $sunset) {
+            return -1; // Nighttime
         }
 
         $totalDuration = $sunset->diffInSeconds($sunrise);

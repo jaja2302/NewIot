@@ -152,6 +152,7 @@ function initializeScrollNavigation(upRoute, downRoute, options = {}) {
     }
 }
 
+
 $(function() {
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const navbar = document.getElementById('navbar');

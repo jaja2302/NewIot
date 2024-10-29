@@ -582,7 +582,7 @@ body {
     background-color: var(--bg-color);
     border-radius: 0.375rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out;
 }
 
 /* Hide the menu button when menu is open */
@@ -1096,4 +1096,61 @@ body {
 .weather-card:has(select):hover {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.sun-path {
+    position: relative;
+    height: 50px;
+    background: linear-gradient(to right, #87CEFA, #FFD700);
+    border-radius: 25px;
+    margin: 10px 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.sun {
+    position: absolute;
+    bottom: 0;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, #ffeb3b, #fbc02d);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 40px;
+    transition: left 0.5s ease-in-out, transform 0.5s ease-in-out;
+    box-shadow: 0 0 10px rgba(255, 223, 0, 0.8);
+    animation: float 3s ease-in-out infinite alternate;
+}
+
+.sun-icon {
+    font-size: 24px;
+    animation: rotate 10s linear infinite;
+}
+
+.time-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #333;
+    margin-top: 5px;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
