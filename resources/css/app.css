@@ -919,6 +919,7 @@ select::-ms-expand {
     transform: translateY(-5px) scale(1.01);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
                 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    backdrop-filter: none; /* Remove blur effect on hover */
 }
 
 .weather-card:hover::before {
