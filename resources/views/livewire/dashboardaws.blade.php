@@ -2,7 +2,7 @@
     <div class="scroll-section">
         <div class="container mx-auto px-4 py-6">
             <!-- Header Section -->
-            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4 weather-card">
                 <!-- Station Selector -->
                 <div class="w-full lg:w-64 select-container">
                     <label for="station" class="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Select Station</label>
@@ -11,7 +11,7 @@
                             wire:model="selectedstation"
                             wire:change="updateSelectedStation($event.target.value)"
                             class="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 appearance-none">
-                            <option value="">Choose a station</option>
+                            <option value="">Choose a stations</option>
                             @foreach($list_station as $station)
                             <option value="{{ $station->id }}">{{ $station->loc }}</option>
                             @endforeach
@@ -223,15 +223,14 @@
         </div>
 
         <div class="container mx-auto px-4 py-6">
-            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4">
-                <div class="w-full lg:w-64 select-container">
-                    <label for="station" class="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Table Data</label>
-
-                    <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
-                        {{$this->table}}
-                    </div>
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
+                <div class="flex items-center gap-2 mb-6">
+                    <i class="fas fa-cloud-rain text-blue-500"></i>
+                    <h2 class="font-semibold text-gray-800 dark:text-white">Rainfall History</h2>
                 </div>
+                {{$this->table}}
             </div>
+
         </div>
     </div>
 
@@ -343,10 +342,10 @@
 
 
 
-            initializeScrollNavigation(
-                "{{ route('waterlevel') }}", // Up route
-                "{{ route('dashboard') }}" // Down route
-            );
+            // initializeScrollNavigation(
+            //     "{{ route('waterlevel') }}", // Up route
+            //     "{{ route('dashboard') }}" // Down route
+            // );
         });
     </script>
 </div>

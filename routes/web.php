@@ -7,7 +7,9 @@ use App\Livewire\Waterlevel as LivewireWaterlevel;
 use App\Livewire\Weatherstation as LivewireWeatherstation;
 use App\Livewire\Dashboardaws as LivewireDashboardaws;
 // Login routes
-Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
+Route::get('/', [AuthController::class, 'showLoginForm'])
+    ->name('login')
+    ->middleware('guest');
 Route::post('/', [AuthController::class, 'login'])->name('login.submit');
 
 // Protected routes

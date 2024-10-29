@@ -7,12 +7,16 @@ use Livewire\Component;
 use App\Models\WeatherStation;
 use App\Models\Weatherstationdata;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -245,29 +249,65 @@ class Dashboardaws extends Component implements HasForms, HasTable
             })
             ->columns([
                 TextColumn::make('weatherstation.loc'),
-                TextColumn::make('date'),
+                TextColumn::make('date')->sortable(),
                 TextColumn::make('temp_out'),
                 TextColumn::make('hum_out'),
                 TextColumn::make('windspeedkmh'),
                 TextColumn::make('winddir'),
             ])
             ->filters([
-                // ...
+                Filter::make('by_year')
+                    ->form([
+                        Select::make('year')
+                            ->options(array_combine(
+                                range(2020, now()->year),
+                                range(2020, now()->year)
+                            ))
+                            // ->default(now()->year)
+                            ->placeholder('Select Year')
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['year'],
+                                function (Builder $query, $year) use ($data) {
+                                    return $query->whereYear('date', $year);
+                                }
+                            );
+                    }),
+                Filter::make('date_range')
+                    ->form([
+                        DatePicker::make('from_date')
+                            ->default(now()->subDays(30))
+                            ->label('From Date'),
+                        DatePicker::make('to_date')
+                            ->default(now())
+                            ->label('To Date')
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['from_date'] && $data['to_date'],
+                                function (Builder $query) use ($data) {
+                                    return $query->whereBetween('date', [$data['from_date'], $data['to_date']]);
+                                }
+                            );
+                    })
             ])
             ->actions([
                 // ...
             ])
             ->bulkActions([
-                BulkAction::make('delete')
-                    ->label('Delete')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        $records->each(function (Weatherstationdata $record) {
-                            $record->delete();
-                        });
-                    }),
+                // BulkAction::make('delete')
+                //     ->label('Delete')
+                //     ->icon('heroicon-o-trash')
+                //     ->color('danger')
+                //     ->requiresConfirmation()
+                //     ->action(function (Collection $records) {
+                //         $records->each(function (Weatherstationdata $record) {
+                //             $record->delete();
+                //         });
+                //     }),
                 BulkAction::make('export')
                     ->label('Export to Excel')
                     ->action(function (Collection $records) {

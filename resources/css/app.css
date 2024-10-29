@@ -25,16 +25,15 @@ body {
     font-family: 'Open Sans', sans-serif;
     overflow: hidden;
     height: 100vh;
-    transition: opacity 0.3s ease-in-out;
 }
 
 .navbar {
     position: fixed;
     top: 50%;
-    left: 0;
+    left: 1rem;
     transform: translateY(-50%);
     background: #fff;
-    border-radius: 0 10px 10px 0;
+    border-radius: 10px;
     padding: 1rem 0;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.03);
     display: flex;
@@ -44,7 +43,7 @@ body {
 }
 
 .navbar.collapsed {
-    transform: translate(-100%, -50%);
+    transform: translateX(-100%);
 }
 
 .navbar__menu {
@@ -141,7 +140,7 @@ body {
 
 /* Adjust main content margin */
 main {
-    margin-left: 7rem;
+    margin-left: 0; /* Remove left margin */
     padding: 2rem;
     padding-top: 3rem;
     transition: margin-left 0.3s ease-in-out;
@@ -151,7 +150,7 @@ main {
 }
 
 main.sidebar-collapsed {
-    margin-left: 0;
+    margin-left: 30px; /* Width of the toggle button */
 }
 
 /* Responsive adjustments */
@@ -676,9 +675,8 @@ body {
 
 #sidebar-toggle {
     position: absolute;
-    top: 50%;
+    top: 10px;
     right: -30px;
-    transform: translateY(-50%);
     background: #fff;
     border: none;
     border-radius: 0 5px 5px 0;
@@ -702,7 +700,7 @@ main {
 }
 
 main.sidebar-collapsed {
-    margin-left: 0;
+    margin-left: 30px; /* Width of the toggle button */
 }
 
 /* Add this new style for mobile view */
@@ -746,7 +744,7 @@ main.sidebar-collapsed {
 
 /* Enhanced Card Styles */
 .bg-white {
-    position: relative;
+    /* position: relative; */
     transition: all 0.3s ease-in-out;
     border-radius: 16px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -1097,46 +1095,4 @@ body {
 .weather-card:has(select):hover {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-/* Add these styles */
-body {
-    transition: opacity 0.3s ease-in-out;
-}
-
-.auth-page {
-    min-height: 100vh;
-    background: linear-gradient(to bottom, var(--bg-color), var(--hover-color));
-}
-
-/* Update loading screen styles */
-#loading-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--bg-color);
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-}
-
-#loading-screen.visible {
-    opacity: 1;
-}
-
-/* Dark mode styles for login page */
-.dark .login-form input {
-    background-color: #374151;
-    border-color: #4B5563;
-    color: #F3F4F6;
-}
-
-.dark .login-form input::placeholder {
-    color: #9CA3AF;
-}
-
-.dark .login-container {
-    background-color: #1F2937;
 }
