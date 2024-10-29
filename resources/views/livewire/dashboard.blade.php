@@ -1,4 +1,5 @@
-<div>
+<div class="min-h-screen">
+
     <!-- City Search Input -->
     <div class="mb-4 relative">
         <input type="text"
@@ -175,4 +176,20 @@
         <p>Data cuaca tidak tersedia. Silakan coba lagi nanti.</p>
         @endif
     </div>
+
+
+    <div class="scroll-indicator scroll-up">
+        <i class="fas fa-chevron-up"></i>
+    </div>
+
+    <div class="scroll-indicator scroll-down">
+        <i class="fas fa-chevron-down"></i>
+    </div>
+
+    <script type="module">
+        initializeScrollNavigation(
+            "{{ route('dashboardaws') }}", // Up route
+            "{{ route('waterlevel') }}" // Down route
+        );
+    </script>
 </div>

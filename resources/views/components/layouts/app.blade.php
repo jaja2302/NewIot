@@ -59,7 +59,7 @@
                     <a href="{{ route('dashboardaws') }}" class="navbar__link"><i class="fa-solid fa-cloud"></i><span>Aws</span></a>
                 </li>
                 <li class="navbar__item">
-                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="navbar__link">
+                    <a href="#" onclick="event.preventDefault(); handleLogout();" class="navbar__link">
                         <i class="fas fa-sign-out-alt"></i><span>Logout</span>
                     </a>
                 </li>
@@ -76,22 +76,19 @@
         <div id="sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-40 hidden md:hidden"></div>
 
         <!-- Main Content -->
-        <div class="flex-1 w-full overflow-x-hidden">
-            <!-- Add the scrolling information section here -->
-            <div class="bg-gray-100 p-4 mb-4 overflow-hidden w-full">
+        <div class="flex-1">
+            <!-- Scrolling text at the top -->
+            <div class="fixed top-0 w-full bg-gray-100 p-4 z-10">
                 <div class="scrolling-text-container">
                     <p class="scrolling-text text-sm text-gray-700">
-                        IoT Weather Station dan Water Level: Sistem kami menyediakan data real-time dari sensor, menampilkan laporan komprehensif di dashboard, termasuk visualisasi grafik harian, mingguan, dan bulanan. Data tersedia dalam format Excel untuk kemudahan analisis.
+                        IoT Weather Station dan Water Level: Sistem kami menyediakan data real-time dari sensor...
                     </p>
                 </div>
             </div>
 
-            <main class="p-4 w-full">
-                <div class="min-h-screen">
-                    <div class="container mx-auto px-4 py-8">
-                        {{ $slot }}
-                    </div>
-                </div>
+            <!-- Main content area -->
+            <main class="w-full pt-16"> <!-- Added pt-16 to account for fixed header -->
+                {{ $slot }}
             </main>
         </div>
     </div>
@@ -111,6 +108,21 @@
     @livewire('notifications')
 
     @filamentScripts
+
+    <script>
+        function handleLogout() {
+            // Show loading screen
+            document.getElementById('loading-screen').style.display = 'flex';
+
+            // Fade out the current page
+            document.body.style.opacity = '0';
+
+            // Submit the logout form after a brief delay
+            setTimeout(() => {
+                document.getElementById('logout-form').submit();
+            }, 300);
+        }
+    </script>
 
 </body>
 

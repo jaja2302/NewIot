@@ -1,4 +1,5 @@
-<div>
+<div class="min-h-screen">
+
     <div class="container mx-auto px-4">
         <!-- Page Title -->
         <div class="mb-8">
@@ -36,29 +37,35 @@
                     <div class="space-y-4">
                         <div>
                             <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                            <input type="date" id="date"
-                                wire:model.live="selectedDate"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                            <div class="select-container">
+                                <input type="date" id="date"
+                                    wire:model.live="selectedDate"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                            </div>
                         </div>
                         <div>
                             <label for="wilayah" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Wilayah</label>
-                            <select id="wilayah" wire:model="selectedWilayah" wire:change="updateSelectedStation($event.target.value)"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Select Wilayah</option>
-                                @foreach($wilayah as $wil)
-                                <option value="{{ $wil->id }}">{{ $wil->nama }}</option>
-                                @endforeach
-                            </select>
+                            <div class="select-container">
+                                <select id="wilayah" wire:model="selectedWilayah" wire:change="updateSelectedStation($event.target.value)"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Select Wilayah</option>
+                                    @foreach($wilayah as $wil)
+                                    <option value="{{ $wil->id }}">{{ $wil->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                         <div>
                             <label for="station" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Station</label>
-                            <select id="station" wire:model="selectedStation" wire:change="onChangeStation($event.target.value)"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Select Station</option>
-                                @foreach($stations as $station)
-                                <option value="{{ $station->id }}">{{ $station->location }}</option>
-                                @endforeach
-                            </select>
+                            <div class="select-container">
+                                <select id="station" wire:model="selectedStation" wire:change="onChangeStation($event.target.value)"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Select Station</option>
+                                    @foreach($stations as $station)
+                                    <option value="{{ $station->id }}">{{ $station->location }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -105,7 +112,13 @@
             </div>
         </div>
     </div>
+    <div class="scroll-indicator scroll-up">
+        <i class="fas fa-chevron-up"></i>
+    </div>
 
+    <div class="scroll-indicator scroll-down">
+        <i class="fas fa-chevron-down"></i>
+    </div>
     <script type="module">
         // Move map initialization outside document.ready
         let map = L.map('map', {
@@ -186,6 +199,12 @@
                 chart.series[1].setData(levelOutData, false);
                 chart.series[2].setData(levelActualData, true); // true to redraw chart once after all series are updated
             });
+
+
+            initializeScrollNavigation(
+                "{{ route('dashboard') }}", // Up route
+                "{{ route('dashboardaws') }}" // Down route
+            );
         });
 
         // Initialize the chart with proper configuration

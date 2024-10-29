@@ -1,7 +1,7 @@
 <x-layouts.app>
     @section('title', 'Login')
 
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-sky-200 to-sky-100 dark:from-gray-800 dark:to-gray-900">
         <div class="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-10 rounded-3xl shadow-2xl transform transition-all hover:scale-105">
             <div>
                 <div class="flex justify-center">
@@ -44,4 +44,20 @@
             </form>
         </div>
     </div>
+
+    <style>
+        .dark .login-input {
+            background-color: #374151;
+            border-color: #4B5563;
+            color: #F3F4F6;
+        }
+
+        .dark .login-input::placeholder {
+            color: #9CA3AF;
+        }
+
+        .dark .login-card {
+            background-color: #1F2937;
+        }
+    </style>
 </x-layouts.app>
