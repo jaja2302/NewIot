@@ -111,28 +111,48 @@ $(function() {
     const $loadingScreen = $('#loading-screen');
     const $navLinks = $('.navbar__link');
 
+    // Show loading screen function
+    function showLoadingScreen() {
+        $loadingScreen.css('display', 'flex');
+        $('body').css({
+            'overflow': 'hidden',
+            'height': '100vh'
+        });
+    }
+
+    // Hide loading screen function
+    function hideLoadingScreen() {
+        $loadingScreen.css('display', 'none');
+        $('body').css({
+            'overflow': '',
+            'height': ''
+        });
+    }
+
     $navLinks.on('click', function(e) {
-        // Don't show loading screen for logout
         if (!$(this).attr('href').includes('logout')) {
             e.preventDefault();
-            $loadingScreen.removeClass('hidden');
+            showLoadingScreen();
             setTimeout(() => {
                 window.location.href = $(this).attr('href');
-            }, 500); // Delay to show loading screen
+            }, 500);
         }
     });
 
     // Hide loading screen when page is fully loaded
     $(window).on('load', function() {
-        $loadingScreen.addClass('hidden');
+        hideLoadingScreen();
     });
 
     // For Livewire navigation
-    $(document).on('livewire:load', function() {
-        Livewire.on('pageChanged', () => {
-            $loadingScreen.addClass('hidden');
-        });
+    document.addEventListener('livewire:load', function() {
+        hideLoadingScreen(); // Hide on initial load
+        Livewire.on('pageChanged', hideLoadingScreen);
     });
 
-    
+    // Show loading screen on Livewire navigation start
+    document.addEventListener('livewire:navigating', showLoadingScreen);
+
+    // Immediately hide loading screen if no navigation occurs
+    setTimeout(hideLoadingScreen, 1000);
 });

@@ -9,7 +9,7 @@
         <!-- Top Grid: Filters and Map -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <!-- Filters Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-xl shadow-sm">
                 <div class="p-6">
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                         <i class="fas fa-filter mr-2"></i>Filters
@@ -66,7 +66,7 @@
 
             <!-- Map Container -->
             <div class="lg:col-span-2">
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                <div class="weather-card bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
                     <div wire:ignore id="map" class="w-full rounded-lg" style="min-height: 400px;"></div>
                 </div>
             </div>
@@ -75,7 +75,7 @@
         <!-- Bottom Grid: Chart and Table -->
         <div class="grid grid-cols-1 gap-6">
             <!-- Chart Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-xl shadow-sm">
                 <div class="p-6">
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                         <i class="fas fa-chart-line mr-2"></i>Water Level Trend
@@ -91,7 +91,7 @@
             </div>
 
             <!-- Table Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-xl shadow-sm">
                 <div class="p-6">
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                         <i class="fas fa-table mr-2"></i>Recent Measurements

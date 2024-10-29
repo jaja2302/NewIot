@@ -5,18 +5,23 @@
 
 
             <!-- Station Selector -->
-            <div class="w-full lg:w-64">
+            <div class="w-full lg:w-64 select-container">
                 <label for="station" class="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Select Station</label>
                 <div class="relative">
                     <select id="station"
                         wire:model="selectedstation"
                         wire:change="updateSelectedStation($event.target.value)"
-                        class="block w-full rounded-lg border-gray-300 bg-white py-2 pl-3 pr-10 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        class="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 appearance-none">
                         <option value="">Choose a station</option>
                         @foreach($list_station as $station)
                         <option value="{{ $station->id }}">{{ $station->loc }}</option>
                         @endforeach
                     </select>
+                    <div class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                        <svg class="h-4 w-4 fill-current text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
                 </div>
             </div>
             <!-- Station Info -->
@@ -33,15 +38,15 @@
             <!-- First Column: Weather Cards -->
             <div class="lg:col-span-1">
                 <!-- Weather Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
+                <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
                     <!-- Weather Effect Overlay -->
-                    <div class="absolute inset-0 pointer-events-none weather-effects" wire:ignore>
+                    <div class="absolute inset-0 pointer-events-none weather-effects">
                         @if($weather_data['temperature']['condition'] === 'Rain')
-                        <div class="rain"></div>
+                        <div class="rain-effect"></div>
                         @elseif($weather_data['temperature']['condition'] === 'Snow')
-                        <div class="snow"></div>
+                        <div class="snow-effect"></div>
                         @elseif($weather_data['temperature']['condition'] === 'Cloudy')
-                        <div class="clouds"></div>
+                        <div class="clouds-effect"></div>
                         @endif
                     </div>
 
@@ -97,7 +102,7 @@
                     </div>
 
                     <!-- Wind Status Card -->
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
                         <div class="flex items-center gap-2 mb-4">
                             <i class="fas fa-wind text-blue-500"></i>
                             <span class="font-semibold text-gray-800 dark:text-white">Wind Status</span>
@@ -114,7 +119,7 @@
                     </div>
 
                     <!-- Solar Radiation -->
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
                         <div class="flex items-center gap-2 mb-6">
                             <i class="fas fa-solar-panel text-yellow-500"></i>
                             <h2 class="font-semibold text-gray-800 dark:text-white">Solar Radiation</h2>
@@ -142,7 +147,7 @@
                 <!-- UV and Rainfall Cards in one line -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <!-- UV Index Card -->
-                    <div class="bg-gray-900 text-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden" style="background-image: url('/img/18635.jpg'); background-size: cover; background-position: center;">
+                    <div class="weather-card bg-gray-900 text-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden" style="background-image: url('/img/18635.jpg'); background-size: cover; background-position: center;">
                         <div class="absolute inset-0 bg-black bg-opacity-50"></div>
                         <div class="relative z-10">
                             <div class="flex items-center gap-2 mb-4">
@@ -164,7 +169,7 @@
                     </div>
 
                     <!-- Rainfall Data Card -->
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
                         <div class="flex items-center gap-2 mb-6">
                             <i class="fas fa-cloud-rain text-blue-500"></i>
                             <h2 class="font-semibold text-gray-800 dark:text-white">Rainfall Data</h2>
@@ -192,7 +197,7 @@
                 <!-- Charts Section -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <!-- Temperature Chart -->
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
                         <div class="flex items-center gap-2 mb-6">
                             <i class="fas fa-temperature-high text-red-500"></i>
                             <h2 class="font-semibold text-gray-800 dark:text-white">Temperature History</h2>
@@ -203,7 +208,7 @@
                     </div>
 
                     <!-- Rainfall Chart -->
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
                         <div class="flex items-center gap-2 mb-6">
                             <i class="fas fa-cloud-rain text-blue-500"></i>
                             <h2 class="font-semibold text-gray-800 dark:text-white">Rainfall History</h2>
@@ -316,117 +321,6 @@
             });
         </script>
     </div>
-    <style>
-        /* Weather Animations */
-        @keyframes spin-slow {
-            from {
-                transform: rotate(0deg);
-            }
 
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes bounce-gentle {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-5px);
-            }
-        }
-
-        @keyframes flash {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        .animate-spin-slow {
-            animation: spin-slow 8s linear infinite;
-        }
-
-        .animate-bounce-gentle {
-            animation: bounce-gentle 2s ease-in-out infinite;
-        }
-
-        .animate-flash {
-            animation: flash 2s ease-in-out infinite;
-        }
-
-        /* Rain Effect */
-        .rain {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(transparent, rgba(255, 255, 255, 0.3));
-            animation: rain 1s linear infinite;
-            background-size: 200% 200%;
-        }
-
-        @keyframes rain {
-            0% {
-                background-position: 0% 0%;
-            }
-
-            100% {
-                background-position: 20% 100%;
-            }
-        }
-
-        /* Snow Effect */
-        .snow {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(white, transparent 60%);
-            animation: snow 3s linear infinite;
-            background-size: 3px 3px;
-        }
-
-        @keyframes snow {
-            0% {
-                background-position: 0px 0px;
-            }
-
-            100% {
-                background-position: 50px 50px;
-            }
-        }
-
-        /* Clouds Effect */
-        .clouds {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.1) 45%, transparent 50%);
-            animation: clouds 3s ease infinite;
-            background-size: 200% 200%;
-        }
-
-        @keyframes clouds {
-            0% {
-                background-position: 0% 0%;
-            }
-
-            50% {
-                background-position: 100% 100%;
-            }
-
-            100% {
-                background-position: 0% 0%;
-            }
-        }
-    </style>
 
 </div>

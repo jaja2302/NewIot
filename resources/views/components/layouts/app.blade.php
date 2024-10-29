@@ -27,12 +27,10 @@
 
 <body class="antialiased">
     <!-- Add this loading screen div -->
-    <div id="loading-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-90 hidden">
+    <div id="loading-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-90 h-screen w-screen overflow-hidden">
         <div class="text-center">
-            <div class="nav-icon lottie-animation"
-                data-animation-path="{{ asset('loading/loadingsanimate.json') }}"
-                id="lottie-container"
-                style="width: 300px; height: 300px;">
+            <div id="lottie-container" class="w-64 h-64">
+                <div class="nav-icon lottie-animation" data-animation-path="{{ asset('loading/loadingsanimate.json') }}"></div>
             </div>
         </div>
     </div>
