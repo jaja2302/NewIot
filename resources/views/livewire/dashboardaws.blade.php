@@ -5,7 +5,7 @@
             <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4 weather-card">
                 <!-- Station Selector -->
                 <div class="w-full lg:w-64 select-container">
-                    <label for="station" class="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Select Station</label>
+                    <!-- <label for="station" class="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Select Station</label> -->
                     <div class="relative">
                         <select id="station"
                             wire:model="selectedstation"
@@ -101,7 +101,7 @@
                         </div>
 
                         <!-- Wind Status Card -->
-                        <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
+                        <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative mt-4">
                             <div class="flex items-center gap-2 mb-4">
                                 <i class="fas fa-wind text-blue-500"></i>
                                 <span class="font-semibold text-gray-800 dark:text-white">Wind Status</span>
@@ -118,7 +118,7 @@
                         </div>
 
                         <!-- Solar Radiation -->
-                        <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
+                        <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative mt-4">
                             <div class="flex items-center gap-2 mb-6">
                                 <i class="fas fa-solar-panel text-yellow-500"></i>
                                 <h2 class="font-semibold text-gray-800 dark:text-white">Solar Radiation</h2>
@@ -218,6 +218,115 @@
                         </div>
                     </div>
 
+                </div>
+            </div>
+
+            <!-- Latest Data Section -->
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative mt-6">
+                <h2 class="font-semibold text-gray-800 dark:text-white">Latest Data</h2>
+                <div>
+                    @if($latest_data)
+                    <p>Temperature: {{ $latest_data->temp_out }}°C</p>
+                    <p>Humidity: {{ $latest_data->hum_out }}%</p>
+                    <p>Wind Speed: {{ $latest_data->windspeedkmh }} km/h</p>
+                    <p>Rain Rate: {{ $latest_data->rain_rate }} mm/h</p>
+                    @else
+                    <p>No data available.</p>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Today's Data Section -->
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative mt-6">
+                <h2 class="font-semibold text-gray-800 dark:text-white">Today's Data</h2>
+                <div>
+                    @if($today_data->isNotEmpty())
+                    @foreach($today_data as $data)
+                    <p>Time: {{ \Carbon\Carbon::parse($data->date)->format('H:i') }} - Temp: {{ $data->temp_out }}°C</p>
+                    @endforeach
+                    @else
+                    <p>No data available for today.</p>
+                    @endif
+                </div>
+            </div>
+
+            <!-- 5 Days Ahead Data Section -->
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative mt-6">
+                <h2 class="font-semibold text-gray-800 dark:text-white">5 Days Ahead</h2>
+                <div>
+                    @if($five_days_ahead_data->isNotEmpty())
+                    @foreach($five_days_ahead_data as $data)
+                    <p>Date: {{ \Carbon\Carbon::parse($data->date)->format('Y-m-d') }} - Temp: {{ $data->temp_out }}°C</p>
+                    @endforeach
+                    @else
+                    <p>No data available for the next 5 days.</p>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Wind Statistics Section -->
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative mt-6">
+                <h2 class="font-semibold text-gray-800 dark:text-white">Wind Statistics</h2>
+                <div>
+                    @if($wind_statistics->isNotEmpty())
+                    <p>Average Wind Speed: {{ $wind_statistics->avg('windspeedkmh') }} km/h</p>
+                    <p>Max Gust: {{ $wind_statistics->max('wind_gust') }} km/h</p>
+                    <p>Wind Direction: {{ $wind_statistics->first()->winddir }}°</p>
+                    @else
+                    <p>No wind data available.</p>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Humidity Levels Section -->
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative mt-6">
+                <h2 class="font-semibold text-gray-800 dark:text-white">Humidity Levels</h2>
+                <div>
+                    @if($humidity_levels->isNotEmpty())
+                    <p>Indoor Humidity: {{ $humidity_levels->first()->hum_in }}%</p>
+                    <p>Outdoor Humidity: {{ $humidity_levels->first()->hum_out }}%</p>
+                    @else
+                    <p>No humidity data available.</p>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Pressure Levels Section -->
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative mt-6">
+                <h2 class="font-semibold text-gray-800 dark:text-white">Pressure Levels</h2>
+                <div>
+                    @if($pressure_levels->isNotEmpty())
+                    <p>Current Pressure: {{ $pressure_levels->first()->air_press_rel }} hPa</p>
+                    @else
+                    <p>No pressure data available.</p>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Rainfall Statistics Section -->
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative mt-6">
+                <h2 class="font-semibold text-gray-800 dark:text-white">Rainfall Statistics</h2>
+                <div>
+                    @if($rainfall_statistics->isNotEmpty())
+                    <p>Total Rainfall Today: {{ $rainfall_statistics->sum('rain_rate') }} mm</p>
+                    <p>Total Rainfall This Week: {{ $rainfall_statistics->sum('rain_today') }} mm</p>
+                    <p>Total Rainfall This Month: {{ $rainfall_statistics->sum('monthlyrainmm') }} mm</p>
+                    @else
+                    <p>No rainfall data available.</p>
+                    @endif
+                </div>
+            </div>
+
+            <!-- UV Index Section -->
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative mt-6">
+                <h2 class="font-semibold text-gray-800 dark:text-white">UV Index</h2>
+                <div>
+                    @if($uv_index->isNotEmpty())
+                    <p>Current UV Index: {{ $uv_index->first()->uv }}</p>
+                    <p>UV Level: {{ $this->getUVLevel($uv_index->first()->uv) }}</p>
+                    @else
+                    <p>No UV data available.</p>
+                    @endif
                 </div>
             </div>
         </div>

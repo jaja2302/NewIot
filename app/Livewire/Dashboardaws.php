@@ -10,12 +10,14 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
@@ -30,6 +32,14 @@ class Dashboardaws extends Component implements HasForms, HasTable
     public $tempChartData;
     public $rainChartData;
     public $selectedDate; // Remove the initialization here
+    public $latest_data;
+    public $today_data;
+    public $five_days_ahead_data;
+    public $wind_statistics;
+    public $humidity_levels;
+    public $pressure_levels;
+    public $rainfall_statistics;
+    public $uv_index;
     use InteractsWithTable;
     use InteractsWithForms;
 
@@ -40,6 +50,16 @@ class Dashboardaws extends Component implements HasForms, HasTable
         $this->selectedDate = '2024-10-18';
         $this->list_station = WeatherStation::all();
         $this->getLatestData($this->selectedstation);
+        $this->fetchLatestData();
+        $this->fetchTodayData();
+        $this->fetchFiveDaysAheadData();
+        $this->fetchWindStatistics();
+        $this->fetchHumidityLevels();
+        $this->fetchPressureLevels();
+        $this->fetchRainfallStatistics();
+        $this->fetchUVIndex();
+
+        // dd($this->getLatestData($this->selectedstation));
         $this->generateChartData($this->selectedstation);
     }
 
@@ -113,7 +133,7 @@ class Dashboardaws extends Component implements HasForms, HasTable
             $this->setDefaultWeatherData();
             return;
         }
-
+        // dd($latest_data);
         // Calculate daily statistics
         $daily_stats = [
             'max_temp' => $today_data->max('temp_out'),
@@ -239,6 +259,67 @@ class Dashboardaws extends Component implements HasForms, HasTable
         return 'Partly Cloudy'; // Placeholder
     }
 
+    private function fetchLatestData()
+    {
+        $this->latest_data = Weatherstationdata::where('idws', $this->selectedstation)
+            ->latest('date')
+            ->first();
+    }
+
+    private function fetchTodayData()
+    {
+        $this->today_data = Weatherstationdata::where('idws', $this->selectedstation)
+            ->whereDate('date', Carbon::today())
+            ->get();
+    }
+
+    private function fetchFiveDaysAheadData()
+    {
+        $this->five_days_ahead_data = Weatherstationdata::where('idws', $this->selectedstation)
+            ->whereDate('date', '>=', Carbon::today())
+            ->whereDate('date', '<=', Carbon::today()->addDays(5))
+            ->get();
+    }
+
+    // Fetch Wind Statistics
+    private function fetchWindStatistics()
+    {
+        $this->wind_statistics = Weatherstationdata::where('idws', $this->selectedstation)
+            ->whereDate('date', Carbon::today())
+            ->get();
+    }
+
+    // Fetch Humidity Levels
+    private function fetchHumidityLevels()
+    {
+        $this->humidity_levels = Weatherstationdata::where('idws', $this->selectedstation)
+            ->whereDate('date', Carbon::today())
+            ->get();
+    }
+
+    // Fetch Pressure Levels
+    private function fetchPressureLevels()
+    {
+        $this->pressure_levels = Weatherstationdata::where('idws', $this->selectedstation)
+            ->whereDate('date', Carbon::today())
+            ->get();
+    }
+
+    // Fetch Rainfall Statistics
+    private function fetchRainfallStatistics()
+    {
+        $this->rainfall_statistics = Weatherstationdata::where('idws', $this->selectedstation)
+            ->whereDate('date', Carbon::today())
+            ->get();
+    }
+
+    // Fetch UV Index
+    private function fetchUVIndex()
+    {
+        $this->uv_index = Weatherstationdata::where('idws', $this->selectedstation)
+            ->whereDate('date', Carbon::today())
+            ->get();
+    }
 
     public function table(Table $table): Table
     {
@@ -250,10 +331,28 @@ class Dashboardaws extends Component implements HasForms, HasTable
             ->columns([
                 TextColumn::make('weatherstation.loc'),
                 TextColumn::make('date')->sortable(),
-                TextColumn::make('temp_out'),
-                TextColumn::make('hum_out'),
-                TextColumn::make('windspeedkmh'),
-                TextColumn::make('winddir'),
+                TextColumn::make('temp_out')->sortable(),
+                TextColumn::make('hum_out')->sortable(),
+                TextColumn::make('windspeedkmh')->sortable(),
+                TextColumn::make('winddir')->sortable(),
+                TextColumn::make('rain_rate')->sortable(),
+                TextColumn::make('rain_today')->sortable(),
+                TextColumn::make('temp_in')->sortable(),
+                TextColumn::make('hum_in')->sortable(),
+                TextColumn::make('uv')->sortable(),
+                TextColumn::make('wind_gust')->sortable(),
+                TextColumn::make('air_press_rel')->sortable(),
+                TextColumn::make('air_press_abs')->sortable(),
+                TextColumn::make('solar_radiation')->sortable(),
+                TextColumn::make('dailyRainIn')->sortable(),
+                TextColumn::make('dailyrainmm')->sortable(),
+                TextColumn::make('raintodaymm')->sortable(),
+                TextColumn::make('totalrainmm')->sortable(),
+                TextColumn::make('weeklyrainmm')->sortable(),
+                TextColumn::make('monthlyrainmm')->sortable(),
+                TextColumn::make('yearlyrainmm')->sortable(),
+                TextColumn::make('maxdailygust')->sortable(),
+                TextColumn::make('wh65batt')->sortable(),
             ])
             ->filters([
                 Filter::make('by_year')
@@ -275,6 +374,22 @@ class Dashboardaws extends Component implements HasForms, HasTable
                                 }
                             );
                     }),
+                Filter::make('by_year_month')
+                    ->form([
+                        TextInput::make('year_month')
+                            ->type('month')
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['year_month'],
+                                function (Builder $query) use ($data) {
+                                    $date = \Carbon\Carbon::createFromFormat('Y-m', $data['year_month']);
+                                    return $query->whereYear('date', $date->year)
+                                        ->whereMonth('date', $date->month);
+                                }
+                            );
+                    }),
                 Filter::make('date_range')
                     ->form([
                         DatePicker::make('from_date')
@@ -293,7 +408,8 @@ class Dashboardaws extends Component implements HasForms, HasTable
                                 }
                             );
                     })
-            ])
+            ], layout: FiltersLayout::AboveContent)
+            ->filtersFormColumns(3)
             ->actions([
                 // ...
             ])
@@ -309,11 +425,19 @@ class Dashboardaws extends Component implements HasForms, HasTable
                 //         });
                 //     }),
                 BulkAction::make('export')
-                    ->label('Export to Excel')
+                    ->label('Excel Database')
                     ->action(function (Collection $records) {
                         return Excel::download(
                             new WeatherstationExcel($records),
                             'Weatherdata-data-' . now()->format('Y-m-d') . '.xlsx'
+                        );
+                    }),
+                BulkAction::make('export_average')
+                    ->label('Excel Average')
+                    ->action(function (Collection $records) {
+                        return Excel::download(
+                            new WeatherstationExcel($records),
+                            'Weatherdata-average-' . now()->format('Y-m-d') . '.xlsx'
                         );
                     })
             ]);
