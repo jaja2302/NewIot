@@ -1,10 +1,8 @@
-/* Add this to your CSS */
 .navbar.hidden {
-    width: 0; /* Set width to 0 */
-    overflow: hidden; /* Prevent overflow */
-    transition: width 0.3s ease, opacity 0.3s ease; /* Smooth transition */
-    opacity: 0; /* Fade out */
-    visibility: hidden; /* Hide from the document flow */
+    width: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
 }
 
 main.sidebar-collapsed {
@@ -16,7 +14,7 @@ main.sidebar-collapsed {
 .navbar {
     position: fixed;
     top: 50%;
-    left: 1rem;
+    /* left: 1rem; */
     transform: translateY(-50%);
     background: #fff;
     border-radius: 10px;
@@ -25,7 +23,7 @@ main.sidebar-collapsed {
     display: flex;
     flex-direction: column;
     z-index: 1000;
-    transition: transform 0.3s ease-in-out;
+    transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
 .navbar.collapsed {
@@ -35,10 +33,12 @@ main.sidebar-collapsed {
 .navbar__menu {
     display: flex;
     flex-direction: column;
+    gap: 1rem; /* Spacing between items */
 }
 
 .navbar__item {
     position: relative;
+    display: flex;
 }
 
 .navbar__link {
@@ -240,8 +240,9 @@ main.sidebar-collapsed {
 
 #sidebar-toggle {
     position: absolute;
-    top: 10px;
+    top: 50%;
     right: -30px;
+    transform: translateY(-50%);
     background: #fff;
     border: none;
     border-radius: 0 5px 5px 0;
