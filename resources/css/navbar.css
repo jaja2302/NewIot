@@ -23,11 +23,15 @@ main.sidebar-collapsed {
     display: flex;
     flex-direction: column;
     z-index: 1000;
-    transition: transform 0.4s ease, opacity 0.4s ease;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease; /* Smooth transition for opening and closing */
 }
 
 .navbar.collapsed {
     transform: translateX(-100%);
+    opacity: 50%; /* Fade out when collapsed */
+}
+.navbar:not(.collapsed) {
+    opacity: 1; /* Fade in when expanded */
 }
 
 .navbar__menu {
@@ -241,7 +245,7 @@ main.sidebar-collapsed {
 #sidebar-toggle {
     position: absolute;
     top: 50%;
-    right: -30px;
+    right: -30px; /* Adjust position as needed */
     transform: translateY(-50%);
     background: #fff;
     border: none;
@@ -251,7 +255,6 @@ main.sidebar-collapsed {
     box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     z-index: 1001;
 }
-
 #sidebar-toggle i {
     transition: transform 0.3s ease-in-out;
 }
@@ -262,11 +265,11 @@ main.sidebar-collapsed {
 
 /* Adjust main content margin */
 main {
-    transition: margin-left 0.3s ease-in-out;
+    transition: margin-left 0.3s ease-in-out; /* Smooth transition for main content */
 }
 
 main.sidebar-collapsed {
-    margin-left: 30px; /* Width of the toggle button */
+    margin-left: 5px; /* Width of the toggle button */
 }
 
 /* Add this new style for mobile view */
