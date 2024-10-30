@@ -2,7 +2,9 @@
 .navbar.hidden {
     width: 0; /* Set width to 0 */
     overflow: hidden; /* Prevent overflow */
-    transition: width 0.3s ease; /* Smooth transition */
+    transition: width 0.3s ease, opacity 0.3s ease; /* Smooth transition */
+    opacity: 0; /* Fade out */
+    visibility: hidden; /* Hide from the document flow */
 }
 
 main.sidebar-collapsed {
@@ -379,4 +381,8 @@ main.sidebar-collapsed {
     .navbar__menu {
         margin-top: 3.5rem; /* Increased top margin */
     }
+}
+
+.navbar {
+    transition: opacity 0.3s ease, width 0.3s ease; /* Smooth transition for opacity and width */
 }

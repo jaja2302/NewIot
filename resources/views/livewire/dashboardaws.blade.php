@@ -2,34 +2,25 @@
     <div class="scroll-section">
         <div class="container mx-auto px-4 py-6">
             <!-- Header Section -->
-            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4 weather-card">
-                <!-- Station Selector -->
-                <div class="w-full lg:w-64 select-container">
-                    <!-- <label for="station" class="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Select Station</label> -->
-                    <div class="relative">
-                        <select id="station"
-                            wire:model="selectedstation"
-                            wire:change="updateSelectedStation($event.target.value)"
-                            class="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 appearance-none">
-                            <option value="">Choose a stations</option>
-                            @foreach($list_station as $station)
-                            <option value="{{ $station->id }}">{{ $station->loc }}</option>
-                            @endforeach
-                        </select>
-                        <div class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
-                            <svg class="h-4 w-4 fill-current text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
+            <div class="flex flex-row items-center justify-between mb-8 gap-4 weather-card">
+                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">Weather Station</h1>
+                <!-- Station Info and Selector -->
+                <div class="relative">
+                    <select id="station"
+                        wire:model="selectedstation"
+                        wire:change="updateSelectedStation($event.target.value)"
+                        class="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 appearance-none">
+                        <option value="">Choose a station</option>
+                        @foreach($list_station as $station)
+                        <option value="{{ $station->id }}">{{ $station->loc }}</option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                        <svg class="h-4 w-4 fill-current text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
                     </div>
                 </div>
-                <!-- Station Info -->
-                <div class="flex flex-col">
-                    <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">Current Weather</h1>
-                    <span class="text-gray-500 dark:text-gray-400 text-sm">SSMS AWS</span>
-                </div>
-
-
             </div>
 
             <!-- Main Grid -->
