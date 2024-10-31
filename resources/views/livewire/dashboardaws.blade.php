@@ -3,7 +3,7 @@
         <div class="container mx-auto px-4 py-6">
             <!-- Header Section -->
             <div class="flex flex-row items-center justify-between mb-8 gap-4 weather-card">
-                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">Weather Station</h1>
+                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">Stasiun Cuaca</h1>
                 <!-- Station Info and Selector -->
                 <div class="relative">
                     <select id="station"
@@ -62,7 +62,7 @@
                                     @break
                                     @endswitch
                                 </div>
-                                <span class="font-semibold text-gray-800 dark:text-white">Weather Conditions</span>
+                                <span class="font-semibold text-gray-800 dark:text-white">Kondisi Cuaca</span>
                             </div>
                             <div class="mb-6">
                                 <div class="flex items-end gap-2">
@@ -77,15 +77,15 @@
                             </div>
                             <div class="grid grid-cols-3 gap-3">
                                 <div class="bg-gray-900 text-white rounded-xl p-3 transition-transform hover:scale-105">
-                                    <div class="text-xs font-medium mb-1">Pressure</div>
+                                    <div class="text-xs font-medium mb-1">Tekanan</div>
                                     <div class="font-semibold">{{ $weather_data['temperature']['pressure'] }}mb</div>
                                 </div>
                                 <div class="bg-lime-100 rounded-xl p-3 transition-transform hover:scale-105">
-                                    <div class="text-xs font-medium mb-1 dark:text-black">Wind</div>
+                                    <div class="text-xs font-medium mb-1 dark:text-black">Angin</div>
                                     <div class="font-semibold dark:text-black">{{ $weather_data['wind']['speed'] }}km/h</div>
                                 </div>
                                 <div class="bg-blue-50 rounded-xl p-3 transition-transform hover:scale-105">
-                                    <div class="text-xs font-medium mb-1 dark:text-black">Humidity</div>
+                                    <div class="text-xs font-medium mb-1 dark:text-black">Kelembapan</div>
                                     <div class="font-semibold dark:text-black">{{ $weather_data['temperature']['humidity'] }}%</div>
                                 </div>
                             </div>
