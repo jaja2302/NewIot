@@ -325,6 +325,9 @@
     </div>
 
     <script type="module">
+        // $(document).ready(function() {
+        //     hideLoadingScreen();
+        // });
         document.addEventListener('livewire:initialized', function() {
             const chartOptions = {
                 chart: {
@@ -478,7 +481,7 @@
                 const chartData = data[0];
 
                 if (chartData && chartData.tempData && chartData.rainData) {
-                    console.log('Updating charts with:', chartData);
+                    // console.log('Updating charts with:', chartData);
                     temperatureChart.series[0].setData(chartData.tempData, true);
                     rainfallChart.series[0].setData(chartData.rainData, true);
                 } else {
@@ -492,6 +495,13 @@
             // Listen for weather updates
             Livewire.on('weatherDataUpdated', () => {
                 loadWeatherAnimation('{{ $weather_data["temperature"]["condition"] }}', 'weather-background');
+            });
+            Livewire.on('changepage', () => {
+                changePage()
+
+            });
+            Livewire.on('hideLoadingScreen', () => {
+                hideLoadingScreen()
             });
         });
     </script>

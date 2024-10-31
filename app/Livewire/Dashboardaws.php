@@ -82,11 +82,13 @@ class Dashboardaws extends Component implements HasForms, HasTable
 
     public function render()
     {
+        $this->dispatch('hideLoadingScreen');
         return view('livewire.dashboardaws');
     }
 
     public function updateSelectedStation($station_id)
     {
+        $this->dispatch('changepage');
         $this->selectedstation = $station_id;
         $this->getLatestData($station_id);
         $this->generateChartData($station_id);
@@ -94,6 +96,7 @@ class Dashboardaws extends Component implements HasForms, HasTable
 
     public function updateSelectedDate($date)
     {
+        $this->dispatch('changepage');
         // $this->selectedstation = $station_id;
         $this->getLatestData($this->selectedstation);
         $this->generateChartData($this->selectedstation);
@@ -134,13 +137,16 @@ class Dashboardaws extends Component implements HasForms, HasTable
 
         $this->tempChartData = $temp_data;
         // $this->rainChartData = $rain_data;
-        $data =
-            // dd($this->tempChartData, $this->rainChartData);
-            // Emit event with new data
-            $this->dispatch('chartDataUpdated', [
-                'tempData' => $temp_data,
-                'rainData' => $rain_data
-            ]);
+        // $data =
+        // dd($this->tempChartData, $this->rainChartData);
+        // Emit event with new data
+        $this->dispatch('chartDataUpdated', [
+            'tempData' => $temp_data,
+            'rainData' => $rain_data
+        ]);
+
+
+        // $this->dispatch('hideLoadingScreen');
     }
 
     private function getLatestData($id)
@@ -208,6 +214,8 @@ class Dashboardaws extends Component implements HasForms, HasTable
                 'avg_today' => number_format($daily_stats['avg_solar'], 1)
             ]
         ];
+
+        // $this->dispatch('hideLoadingScreen');
     }
 
     private function setDefaultWeatherData()

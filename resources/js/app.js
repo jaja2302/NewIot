@@ -7,8 +7,6 @@ window.L = L;
 import 'leaflet/dist/leaflet.css';
 import Highcharts from 'highcharts';
 window.Highcharts = Highcharts;
-// import lottie from 'lottie-web';
-// window.lottie = lottie;
 
 function initializeScrollNavigation(upRoute, downRoute, options = {}) {
     // Adjusted default settings
@@ -361,16 +359,18 @@ $(function() {
         }
     });
 
-    // Hide loading screen when page is fully loaded
+    // Hide loading screen when pagec is fully loaded
     $(window).on('load', function() {
         hideLoadingScreen();
     });
 
-    // For Livewire navigation
-    document.addEventListener('livewire:load', function() {
-        hideLoadingScreen(); // Hide on initial load
-        Livewire.on('pageChanged', hideLoadingScreen);
-    });
+    // // For Livewire navigation
+    // document.addEventListener('livewire:load', function() {
+    //     // console.log('pageChanged');
+        
+    //     hideLoadingScreen(); // Hide on initial load
+    //     Livewire.on('pageChanged', hideLoadingScreen);
+    // });
 
     // Show loading screen on Livewire navigation start
     document.addEventListener('livewire:navigating', showLoadingScreen);
@@ -454,3 +454,20 @@ $(function() {
 
     return animation;
 };
+
+window.changePage =  function showLoadingScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+    loadingScreen.style.display = 'flex';
+    // Force a reflow
+    loadingScreen.offsetHeight;
+    loadingScreen.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+}
+window.hideLoadingScreen =function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+    loadingScreen.classList.remove('visible');
+    setTimeout(() => {
+        loadingScreen.style.display = 'none';
+        document.body.style.overflow = '';
+    }, 300);
+}
