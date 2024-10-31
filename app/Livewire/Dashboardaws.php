@@ -32,6 +32,7 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
 
 class Dashboardaws extends Component implements HasForms, HasTable
 {
@@ -63,7 +64,8 @@ class Dashboardaws extends Component implements HasForms, HasTable
     {
         $this->selectedDate = Carbon::now('Asia/Jakarta')->format('Y-m-d');
         // $this->selectedDate = '2024-10-18';
-        $this->list_station = WeatherStation::where('flags', 1)->get();
+        $list_station = DB::connection('mysql')->table('weather_station_list')->where('flags', 1)->get();
+        $this->list_station = $list_station;
         $this->getLatestData($this->selectedstation);
         $this->fetchLatestData();
         $this->fetchTodayData();
@@ -88,6 +90,14 @@ class Dashboardaws extends Component implements HasForms, HasTable
         $this->selectedstation = $station_id;
         $this->getLatestData($station_id);
         $this->generateChartData($station_id);
+    }
+
+    public function updateSelectedDate($date)
+    {
+        // $this->selectedstation = $station_id;
+        $this->getLatestData($this->selectedstation);
+        $this->generateChartData($this->selectedstation);
+        $this->selectedDate = $date;
     }
 
     private function generateChartData($station_id)
@@ -123,13 +133,14 @@ class Dashboardaws extends Component implements HasForms, HasTable
         }
 
         $this->tempChartData = $temp_data;
-        $this->rainChartData = $rain_data;
-
-        // Emit event with new data
-        $this->dispatch('chartDataUpdated', [
-            'tempData' => $temp_data,
-            'rainData' => $rain_data
-        ]);
+        // $this->rainChartData = $rain_data;
+        $data =
+            // dd($this->tempChartData, $this->rainChartData);
+            // Emit event with new data
+            $this->dispatch('chartDataUpdated', [
+                'tempData' => $temp_data,
+                'rainData' => $rain_data
+            ]);
     }
 
     private function getLatestData($id)
@@ -138,7 +149,7 @@ class Dashboardaws extends Component implements HasForms, HasTable
         $latest_data = Weatherstationdata::where('idws', $id)
             ->latest('date')
             ->first();
-
+        // dd($latest_data);
         // Get today's data for calculations
         $today_data = Weatherstationdata::where('idws', $id)
             ->whereDate('date', $this->selectedDate)
@@ -270,8 +281,39 @@ class Dashboardaws extends Component implements HasForms, HasTable
 
     private function getWeatherCondition($data)
     {
-        // You can implement your own logic here based on temperature, humidity, etc.
-        return 'Partly Cloudy'; // Placeholder
+        // If no data is provided, return 'Unknown'
+        if (!$data) {
+            return 'Unknown';
+        }
+
+        // Check for rain first
+        if ($data->rain_rate > 0) {
+            if ($data->rain_rate >= 7.6) {
+                return 'Hujan Lebat';
+            } elseif ($data->rain_rate >= 2.5) {
+                return 'Hujan Sedang';
+            } else {
+                return 'Hujan Ringan';
+            }
+        }
+
+        // Check temperature and humidity combinations
+        $temp = (float)$data->temp_out;
+        $humidity = (float)$data->hum_out;
+        $solar_radiation = (float)$data->solar_radiation;
+
+        if ($solar_radiation > 600) {
+            return 'Cerah';
+        } elseif ($solar_radiation > 200) {
+            if ($humidity >= 85) {
+                return 'Berawan';
+            }
+            return 'Cerah Berawan';
+        } elseif ($humidity >= 90) {
+            return 'Berkabut';
+        } else {
+            return 'Berawan';
+        }
     }
 
     private function fetchLatestData()
@@ -776,5 +818,20 @@ class Dashboardaws extends Component implements HasForms, HasTable
         // dd($data_bulanan);
 
         return $data_bulanan;
+    }
+
+    public function updatedSelectedDate($value)
+    {
+        $this->selectedDate = $value;
+        $this->getLatestData($this->selectedstation);
+        $this->generateChartData($this->selectedstation);
+        $this->fetchLatestData();
+        $this->fetchTodayData();
+        $this->fetchFiveDaysAheadData();
+        $this->fetchWindStatistics();
+        $this->fetchHumidityLevels();
+        $this->fetchPressureLevels();
+        $this->fetchRainfallStatistics();
+        $this->fetchUVIndex();
     }
 }
