@@ -17,7 +17,7 @@
                     <span class="font-semibold text-indigo-600 dark:text-indigo-400">Web AWS IoT Portal</span>
                 </p>
             </div>
-            <form class="mt-8 space-y-6" action="{{ url('/') }}" method="POST">
+            <form class="mt-8 space-y-6" action="{{ url('/') }}" method="POST" onsubmit="showLoadingScreen()">
                 @csrf
                 <div class="rounded-md shadow-sm -space-y-px">
                     <div>
@@ -60,4 +60,14 @@
             background-color: #1F2937;
         }
     </style>
+
+    <script>
+        function showLoadingScreen() {
+            // Show loading screen
+            document.getElementById('loading-screen').style.display = 'flex';
+
+            // Optional: Fade out the current page
+            document.body.style.opacity = '0';
+        }
+    </script>
 </x-layouts.app>

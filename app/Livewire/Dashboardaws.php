@@ -61,8 +61,8 @@ class Dashboardaws extends Component implements HasForms, HasTable
 
     public function mount()
     {
-        // $this->selectedDate = Carbon::now('Asia/Jakarta')->format('Y-m-d');
-        $this->selectedDate = '2024-10-18';
+        $this->selectedDate = Carbon::now('Asia/Jakarta')->format('Y-m-d');
+        // $this->selectedDate = '2024-10-18';
         $this->list_station = WeatherStation::where('flags', 1)->get();
         $this->getLatestData($this->selectedstation);
         $this->fetchLatestData();

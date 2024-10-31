@@ -10,7 +10,8 @@
     <title>{{ config('app.name') }} - @yield('title', 'Welcome')</title>
 
     @filamentStyles
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/navbar.css'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.14/lottie.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lottie-web@latest"></script>
@@ -30,7 +31,7 @@
     <div id="loading-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-90 h-screen w-screen overflow-hidden">
         <div class="text-center">
             <div id="lottie-container" class="w-64 h-64">
-                <div class="nav-icon lottie-animation" data-animation-path="{{ asset('loading/loadingsanimate.json') }}"></div>
+                <div class="nav-icon lottie-animation" data-animation-path="{{ asset('loading/loading2.json') }}"></div>
             </div>
         </div>
     </div>

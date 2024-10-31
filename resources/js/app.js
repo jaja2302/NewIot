@@ -7,6 +7,8 @@ window.L = L;
 import 'leaflet/dist/leaflet.css';
 import Highcharts from 'highcharts';
 window.Highcharts = Highcharts;
+// import lottie from 'lottie-web';
+// window.lottie = lottie;
 
 function initializeScrollNavigation(upRoute, downRoute, options = {}) {
     // Adjusted default settings
@@ -161,7 +163,11 @@ $(function() {
     // Define all sidebar-related functions at the top level
     function hideSidebar() {
         if (navbar) {
+            navbar.classList.add('transitioning');
             navbar.classList.add('hidden');
+            setTimeout(() => {
+                navbar.classList.remove('transitioning');
+            }, 400);
         }
         if (sidebarOverlay) {
             sidebarOverlay.classList.add('hidden');
@@ -173,12 +179,20 @@ $(function() {
     }
 
     function toggleSidebar() {
+        // Add transition class before toggling
+        navbar.classList.add('transitioning');
         navbar.classList.toggle('hidden');
         sidebarOverlay.classList.toggle('hidden');
         document.body.classList.toggle('overflow-hidden');
+        
         if (mobileMenuButton) {
             mobileMenuButton.classList.toggle('menu-open');
         }
+
+        // Remove transition class after animation completes
+        setTimeout(() => {
+            navbar.classList.remove('transitioning');
+        }, 400); // Match this with your CSS transition duration
     }
 
     function toggleDesktopSidebar() {
@@ -366,4 +380,77 @@ $(function() {
 
     // Expose the function globally
     window.initializeScrollNavigation = initializeScrollNavigation;
+
+   
 });
+ // Add the loadWeatherAnimation function
+ window.loadWeatherAnimation = function(condition, containerId) {
+    const isNight = new Date().getHours() >= 18 || new Date().getHours() < 6;
+    let animationPath = '';
+
+    switch (condition.toLowerCase()) {
+        case 'clear':
+            animationPath = isNight ? '/weather/sunnynight.json' : '/weather/sunnydaylight.json';
+            break;
+        case 'cloudy':
+            animationPath = isNight ? '/weather/cloudnight.json' : '/weather/cloudydaylight.json';
+            break;
+        case 'rain':
+            animationPath = isNight ? '/weather/rainnight.json' : '/weather/raindaylight.json';
+            break;
+        case 'storm':
+            animationPath = isNight ? '/weather/rainstromnight.json' : '/weather/rainstromdaylight.json';
+            break;
+        default:
+            animationPath = isNight ? '/weather/sunnynight.json' : '/weather/sunnydaylight.json';
+    }
+
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.error(`Container with id '${containerId}' not found`);
+        return;
+    }
+
+    // Store animation instance in container's data attribute
+    const existingAnimation = container.animation;
+    if (existingAnimation) {
+        existingAnimation.destroy();
+    }
+
+    const animation = lottie.loadAnimation({
+        container: container,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: animationPath,
+        rendererSettings: {
+            preserveAspectRatio: 'xMidYMid slice',
+            clearCanvas: true
+        }
+    });
+
+    // Adjust these styles to control the animation size and position
+    container.style.width = '100%';  // Make it slightly larger than container
+    container.style.height = '100%'; // Make it slightly larger than container
+    container.style.position = 'absolute';
+    container.style.top = '-10%';    // Adjust vertical position
+    container.style.left = '-10%';   // Adjust horizontal position
+    container.style.zIndex = '0';
+    container.style.opacity = '0.8';  // Adjust transparency (0-1)
+    
+    // Optional: Add transform scale
+    container.style.transform = 'scale(0.7)'; // Adjust scale factor as needed
+
+    // Optional: Add specific SVG styling
+    const svg = container.querySelector('svg');
+    if (svg) {
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        svg.style.transform = 'scale(1.2)'; // Adjust scale factor as needed
+    }
+
+    // Store animation reference
+    container.animation = animation;
+
+    return animation;
+};

@@ -1,6 +1,5 @@
 <div class="min-h-screen">
-
-    <div class="container mx-auto px-4">
+    <div class="container mx-auto px-4 py-6">
         <!-- Page Title -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Water Level Monitoring</h1>
@@ -112,13 +111,7 @@
             </div>
         </div>
     </div>
-    <!-- <div class="scroll-indicator scroll-up">
-        <i class="fas fa-chevron-up"></i>
-    </div>
 
-    <div class="scroll-indicator scroll-down">
-        <i class="fas fa-chevron-down"></i>
-    </div> -->
     <script type="module">
         // Move map initialization outside document.ready
         let map = L.map('map', {
