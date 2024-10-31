@@ -323,11 +323,7 @@
 
         </div>
     </div>
-
     <script type="module">
-        // $(document).ready(function() {
-        //     hideLoadingScreen();
-        // });
         document.addEventListener('livewire:initialized', function() {
             const chartOptions = {
                 chart: {
@@ -343,7 +339,8 @@
                         duration: 1500,
                         easing: 'easeOutBounce'
                     },
-                    reflow: true
+                    reflow: true,
+                    backgroundColor: 'transparent'
                 },
                 title: {
                     text: null
@@ -353,19 +350,31 @@
                     labels: {
                         format: '{value:%H:%M}',
                         rotation: 0,
-                        align: 'center'
+                        align: 'center',
+                        style: {
+                            color: '#E0E0E0'
+                        }
                     },
                     tickInterval: 2 * 3600 * 1000,
                     min: new Date(new Date().setHours(0, 0, 0, 0)).getTime(),
-                    max: new Date(new Date().setHours(23, 59, 59, 999)).getTime()
+                    max: new Date(new Date().setHours(23, 59, 59, 999)).getTime(),
+                    lineColor: '#E0E0E0',
+                    tickColor: '#E0E0E0'
                 },
                 yAxis: {
                     title: {
-                        text: 'Temperature (°C)'
+                        text: 'Temperature (°C)',
+                        style: {
+                            color: '#E0E0E0'
+                        }
                     },
                     labels: {
-                        format: '{value}°C'
+                        format: '{value}°C',
+                        style: {
+                            color: '#E0E0E0'
+                        }
                     },
+                    gridLineColor: '#4B5563',
                     plotBands: [{
                         from: -20,
                         to: 20,
@@ -373,7 +382,7 @@
                         label: {
                             text: 'Cold',
                             style: {
-                                color: '#606060'
+                                color: '#E0E0E0'
                             }
                         }
                     }, {
@@ -383,7 +392,7 @@
                         label: {
                             text: 'Moderate',
                             style: {
-                                color: '#606060'
+                                color: '#E0E0E0'
                             }
                         }
                     }, {
@@ -393,7 +402,7 @@
                         label: {
                             text: 'Hot',
                             style: {
-                                color: '#606060'
+                                color: '#E0E0E0'
                             }
                         }
                     }]
@@ -401,7 +410,11 @@
                 tooltip: {
                     headerFormat: '<b>{point.x:%Y-%m-%d %H:%M}</b><br/>',
                     pointFormat: '<span style="color:{point.color}">\u25CF</span> Temperature: <b>{point.y:.1f}°C</b><br/>{point.icon}',
-                    useHTML: true
+                    useHTML: true,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    style: {
+                        color: '#E0E0E0'
+                    }
                 },
                 series: [{
                     name: 'Temperature',
@@ -435,9 +448,17 @@
                         },
                         marker: {
                             lineWidth: 1,
-                            lineColor: '#ffffff',
+                            lineColor: '#1F2937',
                             enabledThreshold: 0
                         }
+                    }
+                },
+                legend: {
+                    itemStyle: {
+                        color: '#E0E0E0'
+                    },
+                    itemHoverStyle: {
+                        color: '#FFFFFF'
                     }
                 }
             };
@@ -455,25 +476,111 @@
                 xAxis: {
                     type: 'datetime',
                     labels: {
-                        format: '{value:%H:%M}'
-                    }
+                        format: '{value:%H:%M}',
+                        style: {
+                            color: '#666666'
+                        }
+                    },
+                    lineColor: '#666666',
+                    tickColor: '#666666'
                 },
                 yAxis: {
                     title: {
-                        text: 'Rainfall (mm/h)'
+                        text: 'Rainfall (mm/h)',
+                        style: {
+                            color: '#666666'
+                        }
                     },
-                    min: 0
+                    min: 0,
+                    labels: {
+                        style: {
+                            color: '#666666'
+                        }
+                    },
+                    gridLineColor: '#E0E0E0'
                 },
                 tooltip: {
                     headerFormat: '<b>{point.x:%Y-%m-%d %H:%M}</b><br/>',
-                    pointFormat: '{point.y:.1f} mm/h'
+                    pointFormat: '{point.y:.1f} mm/h',
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    style: {
+                        color: '#333333'
+                    }
                 },
                 series: [{
                     name: 'Rainfall',
                     data: @js($rainChartData),
                     color: '#3B82F6',
-                }]
+                }],
+                legend: {
+                    itemStyle: {
+                        color: '#666666'
+                    },
+                    itemHoverStyle: {
+                        color: '#333333'
+                    }
+                },
+                plotOptions: {
+                    column: {
+                        borderColor: 'transparent'
+                    }
+                },
+                credits: {
+                    style: {
+                        color: '#666666'
+                    }
+                }
             });
+
+            // Apply dark mode styles if needed
+            if (document.documentElement.classList.contains('dark')) {
+                rainfallChart.update({
+                    chart: {
+                        backgroundColor: '#1F2937'
+                    },
+                    xAxis: {
+                        labels: {
+                            style: {
+                                color: '#D1D5DB'
+                            }
+                        },
+                        lineColor: '#4B5563',
+                        tickColor: '#4B5563'
+                    },
+                    yAxis: {
+                        title: {
+                            style: {
+                                color: '#D1D5DB'
+                            }
+                        },
+                        labels: {
+                            style: {
+                                color: '#D1D5DB'
+                            }
+                        },
+                        gridLineColor: '#4B5563'
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31, 41, 55, 0.8)',
+                        style: {
+                            color: '#D1D5DB'
+                        }
+                    },
+                    legend: {
+                        itemStyle: {
+                            color: '#D1D5DB'
+                        },
+                        itemHoverStyle: {
+                            color: '#F3F4F6'
+                        }
+                    },
+                    credits: {
+                        style: {
+                            color: '#D1D5DB'
+                        }
+                    }
+                });
+            }
 
             // Update charts when Livewire updates
             Livewire.on('chartDataUpdated', (data) => {
@@ -500,9 +607,41 @@
                 changePage()
 
             });
-            Livewire.on('hideLoadingScreen', () => {
-                hideLoadingScreen()
+            Livewire.on('showLoadingScreen', () => {
+                showLoadingScreen();
             });
+            Livewire.on('hideLoadingScreen', () => {
+                hideLoadingScreen();
+            });
+
+            // Update your select and input elements to trigger loading screen immediately
+            document.getElementById('station').addEventListener('change', function() {
+                showLoadingScreen();
+            });
+
+            const dateInput = document.querySelector('input[type="date"]');
+            if (dateInput) {
+                dateInput.addEventListener('change', function() {
+                    showLoadingScreen();
+                });
+            }
         });
+
+        // Move these functions outside the event listener so they're accessible
+        function showLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.style.display = 'flex';
+            loadingScreen.classList.add('visible');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.classList.remove('visible');
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                document.body.style.overflow = '';
+            }, 300);
+        }
     </script>
 </div>

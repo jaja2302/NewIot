@@ -88,19 +88,36 @@ class Dashboardaws extends Component implements HasForms, HasTable
 
     public function updateSelectedStation($station_id)
     {
-        $this->dispatch('changepage');
+        // Show loading screen immediately
+        $this->dispatch('showLoadingScreen');
+
         $this->selectedstation = $station_id;
         $this->getLatestData($station_id);
         $this->generateChartData($station_id);
+
+        // Hide loading screen after data is loaded
+        $this->dispatch('hideLoadingScreen');
     }
 
     public function updateSelectedDate($date)
     {
-        $this->dispatch('changepage');
-        // $this->selectedstation = $station_id;
+        // Show loading screen immediately
+        $this->dispatch('showLoadingScreen');
+
+        $this->selectedDate = $date;
         $this->getLatestData($this->selectedstation);
         $this->generateChartData($this->selectedstation);
-        $this->selectedDate = $date;
+        $this->fetchLatestData();
+        $this->fetchTodayData();
+        $this->fetchFiveDaysAheadData();
+        $this->fetchWindStatistics();
+        $this->fetchHumidityLevels();
+        $this->fetchPressureLevels();
+        $this->fetchRainfallStatistics();
+        $this->fetchUVIndex();
+
+        // Hide loading screen after all data is loaded
+        $this->dispatch('hideLoadingScreen');
     }
 
     private function generateChartData($station_id)
