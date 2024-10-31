@@ -153,12 +153,81 @@ function initializeScrollNavigation(upRoute, downRoute, options = {}) {
 }
 
 $(function() {
-    // Check if we are on the login page
-    const isLoginPage = window.location.pathname === '/login'; // Adjust the path as necessary
-
-    // Declare variables in a broader scope
+    let sidebarTimer;
+    const SIDEBAR_HIDE_DELAY = 1000;
+    const isLoginPage = window.location.pathname === '/login';
     let mobileMenuButton, navbar, sidebarOverlay, $navbar, $sidebarToggle, $main;
 
+    // Define all sidebar-related functions at the top level
+    function hideSidebar() {
+        if (navbar) {
+            navbar.classList.add('hidden');
+        }
+        if (sidebarOverlay) {
+            sidebarOverlay.classList.add('hidden');
+        }
+        document.body.classList.remove('overflow-hidden');
+        if (mobileMenuButton) {
+            mobileMenuButton.classList.remove('menu-open');
+        }
+    }
+
+    function toggleSidebar() {
+        navbar.classList.toggle('hidden');
+        sidebarOverlay.classList.toggle('hidden');
+        document.body.classList.toggle('overflow-hidden');
+        if (mobileMenuButton) {
+            mobileMenuButton.classList.toggle('menu-open');
+        }
+    }
+
+    function toggleDesktopSidebar() {
+        $navbar.toggleClass('collapsed');
+        $main.toggleClass('sidebar-collapsed');
+    }
+
+    function startSidebarTimer() {
+        clearTimeout(sidebarTimer);
+        sidebarTimer = setTimeout(() => {
+            if (!$navbar.is(':hover')) {
+                $navbar.addClass('collapsed');
+                $main.addClass('sidebar-collapsed');
+            }
+        }, SIDEBAR_HIDE_DELAY);
+    }
+
+    function handleSidebarHover() {
+        if (window.innerWidth > 768) {
+            $navbar.on('mouseenter', function() {
+                clearTimeout(sidebarTimer);
+                $navbar.removeClass('collapsed');
+                $main.removeClass('sidebar-collapsed');
+            });
+
+            $navbar.on('mouseleave', startSidebarTimer);
+            startSidebarTimer();
+        }
+    }
+
+    function handleResize() {
+        if (navbar) {
+            if (window.innerWidth > 768) {
+                navbar.classList.remove('hidden');
+                sidebarOverlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+                handleSidebarHover();
+            } else {
+                $navbar.off('mouseenter mouseleave');
+                clearTimeout(sidebarTimer);
+                navbar.classList.add('hidden');
+                sidebarOverlay.classList.add('hidden');
+                $navbar.removeClass('collapsed');
+                $main.removeClass('sidebar-collapsed');
+            }
+        }
+    }
+
+    // Initialize elements and add event listeners only if not on login page
     if (!isLoginPage) {
         mobileMenuButton = document.getElementById('mobile-menu-button');
         navbar = document.getElementById('navbar');
@@ -167,34 +236,6 @@ $(function() {
         $sidebarToggle = $('#sidebar-toggle');
         $main = $('main');
 
-        function toggleSidebar() {
-            navbar.classList.toggle('hidden');
-            sidebarOverlay.classList.toggle('hidden');
-            document.body.classList.toggle('overflow-hidden');
-            if (mobileMenuButton) {
-                mobileMenuButton.classList.toggle('menu-open');
-            }
-        }
-
-        function hideSidebar() {
-            if (navbar) {
-                navbar.classList.add('hidden'); // Add hidden class to hide the sidebar
-            }
-            if (sidebarOverlay) {
-                sidebarOverlay.classList.add('hidden');
-            }
-            document.body.classList.remove('overflow-hidden');
-            if (mobileMenuButton) {
-                mobileMenuButton.classList.remove('menu-open');
-            }
-        }
-
-        function toggleDesktopSidebar() {
-            $navbar.toggleClass('collapsed');
-            $main.toggleClass('sidebar-collapsed');
-        }
-
-        // Only add event listeners if the elements exist
         if (mobileMenuButton) {
             mobileMenuButton.addEventListener('click', toggleSidebar);
         }
@@ -209,47 +250,20 @@ $(function() {
                 toggleDesktopSidebar();
             }
         });
-    }
 
-    // Function to handle resize events
-    function handleResize() {
-        if (navbar) { // Check if navbar is defined
-            if (window.innerWidth > 768) {
-                navbar.classList.remove('hidden');
-                sidebarOverlay.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-                // Preserve desktop sidebar state
-                if ($navbar.hasClass('collapsed')) {
-                    $main.addClass('sidebar-collapsed');
-                } else {
-                    $main.removeClass('sidebar-collapsed');
+        // Add mobile nav link click handler
+        const navLinks = document.querySelectorAll('.navbar__link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    hideSidebar();
                 }
-            } else {
-                // Always hide sidebar in mobile view
-                navbar.classList.add('hidden');
-                sidebarOverlay.classList.add('hidden');
-                // Remove desktop-specific classes
-                $navbar.removeClass('collapsed');
-                $main.removeClass('sidebar-collapsed');
-            }
-        }
-    }
-
-    // Add resize event listener
-    window.addEventListener('resize', handleResize);
-
-    // Initial call to set correct state
-    handleResize();
-
-    // Hide sidebar when clicking a nav link on mobile
-    const navLinks = document.querySelectorAll('.navbar__link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                hideSidebar();
-            }
+            });
         });
-    });
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+    }
 
     const $themeToggleBtn = $('#theme-toggle');
     const $html = $('html');
@@ -351,6 +365,5 @@ $(function() {
     setTimeout(hideLoadingScreen, 1000);
 
     // Expose the function globally
-   
+    window.initializeScrollNavigation = initializeScrollNavigation;
 });
-window.initializeScrollNavigation = initializeScrollNavigation;

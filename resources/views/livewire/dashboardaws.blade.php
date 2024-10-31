@@ -333,14 +333,14 @@
 
         </div>
     </div>
-
+    <!-- 
     <div class="scroll-indicator scroll-up">
         <i class="fas fa-chevron-up"></i>
     </div>
 
     <div class="scroll-indicator scroll-down">
         <i class="fas fa-chevron-down"></i>
-    </div>
+    </div> -->
 
     <script type="module">
         document.addEventListener('livewire:initialized', function() {

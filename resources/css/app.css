@@ -391,411 +391,6 @@ body {
     background-color: #4a5568;
 }
 
-/* Mobile menu button styles */
-#mobile-menu-button {
-    display: none;
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    z-index: 1002; /* Higher than navbar z-index */
-    padding: 0.5rem;
-    background-color: var(--bg-color);
-    border-radius: 0.375rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out;.navbar.hidden {
-    width: 0;
-    overflow: hidden;
-    opacity: 0;
-    visibility: hidden;
-}
-
-main.sidebar-collapsed {
-    margin-left: 0; /* Remove left margin when sidebar is hidden */
-}
-
-
-/* Consolidated Navbar Styles */
-.navbar {
-    position: fixed;
-    top: 50%;
-    /* left: 1rem; */
-    transform: translateY(-50%);
-    background: #fff;
-    border-radius: 10px;
-    padding: 1rem 0;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.03);
-    display: flex;
-    flex-direction: column;
-    z-index: 1000;
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease; /* Smooth transition for opening and closing */
-}
-
-.navbar.collapsed {
-    transform: translateX(-100%);
-    opacity: 50%; /* Fade out when collapsed */
-}
-.navbar:not(.collapsed) {
-    opacity: 1; /* Fade in when expanded */
-}
-
-.navbar__menu {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem; /* Spacing between items */
-}
-
-.navbar__item {
-    position: relative;
-    display: flex;
-}
-
-.navbar__link {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 3.5rem;
-    width: 5.5rem;
-    color: #6a778e;
-    transition: 250ms ease all;
-}
-
-.navbar__link i {
-    font-size: 1.2rem;
-}
-
-.navbar__link:hover {
-    color: #fff;
-}
-
-.navbar__link span {
-    position: absolute;
-    left: 100%;
-    transform: translate(-3rem);
-    margin-left: 1rem;
-    opacity: 0;
-    pointer-events: none;
-    color: #406ff3;
-    background: #fff;
-    padding: 0.75rem;
-    transition: 250ms ease all;
-    border-radius: 17.5px;
-}
-
-.navbar__link:hover span {
-    opacity: 1;
-    transform: translate(0);
-}
-
-.navbar__menu {
-    position: relative;
-}
-
-.navbar__item {
-    position: relative;
-}
-
-.navbar__item:before {
-    content: '';
-    position: absolute;
-    opacity: 0;
-    z-index: -1;
-    top: 0;
-    left: 1rem;
-    width: 3.5rem;
-    height: 3.5rem;
-    background: #406ff3;
-    border-radius: 17.5px;
-    transition: 250ms cubic-bezier(1, 0.2, 0.1, 1.2) all;
-}
-
-.navbar__item:hover:before {
-    opacity: 1;
-    animation: gooeyEffect 250ms 1;
-}
-
-.navbar__item:last-child:before {
-    content: none;
-}
-
-
-main.sidebar-collapsed {
-    margin-left: 30px; /* Width of the toggle button */
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .navbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        width: 250px;
-        height: 100%;
-        flex-direction: column;
-        justify-content: flex-start;
-        padding: 1rem;
-        z-index: 1001;
-        background-color: var(--card-bg);
-        transition: transform 0.3s ease-in-out;
-        overflow-y: auto;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .navbar:not(.hidden) {
-        transform: translateX(0);
-    }
-
-    .navbar__menu {
-        flex-direction: column;
-        margin-top: 2rem;
-    }
-
-    .navbar__item {
-        margin-bottom: 1rem;
-    }
-
-    .navbar__link {
-        width: 100%;
-        height: auto;
-        padding: 0.75rem;
-        justify-content: flex-start;
-    }
-
-    .navbar__link i {
-        margin-right: 1rem;
-        width: 20px;
-        text-align: center;
-    }
-
-    .navbar__link span {
-        display: inline;
-        position: static;
-        opacity: 1;
-        transform: none;
-        margin-left: 0;
-        color: inherit;
-        background: none;
-        padding: 0;
-    }
-
-    .navbar__brand {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #4d689e;
-    }
-
-    .navbar__logo {
-        width: 40px;
-        height: auto;
-        margin-right: 1rem;
-        margin-bottom: 0;
-    }
-
-    .navbar__company-name {
-        font-size: 1.2rem;
-    }
-
-    main {
-        margin-left: 0;
-        padding-top: 4rem; /* Add space for the mobile menu button */
-    }
-
-    .navbar__item:before {
-        content: none;
-    }
-
-    .navbar__link:hover {
-        background-color: #419df8;
-        border-radius: 8px;
-    }
-}
-
-/* Logo and Company Name Styles */
-.navbar__brand {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #eaeef6;
-}
-
-.navbar__logo {
-    width: 50px;
-    height: auto;
-    margin-bottom: 0.5rem;
-}
-
-.navbar__company-name {
-    font-size: 0.8rem;
-    color: #406ff3;
-    text-align: center;
-    font-weight: bold;
-}
-
-
-/* Add these new styles */
-.navbar {
-    transition: transform 0.3s ease-in-out;
-}
-
-.navbar.collapsed {
-    transform: translateX(-100%);
-}
-
-#sidebar-toggle {
-    position: absolute;
-    top: 50%;
-    right: -30px; /* Adjust position as needed */
-    transform: translateY(-50%);
-    background: #fff;
-    border: none;
-    border-radius: 0 5px 5px 0;
-    padding: 5px 10px;
-    cursor: pointer;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    z-index: 1001;
-}
-#sidebar-toggle i {
-    transition: transform 0.3s ease-in-out;
-}
-
-.navbar.collapsed #sidebar-toggle i {
-    transform: rotate(180deg);
-}
-
-/* Adjust main content margin */
-main {
-    transition: margin-left 0.3s ease-in-out; /* Smooth transition for main content */
-}
-
-main.sidebar-collapsed {
-    margin-left: 5px; /* Width of the toggle button */
-}
-
-/* Add this new style for mobile view */
-@media (max-width: 768px) {
-    .navbar.collapsed {
-        transform: translateX(-100%);
-    }
-}
-
-
-/* Responsive Navbar Styles */
-@media (max-width: 768px) {
-    .navbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        transform: translateX(-100%);
-        width: 250px;
-        height: 100%;
-        flex-direction: column;
-        justify-content: flex-start;
-        padding: 1rem;
-        z-index: 1001;
-        background-color: rgb(255, 255, 255);
-        transition: transform 0.3s ease-in-out;
-        overflow-y: auto;
-        box-shadow: 2px 0 10px rgba(110, 109, 109, 0.1);
-    }
-
-    .navbar:not(.hidden) {
-        transform: translateX(0);
-    }
-
-    .navbar__menu {
-        flex-direction: column;
-        margin-top: 2rem;
-    }
-
-    .navbar__item {
-        margin-bottom: 1rem;
-    }
-
-    .navbar__link {
-        width: 100%;
-        height: auto;
-        padding: 0.75rem;
-        justify-content: flex-start;
-    }
-
-    .navbar__link i {
-        margin-right: 1rem;
-        width: 20px;
-        text-align: center;
-    }
-
-    .navbar__link span {
-        display: inline;
-        position: static;
-        opacity: 1;
-        transform: none;
-        margin-left: 0;
-        color: inherit;
-        background: none;
-        padding: 0;
-    }
-
-    .navbar__brand {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #eaeef6;
-    }
-
-    .navbar__logo {
-        width: 40px;
-        height: auto;
-        margin-right: 1rem;
-        margin-bottom: 0;
-    }
-
-    .navbar__company-name {
-        font-size: 1.2rem;
-    }
-
-    main {
-        margin-left: 0;
-        padding-top: 4rem; /* Add space for the mobile menu button */
-    }
-
-    .navbar__item:before {
-        content: none;
-    }
-
-    .navbar__link:hover {
-        background-color: #4b82b9;
-        border-radius: 8px;
-    }
-}
-
-@media (max-width: 768px) {
-    #mobile-menu-button {
-        display: block;
-    }
-
-    .navbar {
-        width: 250px;
-        /* ... existing navbar styles ... */
-    }
-
-    /* Ensure navbar items don't overlap with menu button */
-    .navbar__menu {
-        margin-top: 3.5rem; /* Increased top margin */
-    }
-}
-
-.navbar {
-    transition: opacity 0.3s ease, width 0.3s ease; /* Smooth transition for opacity and width */
-}
-}
-
 /* Hide the menu button when menu is open */
 #mobile-menu-button.menu-open {
     opacity: 0;
@@ -1178,23 +773,15 @@ body {
     animation: bounceDown 2s infinite;
 }
 
-.navbar.hidden {
-    width: 0;
-    overflow: hidden;
-    opacity: 0;
-    visibility: hidden;
-}
 
-main.sidebar-collapsed {
-    margin-left: 0; /* Remove left margin when sidebar is hidden */
-}
 
+
+/* navbar and sidebar  */
 
 /* Consolidated Navbar Styles */
 .navbar {
     position: fixed;
     top: 50%;
-    /* left: 1rem; */
     transform: translateY(-50%);
     background: #fff;
     border-radius: 10px;
@@ -1203,21 +790,22 @@ main.sidebar-collapsed {
     display: flex;
     flex-direction: column;
     z-index: 1000;
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease; /* Smooth transition for opening and closing */
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease, width 0.3s ease;
 }
 
 .navbar.collapsed {
     transform: translateX(-100%);
-    opacity: 50%; /* Fade out when collapsed */
+    opacity: 50%;
 }
+
 .navbar:not(.collapsed) {
-    opacity: 1; /* Fade in when expanded */
+    opacity: 1;
 }
 
 .navbar__menu {
     display: flex;
     flex-direction: column;
-    gap: 1rem; /* Spacing between items */
+    gap: 1rem;
 }
 
 .navbar__item {
@@ -1263,14 +851,6 @@ main.sidebar-collapsed {
     transform: translate(0);
 }
 
-.navbar__menu {
-    position: relative;
-}
-
-.navbar__item {
-    position: relative;
-}
-
 .navbar__item:before {
     content: '';
     position: absolute;
@@ -1292,101 +872,6 @@ main.sidebar-collapsed {
 
 .navbar__item:last-child:before {
     content: none;
-}
-
-
-main.sidebar-collapsed {
-    margin-left: 30px; /* Width of the toggle button */
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .navbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        width: 250px;
-        height: 100%;
-        flex-direction: column;
-        justify-content: flex-start;
-        padding: 1rem;
-        z-index: 1001;
-        background-color: var(--card-bg);
-        transition: transform 0.3s ease-in-out;
-        overflow-y: auto;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .navbar:not(.hidden) {
-        transform: translateX(0);
-    }
-
-    .navbar__menu {
-        flex-direction: column;
-        margin-top: 2rem;
-    }
-
-    .navbar__item {
-        margin-bottom: 1rem;
-    }
-
-    .navbar__link {
-        width: 100%;
-        height: auto;
-        padding: 0.75rem;
-        justify-content: flex-start;
-    }
-
-    .navbar__link i {
-        margin-right: 1rem;
-        width: 20px;
-        text-align: center;
-    }
-
-    .navbar__link span {
-        display: inline;
-        position: static;
-        opacity: 1;
-        transform: none;
-        margin-left: 0;
-        color: inherit;
-        background: none;
-        padding: 0;
-    }
-
-    .navbar__brand {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #4d689e;
-    }
-
-    .navbar__logo {
-        width: 40px;
-        height: auto;
-        margin-right: 1rem;
-        margin-bottom: 0;
-    }
-
-    .navbar__company-name {
-        font-size: 1.2rem;
-    }
-
-    main {
-        margin-left: 0;
-        padding-top: 4rem; /* Add space for the mobile menu button */
-    }
-
-    .navbar__item:before {
-        content: none;
-    }
-
-    .navbar__link:hover {
-        background-color: #419df8;
-        border-radius: 8px;
-    }
 }
 
 /* Logo and Company Name Styles */
@@ -1412,20 +897,10 @@ main.sidebar-collapsed {
     font-weight: bold;
 }
 
-
-/* Add these new styles */
-.navbar {
-    transition: transform 0.3s ease-in-out;
-}
-
-.navbar.collapsed {
-    transform: translateX(-100%);
-}
-
 #sidebar-toggle {
     position: absolute;
     top: 50%;
-    right: -30px; /* Adjust position as needed */
+    right: -30px;
     transform: translateY(-50%);
     background: #fff;
     border: none;
@@ -1435,6 +910,7 @@ main.sidebar-collapsed {
     box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     z-index: 1001;
 }
+
 #sidebar-toggle i {
     transition: transform 0.3s ease-in-out;
 }
@@ -1445,29 +921,34 @@ main.sidebar-collapsed {
 
 /* Adjust main content margin */
 main {
-    transition: margin-left 0.3s ease-in-out; /* Smooth transition for main content */
+    transition: margin-left 0.3s ease-in-out;
 }
 
 main.sidebar-collapsed {
-    margin-left: 5px; /* Width of the toggle button */
+    margin-left: 5px;
 }
 
-/* Add this new style for mobile view */
-@media (max-width: 768px) {
-    .navbar.collapsed {
-        transform: translateX(-100%);
-    }
+/* Mobile menu button styles */
+#mobile-menu-button {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1002;
+    padding: 0.5rem;
+    background-color: var(--bg-color);
+    border-radius: 0.375rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
 }
 
-
-/* Responsive Navbar Styles */
+/* Responsive adjustments */
 @media (max-width: 768px) {
     .navbar {
         position: fixed;
         top: 0;
         left: 0;
         bottom: 0;
-        transform: translateX(-100%);
         width: 250px;
         height: 100%;
         flex-direction: column;
@@ -1478,6 +959,7 @@ main.sidebar-collapsed {
         transition: transform 0.3s ease-in-out;
         overflow-y: auto;
         box-shadow: 2px 0 10px rgba(110, 109, 109, 0.1);
+        transform: translateX(-100%);
     }
 
     .navbar:not(.hidden) {
@@ -1486,7 +968,7 @@ main.sidebar-collapsed {
 
     .navbar__menu {
         flex-direction: column;
-        margin-top: 2rem;
+        margin-top: 3.5rem;
     }
 
     .navbar__item {
@@ -1538,7 +1020,7 @@ main.sidebar-collapsed {
 
     main {
         margin-left: 0;
-        padding-top: 4rem; /* Add space for the mobile menu button */
+        padding-top: 4rem;
     }
 
     .navbar__item:before {
@@ -1546,27 +1028,18 @@ main.sidebar-collapsed {
     }
 
     .navbar__link:hover {
-        background-color: #4b82b9;
+        background-color: #419df8;
         border-radius: 8px;
     }
-}
 
-@media (max-width: 768px) {
     #mobile-menu-button {
         display: block;
     }
-
-    .navbar {
-        width: 250px;
-        /* ... existing navbar styles ... */
-    }
-
-    /* Ensure navbar items don't overlap with menu button */
-    .navbar__menu {
-        margin-top: 3.5rem; /* Increased top margin */
-    }
 }
 
-.navbar {
-    transition: opacity 0.3s ease, width 0.3s ease; /* Smooth transition for opacity and width */
+.navbar.hidden {
+    width: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
 }

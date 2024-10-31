@@ -112,13 +112,13 @@
             </div>
         </div>
     </div>
-    <div class="scroll-indicator scroll-up">
+    <!-- <div class="scroll-indicator scroll-up">
         <i class="fas fa-chevron-up"></i>
     </div>
 
     <div class="scroll-indicator scroll-down">
         <i class="fas fa-chevron-down"></i>
-    </div>
+    </div> -->
     <script type="module">
         // Move map initialization outside document.ready
         let map = L.map('map', {
@@ -201,10 +201,10 @@
             });
 
 
-            initializeScrollNavigation(
-                "{{ route('dashboard') }}", // Up route
-                "{{ route('dashboardaws') }}" // Down route
-            );
+            // initializeScrollNavigation(
+            //     "{{ route('dashboard') }}", // Up route
+            //     "{{ route('dashboardaws') }}" // Down route
+            // );
         });
 
         // Initialize the chart with proper configuration
