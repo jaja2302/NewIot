@@ -131,7 +131,7 @@
                             </div>
                             <div class="flex items-center space-x-4">
                                 <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-3 text-center">
-                                    <div class="text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">Max Gust Today</div>
+                                    <div class="text-xs font-medium mb-1 text-gray-600 dark:text-gray-400">Max Gust {{ $selectedDate }}</div>
                                     <div class="text-lg font-bold text-gray-800 dark:text-white">{{ $weather_data['wind']['gust'] }} km/h</div>
                                 </div>
                                 <div class="relative w-24 h-24">
@@ -166,7 +166,7 @@
                         </div>
                         <div class="mt-4 text-sm">
                             <div class="flex justify-between items-center">
-                                <span>Rata rata dalam hari ini:</span>
+                                <span>Rata rata {{ $selectedDate }}</span>
                                 <span>{{ $weather_data['solar']['avg_today'] }} W/m²</span>
                             </div>
                         </div>
@@ -195,7 +195,7 @@
                             <p class="text-gray-700 mt-4 dark:text-white">{{ $weather_data['uv']['description'] }}</p>
                             <div class="mt-4 text-sm text-gray-700 dark:text-white">
                                 <div class="flex justify-between items-center">
-                                    <span>Max UV Hari Ini:</span>
+                                    <span>Max UV Hari Ini {{ $selectedDate }}:</span>
                                     <span>{{ $weather_data['uv']['max_today'] }} UVI</span>
                                 </div>
                             </div>
@@ -216,7 +216,7 @@
                             </div>
                             <div class="text-center p-4 bg-blue-50 rounded-xl">
                                 <div class="text-xl font-bold text-gray-800">{{ $weather_data['rain']['today'] }} mm</div>
-                                <div class="text-sm text-gray-600 mt-1">Hari Ini</div>
+                                <div class="text-sm text-gray-600 mt-1">Hari Ini {{ $selectedDate }}</div>
                             </div>
                             <div class="text-center p-4 bg-blue-50 rounded-xl">
                                 <div class="text-xl font-bold text-gray-800">{{ $weather_data['rain']['weekly'] }} mm</div>
@@ -235,7 +235,7 @@
                     <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
                         <div class="flex items-center gap-2 mb-6">
                             <i class="fas fa-database text-purple-500"></i>
-                            <h2 class="font-semibold text-gray-800 dark:text-white">Data hari ini</h2>
+                            <h2 class="font-semibold text-gray-800 dark:text-white">Data {{ $selectedDate }}</h2>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             @if($latest_data)
@@ -295,7 +295,7 @@
         <div class="mt-4 weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
             <div class="flex items-center gap-2 mb-6">
                 <i class="fas fa-temperature-high text-red-500"></i>
-                <h2 class="font-semibold text-gray-800 dark:text-white">Riwayat Suhu Hari Ini</h2>
+                <h2 class="font-semibold text-gray-800 dark:text-white">Riwayat Suhu {{ $selectedDate }}</h2>
             </div>
             <div wire:ignore class="h-[400px]">
                 <div id="temperatureChart" class="w-full h-full"></div>
@@ -306,22 +306,21 @@
         <div class="mt-4 weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
             <div class="flex items-center gap-2 mb-6">
                 <i class="fas fa-cloud-rain text-blue-500"></i>
-                <h2 class="font-semibold text-gray-800 dark:text-white">Riwayat Curah Hujan Hari Ini</h2>
+                <h2 class="font-semibold text-gray-800 dark:text-white">Riwayat Curah Hujan {{ $selectedDate }}</h2>
             </div>
             <div wire:ignore class="h-[400px]">
                 <div id="rainfallChart" class="w-full h-full"></div>
             </div>
         </div>
-        <div class="container mx-auto px-4 py-6">
-            <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
-                <div class="flex items-center gap-2 mb-6">
-                    <i class="fas fa-cloud-rain text-blue-500"></i>
-                    <h2 class="font-semibold text-gray-800 dark:text-white">Rainfall History</h2>
-                </div>
-                {{$this->table}}
-            </div>
-
+        <div class="mt-4">
+            <h2 class="flex items-center gap-2 mb-4 font-semibold text-gray-800 dark:text-white">
+                <i class="fas fa-history text-blue-500"></i>
+                Riwayat Data Tabel
+            </h2>
+            {{$this->table}}
         </div>
+
+
     </div>
     <script type="module">
         document.addEventListener('livewire:initialized', function() {
