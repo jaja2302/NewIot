@@ -1,29 +1,29 @@
 <div class="min-h-screen">
     <div class="container mx-auto px-4 py-6">
         <!-- Header Section -->
-        <div class="flex flex-row items-center justify-between mb-8 gap-4 weather-card">
-            <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">Stasiun</h1>
-            <div class="flex gap-4">
-                <!-- Existing station selector -->
-                <div class="relative">
-                    <select id="station"
-                        wire:model="selectedstation"
-                        wire:change="updateSelectedStation($event.target.value)"
-                        class="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 appearance-none">
-                        <option value="">Choose a station</option>
-                        @foreach($list_station as $station)
-                        <option value="{{ $station->id }}">{{ $station->loc }}</option>
-                        @endforeach
-                    </select>
-                    <div class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
-                        <svg class="h-4 w-4 fill-current text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl shadow-lg p-6 mb-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <h1 class="text-3xl font-bold text-white mb-4 md:mb-0">
+                    <i class="fas fa-map-marker-alt mr-2"></i>Stasiun Cuaca
+                </h1>
+                <div class="w-full md:w-auto">
+                    <div class="relative">
+                        <select id="station"
+                            wire:model="selectedstation"
+                            wire:change="updateSelectedStation($event.target.value)"
+                            class="block w-full md:w-64 rounded-lg border-2 border-white bg-white bg-opacity-20 py-2 pl-3 pr-10 text-sm text-white placeholder-white::placeholder focus:border-white focus:outline-none focus:ring-2 focus:ring-white appearance-none transition duration-300 ease-in-out hover:bg-opacity-30">
+                            <option value="" class="text-gray-700">Choose a station</option>
+                            @foreach($list_station as $station)
+                            <option value="{{ $station->id }}" class="text-gray-700">{{ $station->loc }}</option>
+                            @endforeach
+                        </select>
+                        <div class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+                            <svg class="h-4 w-4 fill-current text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
-
-                <!-- New date selector -->
-
             </div>
         </div>
 
@@ -292,7 +292,7 @@
         </div>
 
         <!-- Temperature Chart -->
-        <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
+        <div class="mt-4 weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
             <div class="flex items-center gap-2 mb-6">
                 <i class="fas fa-temperature-high text-red-500"></i>
                 <h2 class="font-semibold text-gray-800 dark:text-white">Riwayat Suhu Hari Ini</h2>
@@ -303,7 +303,7 @@
         </div>
 
         <!-- Rainfall Chart -->
-        <div class="weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
+        <div class="mt-4 weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
             <div class="flex items-center gap-2 mb-6">
                 <i class="fas fa-cloud-rain text-blue-500"></i>
                 <h2 class="font-semibold text-gray-800 dark:text-white">Riwayat Curah Hujan Hari Ini</h2>
@@ -325,6 +325,9 @@
     </div>
     <script type="module">
         document.addEventListener('livewire:initialized', function() {
+
+
+            //charts temperature
             const chartOptions = {
                 chart: {
                     type: 'line',
@@ -352,29 +355,29 @@
                         rotation: 0,
                         align: 'center',
                         style: {
-                            color: '#E0E0E0'
+                            color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                         }
                     },
                     tickInterval: 2 * 3600 * 1000,
                     min: new Date(new Date().setHours(0, 0, 0, 0)).getTime(),
                     max: new Date(new Date().setHours(23, 59, 59, 999)).getTime(),
-                    lineColor: '#E0E0E0',
-                    tickColor: '#E0E0E0'
+                    lineColor: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666',
+                    tickColor: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                 },
                 yAxis: {
                     title: {
                         text: 'Temperature (°C)',
                         style: {
-                            color: '#E0E0E0'
+                            color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                         }
                     },
                     labels: {
                         format: '{value}°C',
                         style: {
-                            color: '#E0E0E0'
+                            color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                         }
                     },
-                    gridLineColor: '#4B5563',
+                    gridLineColor: document.documentElement.classList.contains('dark') ? '#4B5563' : '#E0E0E0',
                     plotBands: [{
                         from: -20,
                         to: 20,
@@ -382,7 +385,7 @@
                         label: {
                             text: 'Cold',
                             style: {
-                                color: '#E0E0E0'
+                                color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                             }
                         }
                     }, {
@@ -392,7 +395,7 @@
                         label: {
                             text: 'Moderate',
                             style: {
-                                color: '#E0E0E0'
+                                color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                             }
                         }
                     }, {
@@ -402,7 +405,7 @@
                         label: {
                             text: 'Hot',
                             style: {
-                                color: '#E0E0E0'
+                                color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                             }
                         }
                     }]
@@ -411,9 +414,9 @@
                     headerFormat: '<b>{point.x:%Y-%m-%d %H:%M}</b><br/>',
                     pointFormat: '<span style="color:{point.color}">\u25CF</span> Temperature: <b>{point.y:.1f}°C</b><br/>{point.icon}',
                     useHTML: true,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    backgroundColor: document.documentElement.classList.contains('dark') ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)',
                     style: {
-                        color: '#E0E0E0'
+                        color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#333333'
                     }
                 },
                 series: [{
@@ -448,24 +451,25 @@
                         },
                         marker: {
                             lineWidth: 1,
-                            lineColor: '#1F2937',
+                            lineColor: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666',
                             enabledThreshold: 0
                         }
                     }
                 },
                 legend: {
                     itemStyle: {
-                        color: '#E0E0E0'
+                        color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                     },
                     itemHoverStyle: {
-                        color: '#FFFFFF'
+                        color: document.documentElement.classList.contains('dark') ? '#F3F4F6' : '#333333'
                     }
                 }
             };
 
             const temperatureChart = Highcharts.chart('temperatureChart', chartOptions);
 
-            const rainfallChart = Highcharts.chart('rainfallChart', {
+            //chart rainfall
+            const rainfallChartOptions = {
                 chart: {
                     type: 'column',
                     backgroundColor: 'transparent'
@@ -478,33 +482,33 @@
                     labels: {
                         format: '{value:%H:%M}',
                         style: {
-                            color: '#666666'
+                            color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                         }
                     },
-                    lineColor: '#666666',
-                    tickColor: '#666666'
+                    lineColor: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666',
+                    tickColor: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                 },
                 yAxis: {
                     title: {
                         text: 'Rainfall (mm/h)',
                         style: {
-                            color: '#666666'
+                            color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                         }
                     },
                     min: 0,
                     labels: {
                         style: {
-                            color: '#666666'
+                            color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                         }
                     },
-                    gridLineColor: '#E0E0E0'
+                    gridLineColor: document.documentElement.classList.contains('dark') ? '#4B5563' : '#E0E0E0'
                 },
                 tooltip: {
                     headerFormat: '<b>{point.x:%Y-%m-%d %H:%M}</b><br/>',
                     pointFormat: '{point.y:.1f} mm/h',
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    backgroundColor: document.documentElement.classList.contains('dark') ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)',
                     style: {
-                        color: '#333333'
+                        color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#333333'
                     }
                 },
                 series: [{
@@ -514,10 +518,10 @@
                 }],
                 legend: {
                     itemStyle: {
-                        color: '#666666'
+                        color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                     },
                     itemHoverStyle: {
-                        color: '#333333'
+                        color: document.documentElement.classList.contains('dark') ? '#F3F4F6' : '#333333'
                     }
                 },
                 plotOptions: {
@@ -527,68 +531,18 @@
                 },
                 credits: {
                     style: {
-                        color: '#666666'
+                        color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                     }
                 }
-            });
+            };
 
-            // Apply dark mode styles if needed
-            if (document.documentElement.classList.contains('dark')) {
-                rainfallChart.update({
-                    chart: {
-                        backgroundColor: '#1F2937'
-                    },
-                    xAxis: {
-                        labels: {
-                            style: {
-                                color: '#D1D5DB'
-                            }
-                        },
-                        lineColor: '#4B5563',
-                        tickColor: '#4B5563'
-                    },
-                    yAxis: {
-                        title: {
-                            style: {
-                                color: '#D1D5DB'
-                            }
-                        },
-                        labels: {
-                            style: {
-                                color: '#D1D5DB'
-                            }
-                        },
-                        gridLineColor: '#4B5563'
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(31, 41, 55, 0.8)',
-                        style: {
-                            color: '#D1D5DB'
-                        }
-                    },
-                    legend: {
-                        itemStyle: {
-                            color: '#D1D5DB'
-                        },
-                        itemHoverStyle: {
-                            color: '#F3F4F6'
-                        }
-                    },
-                    credits: {
-                        style: {
-                            color: '#D1D5DB'
-                        }
-                    }
-                });
-            }
+            const rainfallChart = Highcharts.chart('rainfallChart', rainfallChartOptions);
 
             // Update charts when Livewire updates
             Livewire.on('chartDataUpdated', (data) => {
-                // console.log('Received chart data:', data);
                 const chartData = data[0];
 
                 if (chartData && chartData.tempData && chartData.rainData) {
-                    // console.log('Updating charts with:', chartData);
                     temperatureChart.series[0].setData(chartData.tempData, true);
                     rainfallChart.series[0].setData(chartData.rainData, true);
                 } else {

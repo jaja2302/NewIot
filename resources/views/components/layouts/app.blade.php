@@ -31,13 +31,13 @@
     <div id="loading-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-90 h-screen w-screen overflow-hidden">
         <div class="text-center">
             <div id="lottie-container" class="w-64 h-64">
-                <div class="nav-icon lottie-animation" data-animation-path="{{ asset('loading/loading2.json') }}"></div>
+                <div class="nav-icon lottie-animation" data-animation-path="{{ asset('loading/waterdrop.json') }}"></div>
             </div>
         </div>
     </div>
 
     @auth
-    <div class="flex flex-col md:flex-row min-h-screen overflow-x-hidden">
+    <div class="flex flex-col md:flex-row min-h-screen overflow-x-hidden bg-gradient-to-b from-sky-200 to-sky-100 dark:from-gray-800 dark:to-gray-900">
         <!-- Mobile menu button -->
         <button id="mobile-menu-button" class="md:hidden fixed top-4 left-4 z-50 p-2 mt-10 bg-white rounded-md shadow-md">
             <i class="fas fa-bars"></i>
