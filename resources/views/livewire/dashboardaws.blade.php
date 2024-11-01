@@ -1,4 +1,6 @@
 <div class="min-h-screen">
+    @section('title', 'AWS Dashboard')
+
     <div class="container mx-auto px-4 py-6">
         <!-- Header Section -->
         <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl shadow-lg p-6 mb-8">

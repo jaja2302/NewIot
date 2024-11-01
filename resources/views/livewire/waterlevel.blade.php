@@ -1,4 +1,6 @@
 <div class="min-h-screen">
+    @section('title', 'Water Level Monitoring')
+
     <div class="container mx-auto px-4 py-6">
         <!-- Page Title -->
         <div class="mb-8">
