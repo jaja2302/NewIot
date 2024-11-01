@@ -160,37 +160,25 @@ $(function() {
 
     // Define all sidebar-related functions at the top level
     function hideSidebar() {
-        if (navbar) {
-            navbar.classList.add('transitioning');
-            navbar.classList.add('hidden');
-            setTimeout(() => {
-                navbar.classList.remove('transitioning');
-            }, 400);
-        }
-        if (sidebarOverlay) {
-            sidebarOverlay.classList.add('hidden');
-        }
+        navbar.classList.add('hidden');
+        sidebarOverlay.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
+        document.querySelector('main').classList.remove('sidebar-open');
+        
         if (mobileMenuButton) {
             mobileMenuButton.classList.remove('menu-open');
         }
     }
 
     function toggleSidebar() {
-        // Add transition class before toggling
-        navbar.classList.add('transitioning');
         navbar.classList.toggle('hidden');
         sidebarOverlay.classList.toggle('hidden');
         document.body.classList.toggle('overflow-hidden');
+        document.querySelector('main').classList.toggle('sidebar-open');
         
         if (mobileMenuButton) {
             mobileMenuButton.classList.toggle('menu-open');
         }
-
-        // Remove transition class after animation completes
-        setTimeout(() => {
-            navbar.classList.remove('transitioning');
-        }, 400); // Match this with your CSS transition duration
     }
 
     function toggleDesktopSidebar() {
@@ -475,3 +463,32 @@ $(function() {
 
     return animation;
 };
+
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+});
+
+document.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+});
+
+function handleSwipe() {
+    const swipeDistance = touchEndX - touchStartX;
+    if (Math.abs(swipeDistance) > 100) { // Min swipe distance
+        if (swipeDistance > 0) {
+            // Swipe right - open menu
+            if (navbar.classList.contains('hidden')) {
+                toggleSidebar();
+            }
+        } else {
+            // Swipe left - close menu
+            if (!navbar.classList.contains('hidden')) {
+                hideSidebar();
+            }
+        }
+    }
+}
