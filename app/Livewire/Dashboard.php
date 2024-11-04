@@ -15,11 +15,14 @@ class Dashboard extends Component
     public $searchQuery = '';
     public $searchResults = [];
     public $isSearching = false;
+    public $weatheranimation = null;
+    public $chartUvindex = [];
 
     public function mount()
     {
         $this->loadCachedLocation();
         $this->fetchWeatherData();
+        // dd($this->loadCachedLocation());
     }
 
     private function loadCachedLocation()
@@ -40,7 +43,6 @@ class Dashboard extends Component
         if ($cachedData) {
             $this->weatherData = $cachedData;
         } else {
-            // Fetch weather data from Open-Meteo API
             $response = Http::get("https://api.open-meteo.com/v1/forecast", [
                 'latitude' => $this->lat,
                 'longitude' => $this->lon,
@@ -51,10 +53,16 @@ class Dashboard extends Component
             ]);
 
             $this->weatherData = $response->json();
-            // dd($this->weatherData);
-            // Cache the weather data for 1 hour
             Cache::put($cacheKey, $this->weatherData, now()->addHour());
         }
+
+
+
+
+        // Update the weather animation based on the latest weather data
+        $this->weatheranimation = $this->getWeatherAnimation();
+        $this->chartUvindex();
+        $this->dispatch('weatherAnimationUpdated', $this->weatheranimation);
     }
 
     public function updateLocation($lat, $lon)
@@ -68,8 +76,33 @@ class Dashboard extends Component
     public function setLocationError($error)
     {
         $this->locationError = $error;
-        // Fetch weather data with default coordinates when there's an error
         $this->fetchWeatherData();
+    }
+
+    public function searchCity()
+    {
+        $this->isSearching = true;
+
+        if (strlen($this->searchQuery) < 3) {
+            $this->searchResults = [];
+            $this->isSearching = false;
+            return;
+        }
+
+        $response = Http::get("https://api.opencagedata.com/geocode/v1/json", [
+            'q' => $this->searchQuery . ', Indonesia',
+            'key' => env('OPENCAGE_API_KEY'),
+            'language' => 'en',
+            'limit' => 5,
+        ]);
+
+        if ($response->successful()) {
+            $this->searchResults = $response->json()['results'];
+        } else {
+            $this->locationError = "Error searching for cities. Please try again.";
+        }
+
+        $this->isSearching = false;
     }
 
     public function render()
@@ -77,6 +110,92 @@ class Dashboard extends Component
         return view('livewire.dashboard');
     }
 
+    public function getWeatherAnimation()
+    {
+        $weatherCode = $this->weatherData['current']['weather_code'] ?? 0;
+        $isDay = $this->weatherData['current']['is_day'] ?? 1;
+
+        if ($weatherCode === 0) {
+            return $isDay ? 'sunnydaylight' : 'sunnynight';
+        } elseif (in_array($weatherCode, [1, 2, 3])) {
+            return $isDay ? 'cloudydaylight' : 'cloudnight';
+        } elseif (in_array($weatherCode, [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82])) {
+            return $isDay ? 'raindaylight' : 'rainnight';
+        } elseif (in_array($weatherCode, [95, 96, 99])) {
+            return $isDay ? 'rainstormdaylight' : 'rainstormnight';
+        }
+
+        return $isDay ? 'sunnydaylight' : 'sunnynight';
+    }
+
+    public function chartUvindex()
+    {
+        $data  = $this->weatherData;
+        $dates = $data["daily"]["time"];
+        $uvIndexes = $data["daily"]["uv_index_max"];
+
+        $formattedData = [];
+
+        foreach ($dates as $index => $date) {
+            $formattedData[] = [
+                strtotime($date) * 1000, // Convert date to Unix timestamp in milliseconds
+                $uvIndexes[$index]
+            ];
+        }
+
+        $this->chartUvindex = $formattedData;
+        $this->dispatch('chartDataUpdated', $formattedData);
+    }
+
+    public function setLocation($lat, $lon, $cityName)
+    {
+        $this->lat = $lat;
+        $this->lon = $lon;
+        $this->locationError = null;
+        $this->searchQuery = $cityName;
+        $this->searchResults = [];
+
+        Cache::put('user_location', [
+            'lat' => $lat,
+            'lon' => $lon,
+            'city' => $cityName
+        ], now()->addDays(30));
+
+        $this->fetchWeatherData();
+
+        // Dispatch event for map update
+        $this->dispatch('locationUpdated', [
+            'lat' => $lat,
+            'lon' => $lon,
+            'cityName' => $cityName
+        ]);
+    }
+
+    public function updatedSearchQuery()
+    {
+        $this->searchCity();
+    }
+
+
+    public function calculateSunPosition()
+    {
+        $now = now(); // Current time
+        $sunrise = isset($this->weatherData['daily']['sunrise'][0]) ? \Carbon\Carbon::parse($this->weatherData['daily']['sunrise'][0]) : null;
+        $sunset = isset($this->weatherData['daily']['sunset'][0]) ? \Carbon\Carbon::parse($this->weatherData['daily']['sunset'][0]) : null;
+
+        if (!$sunrise || !$sunset) {
+            return 0; // No sunrise/sunset data available
+        }
+
+        if ($now < $sunrise || $now > $sunset) {
+            return -1; // Nighttime
+        }
+
+        $totalDuration = $sunset->diffInSeconds($sunrise);
+        $elapsed = $now->diffInSeconds($sunrise);
+        $position = ($elapsed / $totalDuration) * 100; // Percentage of the sun's path
+        return $position;
+    }
     public function getWeatherIcon($code)
     {
         $icons = [
@@ -111,110 +230,5 @@ class Dashboard extends Component
         ];
 
         return $icons[$code] ?? '❓';
-    }
-
-    public function updatedSearchQuery()
-    {
-        $this->searchCity();
-    }
-
-    public function searchCity()
-    {
-        $this->isSearching = true;
-
-        if (strlen($this->searchQuery) < 3) {
-            $this->searchResults = [];
-            $this->isSearching = false;
-            return;
-        }
-
-        $response = Http::get("https://api.opencagedata.com/geocode/v1/json", [
-            'q' => $this->searchQuery . ', Indonesia',
-            'key' => env('OPENCAGE_API_KEY'),
-            'language' => 'en',
-            'limit' => 5,
-        ]);
-
-        if ($response->successful()) {
-            $this->searchResults = $response->json()['results'];
-        } else {
-            $this->locationError = "Error searching for cities. Please try again.";
-        }
-
-        $this->isSearching = false;
-    }
-
-    public function setLocation($lat, $lon, $cityName)
-    {
-        $this->lat = $lat;
-        $this->lon = $lon;
-        $this->locationError = null;
-        $this->searchQuery = $cityName;
-        $this->searchResults = [];
-
-        // Cache the user's location
-        Cache::put('user_location', [
-            'lat' => $lat,
-            'lon' => $lon,
-            'city' => $cityName
-        ], now()->addDays(30));
-
-        $this->fetchWeatherData();
-    }
-
-    public function getWeatherDescription($code)
-    {
-        $descriptions = [
-            0 => 'Cerah',
-            1 => 'Sebagian cerah',
-            2 => 'Berawan sebagian',
-            3 => 'Berawan',
-            45 => 'Berkabut',
-            48 => 'Berkabut tebal',
-            51 => 'Gerimis ringan',
-            53 => 'Gerimis sedang',
-            55 => 'Gerimis lebat',
-            56 => 'Gerimis beku ringan',
-            57 => 'Gerimis beku lebat',
-            61 => 'Hujan ringan',
-            63 => 'Hujan sedang',
-            65 => 'Hujan lebat',
-            66 => 'Hujan beku ringan',
-            67 => 'Hujan beku lebat',
-            71 => 'Salju ringan',
-            73 => 'Salju sedang',
-            75 => 'Salju lebat',
-            77 => 'Butiran salju',
-            80 => 'Hujan ringan',
-            81 => 'Hujan sedang',
-            82 => 'Hujan lebat',
-            85 => 'Hujan salju ringan',
-            86 => 'Hujan salju lebat',
-            95 => 'Badai petir',
-            96 => 'Badai petir dengan hujan es ringan',
-            99 => 'Badai petir dengan hujan es lebat',
-        ];
-
-        return $descriptions[$code] ?? 'Tidak diketahui';
-    }
-
-    public function calculateSunPosition()
-    {
-        $now = now(); // Current time
-        $sunrise = isset($this->weatherData['daily']['sunrise'][0]) ? \Carbon\Carbon::parse($this->weatherData['daily']['sunrise'][0]) : null;
-        $sunset = isset($this->weatherData['daily']['sunset'][0]) ? \Carbon\Carbon::parse($this->weatherData['daily']['sunset'][0]) : null;
-
-        if (!$sunrise || !$sunset) {
-            return 0; // No sunrise/sunset data available
-        }
-
-        if ($now < $sunrise || $now > $sunset) {
-            return -1; // Nighttime
-        }
-
-        $totalDuration = $sunset->diffInSeconds($sunrise);
-        $elapsed = $now->diffInSeconds($sunrise);
-        $position = ($elapsed / $totalDuration) * 100; // Percentage of the sun's path
-        return $position;
     }
 }

@@ -1,20 +1,25 @@
 <table>
     <thead>
         <tr>
-            <th>Date</th>
-            <th>Wind Speed (km/h)</th>
-            <th>Wind Direction</th>
-            <th>Rain Rate</th>
-            <th>Rain Today</th>
-            <th>Indoor Temp</th>
-            <th>Outdoor Temp</th>
-            <th>Indoor Humidity</th>
-            <th>Outdoor Humidity</th>
-            <th>UV</th>
-            <th>Wind Gust</th>
-            <th>Relative Air Pressure</th>
-            <th>Absolute Air Pressure</th>
-            <th>Solar Radiation</th>
+            <th>Tanggal</th>
+            <th>Kecepatan Angin (km/jam)</th>
+            <th>Arah Angin (derajat)</th>
+            <th>Tingkat Hujan (mm/5 menit)</th>
+            <th>Curah Hujan Hari Ini (mm)</th>
+            <th>Suhu Dalam Ruangan (°C)</th>
+            <th>Suhu Luar Ruangan (°C)</th>
+            <th>Kelembaban Dalam Ruangan (%)</th>
+            <th>Kelembaban Luar Ruangan (%)</th>
+            <th>UV (indeks)</th>
+            <th>Hembusan Angin (km/jam)</th>
+            <th>Tekanan Udara Relatif (hPa)</th>
+            <th>Tekanan Udara Absolut (hPa)</th>
+            <th>Radiasi Matahari (W/m²)</th>
+            <th>Hujan Harian (mm)</th>
+            <th>Curah Hujan Mingguan (mm)</th>
+            <th>Curah Hujan Bulanan (mm)</th>
+            <th>Curah Hujan Tahunan (mm)</th>
+            <th>Hembusan Angin Harian Maksimal (km/jam)</th>
         </tr>
     </thead>
     <tbody>
@@ -35,7 +40,11 @@
             <td style="background-color: {{$item['date'] == 'Avarage' ? 'blue' : ''}}; color:{{$item['date'] == 'Avarage' ? 'white' : 'black'}}">{{ $item['air_press_rel'] }}</td>
             <td style="background-color: {{$item['date'] == 'Avarage' ? 'blue' : ''}}; color:{{$item['date'] == 'Avarage' ? 'white' : 'black'}}">{{ $item['air_press_abs'] }}</td>
             <td style="background-color: {{$item['date'] == 'Avarage' ? 'blue' : ''}}; color:{{$item['date'] == 'Avarage' ? 'white' : 'black'}}">{{ $item['solar_radiation'] }}</td>
-
+            <td style="background-color: {{$item['date'] == 'Avarage' ? 'blue' : ''}}; color:{{$item['date'] == 'Avarage' ? 'white' : 'black'}}">{{ $item['dailyrainmm'] }}</td>
+            <td style="background-color: {{$item['date'] == 'Avarage' ? 'blue' : ''}}; color:{{$item['date'] == 'Avarage' ? 'white' : 'black'}}">{{ $item['weeklyrainmm'] }}</td>
+            <td style="background-color: {{$item['date'] == 'Avarage' ? 'blue' : ''}}; color:{{$item['date'] == 'Avarage' ? 'white' : 'black'}}">{{ $item['monthlyrainmm'] }}</td>
+            <td style="background-color: {{$item['date'] == 'Avarage' ? 'blue' : ''}}; color:{{$item['date'] == 'Avarage' ? 'white' : 'black'}}">{{ $item['yearlyrainmm'] }}</td>
+            <td style="background-color: {{$item['date'] == 'Avarage' ? 'blue' : ''}}; color:{{$item['date'] == 'Avarage' ? 'white' : 'black'}}">{{ $item['maxdailygust'] }}</td>
         </tr>
         @endforeach
         @endforeach

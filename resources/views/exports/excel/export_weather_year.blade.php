@@ -1,20 +1,20 @@
 <table>
     <thead>
         <tr>
-            <th>Date</th>
-            <th>Wind Speed (km/h)</th>
-            <th>Wind Direction</th>
-            <th>Rain Rate</th>
-            <th>Rain Today</th>
-            <th>Indoor Temp</th>
-            <th>Outdoor Temp</th>
-            <th>Indoor Humidity</th>
-            <th>Outdoor Humidity</th>
-            <th>UV</th>
-            <th>Wind Gust</th>
-            <th>Relative Air Pressure</th>
-            <th>Absolute Air Pressure</th>
-            <th>Solar Radiation</th>
+            <th>Tanggal</th>
+            <th>Kecepatan Angin (km/h)</th>
+            <th>Arah Angin (derajat)</th>
+            <th>Tingkat Hujan (mm/h)</th>
+            <th>Curah Hujan Hari Ini (mm)</th>
+            <th>Suhu Dalam Ruangan (°C)</th>
+            <th>Suhu Luar Ruangan (°C)</th>
+            <th>Kelembaban Dalam Ruangan (%)</th>
+            <th>Kelembaban Luar Ruangan (%)</th>
+            <th>UV (indeks)</th>
+            <th>Hembusan Angin (km/h)</th>
+            <th>Tekanan Udara Relatif (hPa)</th>
+            <th>Tekanan Udara Absolut (hPa)</th>
+            <th>Radiasi Matahari (W/m²)</th>
         </tr>
     </thead>
     <tbody>

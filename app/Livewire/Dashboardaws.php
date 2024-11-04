@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Exports\Weatherexceldaterange;
+use App\Exports\Weatherexcelperhours;
 use App\Exports\Weatherexcelyear;
 use App\Exports\Weatherexcelyearmonth;
 use App\Exports\WeatherstationExcel;
@@ -56,6 +57,9 @@ class Dashboardaws extends Component implements HasForms, HasTable
     public $toggle_by_year = true;
     public $toggle_by_year_month = false;
     public $toggle_by_date_range = false;
+    public $station_lat;
+    public $station_lon;
+    public $station_loc;
     use InteractsWithTable;
     use InteractsWithForms;
 
@@ -66,6 +70,17 @@ class Dashboardaws extends Component implements HasForms, HasTable
         // $this->selectedDate = '2024-10-18';
         $list_station = DB::connection('mysql')->table('weather_station_list')->where('flags', 1)->get();
         $this->list_station = $list_station;
+
+        // Get the initial station coordinates
+        $station = DB::connection('mysql')
+            ->table('weather_station_list')
+            ->where('id', $this->selectedstation)
+            ->first();
+
+        $this->station_lat = $station->lat;
+        $this->station_lon = $station->lon;
+        $this->station_loc = $station->loc;
+
         $this->getLatestData($this->selectedstation);
         $this->fetchLatestData();
         $this->fetchTodayData();
@@ -92,11 +107,29 @@ class Dashboardaws extends Component implements HasForms, HasTable
         $this->dispatch('showLoadingScreen');
 
         $this->selectedstation = $station_id;
+
+        // Update station coordinates when station changes
+        $station = DB::connection('mysql')
+            ->table('weather_station_list')
+            ->where('id', $station_id)
+            ->first();
+
+        $this->station_lat = $station->lat;
+        $this->station_lon = $station->lon;
+        $this->station_loc = $station->loc;
+
         $this->getLatestData($station_id);
         $this->generateChartData($station_id);
 
         // Hide loading screen after data is loaded
         $this->dispatch('hideLoadingScreen');
+
+        // Dispatch event to update map
+        $this->dispatch('updateMapMarker', [
+            'lat' => $this->station_lat,
+            'lon' => $this->station_lon,
+            'loc' => $this->station_loc
+        ]);
     }
 
     public function updateSelectedDate($date)
@@ -153,6 +186,7 @@ class Dashboardaws extends Component implements HasForms, HasTable
         }
 
         $this->tempChartData = $temp_data;
+        // dd($this->tempChartData);
         // $this->rainChartData = $rain_data;
         // $data =
         // dd($this->tempChartData, $this->rainChartData);
@@ -407,7 +441,9 @@ class Dashboardaws extends Component implements HasForms, HasTable
     {
         return $table
             ->query(function () {
-                $data = Weatherstationdata::query()->where('idws', $this->selectedstation);
+                $data = Weatherstationdata::query()
+                    ->where('idws', $this->selectedstation)
+                    ->orderBy('id', 'desc');
                 return $data;
             })
             ->columns([
@@ -434,15 +470,90 @@ class Dashboardaws extends Component implements HasForms, HasTable
                 TextColumn::make('monthlyrainmm')->label('Hujan Bulanan (mm)')->sortable(),
                 TextColumn::make('yearlyrainmm')->label('Hujan Tahunan (mm)')->sortable(),
                 TextColumn::make('maxdailygust')->label('Hembusan Angin Harian Maksimum')->sortable(),
-                TextColumn::make('wh65batt')->label('Baterai WH65')->sortable(),
+                // TextColumn::make('wh65batt')->label('Baterai WH65')->sortable(),
             ])
             ->filters([
                 Filter::make('by_year')
                     ->form([
-
                         Tabs::make('Tabs')
-
                             ->tabs([
+                                Tabs\Tab::make('by_year_month')
+                                    ->label('Cari berdasarkan Tahun dan Bulan')
+                                    ->visible(fn($get) => !$get('toggle_by_year') && !$get('toggle_by_date_range'))
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Set $set) {
+                                        if ($state) {
+                                            $set('toggle_by_year_month', true);
+                                            $set('toggle_by_year', false);
+                                            $set('toggle_by_date_range', false);
+                                            $this->toggle_by_year = false;
+                                            $this->toggle_by_year_month = true;
+                                            $this->toggle_by_date_range = false;
+                                        }
+                                    })
+                                    ->schema([
+                                        Section::make('Berdasarkan Tahun dan Bulan')
+                                            ->translateLabel()
+                                            ->headerActions([
+                                                FormAction::make('Export_excel')
+                                                    ->label('Export Excel Per 5 Menit')
+                                                    ->color('success')
+                                                    ->tooltip('Export Excel Per 5 Menit')
+                                                    ->action(function ($state, FormAction $action) {
+                                                        // dd($state);
+                                                        if ($state['year_month'] == null) {
+                                                            Notification::make()
+                                                                ->title('Perhatian')
+                                                                ->warning()
+                                                                ->body('Bulan tidak boleh kosong')
+                                                                ->send();
+                                                            $action->halt();
+                                                        }
+                                                        $data_harian = $this->dataharian($state);
+                                                        // dd($data_harian);
+
+                                                        $data_mingguan = $this->datamingguan($state);
+                                                        $data_bulanan = $this->databulanan($state);
+
+                                                        $data = [
+                                                            'Harian' => $data_harian,
+                                                            'Mingguan' => $data_mingguan,
+                                                            'Bulanan' => $data_bulanan
+                                                        ];
+
+
+                                                        return Excel::download(
+                                                            new Weatherexcelyearmonth($data),
+                                                            'Rekap-Data-Perbulan_5menit' . $state['year_month'] . '.xlsx'
+                                                        );
+                                                    }),
+                                                FormAction::make('Export_excels')
+                                                    ->label('Export Excel Per 1 Jam')
+                                                    ->tooltip('Export Excel Per 1 Jam')
+                                                    ->action(function ($state, FormAction $action) {
+                                                        // dd($state);
+                                                        if ($state['year_month'] == null) {
+                                                            Notification::make()
+                                                                ->title('Perhatian')
+                                                                ->warning()
+                                                                ->body('Bulan tidak boleh kosong')
+                                                                ->send();
+                                                            $action->halt();
+                                                        }
+                                                        $data_perjam = $this->dataperjam($state);
+                                                        return Excel::download(
+                                                            new Weatherexcelperhours($data_perjam),
+                                                            'Rekap-Data-Perbulan_perjam' . $state['year_month'] . '.xlsx'
+                                                        );
+                                                    }),
+                                            ])
+                                            ->description('Jangan lupa checklist semua data sebelum export ke excel')
+                                            ->schema([
+                                                TextInput::make('year_month')
+                                                    ->type('month')
+                                                    ->afterStateUpdated(fn($state, Set $set) => $set('toggle_by_year_month', true)),
+                                            ]),
+                                    ]),
                                 Tabs\Tab::make('by_year')
                                     ->label('Cari berdasarkan Tahun')
                                     ->live()
@@ -468,6 +579,8 @@ class Dashboardaws extends Component implements HasForms, HasTable
                                             ->headerActions([
                                                 FormAction::make('Export_excel')
                                                     ->label('Export Excel')
+                                                    ->tooltip('Dalam Perbaikan')
+                                                    ->disabled()
                                                     ->action(function ($state) {
                                                         // dd($state);
                                                         // $data['data'] = $state;
@@ -506,62 +619,7 @@ class Dashboardaws extends Component implements HasForms, HasTable
                                             ]),
 
                                     ]),
-                                Tabs\Tab::make('by_year_month')
-                                    ->label('Cari berdasarkan Tahun dan Bulan')
-                                    ->visible(fn($get) => !$get('toggle_by_year') && !$get('toggle_by_date_range'))
-                                    ->live()
-                                    ->afterStateUpdated(function ($state, Set $set) {
-                                        if ($state) {
-                                            $set('toggle_by_year_month', true);
-                                            $set('toggle_by_year', false);
-                                            $set('toggle_by_date_range', false);
-                                            $this->toggle_by_year = false;
-                                            $this->toggle_by_year_month = true;
-                                            $this->toggle_by_date_range = false;
-                                        }
-                                    })
-                                    ->schema([
-                                        Section::make('Berdasarkan Tahun dan Bulan')
-                                            ->translateLabel()
-                                            ->headerActions([
-                                                FormAction::make('Export_excel')
-                                                    ->label('Export Excel')
-                                                    ->action(function ($state, FormAction $action) {
-                                                        // dd($state);
-                                                        if ($state['year_month'] == null) {
-                                                            Notification::make()
-                                                                ->title('warning')
-                                                                ->warning()
-                                                                ->body('Bulan tidak boleh kosong')
-                                                                ->send();
-                                                            $action->halt();
-                                                        }
-                                                        $data_harian = $this->dataharian($state);
-                                                        $data_mingguan = $this->datamingguan($state);
-                                                        $data_bulanan = $this->databulanan($state);
-                                                        // dd($data_bulanan);
 
-                                                        $data = [
-                                                            'Harian' => $data_harian,
-                                                            'Mingguan' => $data_mingguan,
-                                                            'Bulanan' => $data_bulanan
-                                                        ];
-
-
-                                                        return Excel::download(
-                                                            new Weatherexcelyearmonth($data),
-                                                            'Rekap-Data-Perbulan' . $state['year_month'] . '.xlsx'
-                                                        );
-                                                    }),
-                                            ])
-
-                                            ->description('Jangan lupa checklist semua data sebelum export ke excel')
-                                            ->schema([
-                                                TextInput::make('year_month')
-                                                    ->type('month')
-                                                    ->afterStateUpdated(fn($state, Set $set) => $set('toggle_by_year_month', true)),
-                                            ]),
-                                    ]),
                             ]),
                     ])
                     ->columnSpanFull()
@@ -750,8 +808,80 @@ class Dashboardaws extends Component implements HasForms, HasTable
         return $data_harian;
     }
 
+    private function dataperjam($state)
+    {
+        $data_harian = Weatherstationdata::select([
+            '*',
+            DB::raw("DATE_FORMAT(date, '%y-%m-%d') as Tanggal"),
+            DB::raw("DATE_FORMAT(date, '%H') as Jam")
+        ])
+            ->where('idws', $this->selectedstation)
+            ->where('date', 'like', '%' . $state['year_month'] . '%')
+            ->orderBy('date', 'asc')
+            ->get()
+            ->groupBy(['Tanggal', 'Jam']);
+        // dd($data_harian);
+
+        $data_harian = json_decode(json_encode($data_harian), true);
+        //   
+        // dd($data_harian);
+        $data = [];
+        foreach ($data_harian as $date => $hours) {
+            $rain_today = 0;
+            foreach ($hours as $hour => $records) {
+                $avarage = count($records);
+                $windspeedkmh = 0;
+                $winddir_sum = 0;
+                $rain_rate_sum = 0;
+                $temp_in_sum = 0;
+                $temp_out_sum = 0;
+                $hum_in_sum = 0;
+                $hum_out_sum = 0;
+                $uv_sum = 0;
+                $wind_gust_sum = 0;
+                $air_press_rel_sum = 0;
+                $air_press_abs_sum = 0;
+                $solar_radiation_sum = 0;
+                $dailyrainmm = 0;
+                foreach ($records as $key => $value) {
+                    $windspeedkmh += $value['windspeedkmh'];
+                    $winddir_sum += $value['winddir'];
+                    $rain_rate_sum += $value['rain_rate'];
+                    $temp_in_sum += $value['temp_in'];
+                    $temp_out_sum += $value['temp_out'];
+                    $hum_in_sum += $value['hum_in'];
+                    $hum_out_sum += $value['hum_out'];
+                    $uv_sum += $value['uv'];
+                    $wind_gust_sum += $value['wind_gust'];
+                    $air_press_rel_sum += $value['air_press_rel'];
+                    $air_press_abs_sum += $value['air_press_abs'];
+                    $solar_radiation_sum += $value['solar_radiation'];
+                    $dailyrainmm += $value['dailyrainmm'];
+                }
+                $data[$date]['Jam ke-' . $hour . ':00']['windspeedkmh'] = $windspeedkmh / $avarage;
+                $data[$date]['Jam ke-' . $hour . ':00']['winddir'] = $winddir_sum / $avarage;
+                $data[$date]['Jam ke-' . $hour . ':00']['rain_rate'] = $rain_rate_sum;
+                $data[$date]['Jam ke-' . $hour . ':00']['rain_today'] = $rain_today += $rain_rate_sum;
+                $data[$date]['Jam ke-' . $hour . ':00']['temp_in'] = $temp_in_sum / $avarage;
+                $data[$date]['Jam ke-' . $hour . ':00']['temp_out'] = $temp_out_sum / $avarage;
+                $data[$date]['Jam ke-' . $hour . ':00']['hum_in'] = $hum_in_sum / $avarage;
+                $data[$date]['Jam ke-' . $hour . ':00']['hum_out'] = $hum_out_sum / $avarage;
+                $data[$date]['Jam ke-' . $hour . ':00']['uv'] = $uv_sum / $avarage;
+                $data[$date]['Jam ke-' . $hour . ':00']['wind_gust'] = $wind_gust_sum / $avarage;
+                $data[$date]['Jam ke-' . $hour . ':00']['air_press_rel'] = $air_press_rel_sum / $avarage;
+                $data[$date]['Jam ke-' . $hour . ':00']['air_press_abs'] = $air_press_abs_sum / $avarage;
+                $data[$date]['Jam ke-' . $hour . ':00']['solar_radiation'] = $solar_radiation_sum / $avarage;
+                $data[$date]['Jam ke-' . $hour . ':00']['dailyrainmm'] = $dailyrainmm;
+            }
+        }
+        // dd($data);
+        return $data;
+    }
+
+
     private function getavaragebyfiltermonth($data)
     {
+        // dd($data);
         foreach ($data as $key => &$value) {
 
             $data_count = count($value);
@@ -770,6 +900,7 @@ class Dashboardaws extends Component implements HasForms, HasTable
             $solar_radiation_sum = 0;
 
             foreach ($value as $key1 => $value1) {
+                // dd($value1);
                 $windspeedkmhp += $value1['windspeedkmh'] ?? 0;
                 $winddir_sum += $value1['winddir'] ?? 0;
                 $rain_rate_sum += $value1['rain_rate'] ?? 0;
@@ -788,11 +919,21 @@ class Dashboardaws extends Component implements HasForms, HasTable
                 $air_press_rel_sum += $value1['air_press_rel'] ?? 0;
                 $air_press_abs_sum += $value1['air_press_abs'] ?? 0;
                 $solar_radiation_sum += $value1['solar_radiation'] ?? 0;
+                $dailyRainIn = $value1['dailyRainIn'];
+                $dailyrainmm = $value1['dailyrainmm'];
+                $raintodaymm = $value1['raintodaymm'];
+                $totalrainmm = $value1['totalrainmm'];
+                $weeklyrainmm = $value1['weeklyrainmm'];
+                $monthlyrainmm = $value1['monthlyrainmm'];
+                $yearlyrainmm = $value1['yearlyrainmm'];
+                $maxdailygust = $value1['maxdailygust'];
+                $iddata = $value1['id'];
             }
+            $value['avarage']['id'] = $iddata;
             $value['avarage']['date'] = 'Avarage';
             $value['avarage']['windspeedkmh'] = $windspeedkmhp / $data_count;
             $value['avarage']['winddir'] = $winddir_sum / $data_count;
-            $value['avarage']['rain_rate'] = $rain_rate_sum / $data_count;
+            $value['avarage']['rain_rate'] = $dailyrainmm;
             $value['avarage']['rain_today'] = $rain_today_sum / $data_count;
             $value['avarage']['temp_in'] = $temp_in_sum / $data_count;
             $value['avarage']['temp_out'] = $temp_out_sum / $data_count;
@@ -803,6 +944,14 @@ class Dashboardaws extends Component implements HasForms, HasTable
             $value['avarage']['air_press_rel'] = $air_press_rel_sum / $data_count;
             $value['avarage']['air_press_abs'] = $air_press_abs_sum / $data_count;
             $value['avarage']['solar_radiation'] = $solar_radiation_sum / $data_count;
+            $value['avarage']['dailyRainIn'] = $dailyRainIn;
+            $value['avarage']['dailyrainmm'] = $dailyrainmm;
+            $value['avarage']['raintodaymm'] = $raintodaymm;
+            $value['avarage']['totalrainmm'] = $totalrainmm;
+            $value['avarage']['weeklyrainmm'] = $weeklyrainmm;
+            $value['avarage']['monthlyrainmm'] = $monthlyrainmm;
+            $value['avarage']['yearlyrainmm'] = $yearlyrainmm;
+            $value['avarage']['maxdailygust'] = $maxdailygust;
         }
 
         return $data;
