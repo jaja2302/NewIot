@@ -60,6 +60,8 @@ class Dashboardaws extends Component implements HasForms, HasTable
     public $station_lat;
     public $station_lon;
     public $station_loc;
+    public $weatheranimation = null;
+
     use InteractsWithTable;
     use InteractsWithForms;
 
@@ -155,49 +157,54 @@ class Dashboardaws extends Component implements HasForms, HasTable
 
     private function generateChartData($station_id)
     {
-        // Get data for the selected date with proper time formatting
+        // Get data for the selected date and group by hour
         $historical_data = Weatherstationdata::where('idws', $station_id)
             ->whereDate('date', $this->selectedDate)
             ->orderBy('date', 'asc')
-            ->get();
+            ->get()
+            ->groupBy(function ($item) {
+                return Carbon::parse($item->date)->format('H:00'); // Group by hour
+            })
+            ->map(function ($hourData) {
+                // Calculate average values for each hour
+                return [
+                    'date' => $hourData->first()->date, // Get first record's timestamp
+                    'temp_out' => $hourData->avg('temp_out'),
+                    'rain_rate' => $hourData->sum('rain_rate') // Sum for rainfall
+                ];
+            });
 
         $temp_data = [];
         $rain_data = [];
 
-        foreach ($historical_data as $data) {
+        foreach ($historical_data as $hour => $data) {
             // Convert to UTC timestamp in milliseconds
-            $timestamp = strtotime($data->date) * 1000;
+            $timestamp = strtotime($data['date']) * 1000;
 
             // Temperature data
-            if ($data->temp_out !== null) {
+            if ($data['temp_out'] !== null) {
                 $temp_data[] = [
                     $timestamp,
-                    round((float)$data->temp_out, 1)
+                    round((float)$data['temp_out'], 1)
                 ];
             }
 
             // Rainfall data
-            if ($data->rain_rate !== null) {
+            if ($data['rain_rate'] !== null) {
                 $rain_data[] = [
                     $timestamp,
-                    round((float)$data->rain_rate, 2)
+                    round((float)$data['rain_rate'], 2)
                 ];
             }
         }
 
         $this->tempChartData = $temp_data;
-        // dd($this->tempChartData);
-        // $this->rainChartData = $rain_data;
-        // $data =
-        // dd($this->tempChartData, $this->rainChartData);
+
         // Emit event with new data
         $this->dispatch('chartDataUpdated', [
             'tempData' => $temp_data,
             'rainData' => $rain_data
         ]);
-
-
-        // $this->dispatch('hideLoadingScreen');
     }
 
     private function getLatestData($id)
@@ -266,7 +273,43 @@ class Dashboardaws extends Component implements HasForms, HasTable
             ]
         ];
 
+        $this->weatheranimation = $this->getWeatherAnimation();
+        $this->dispatch('weatherAnimationUpdated', $this->weatheranimation);
         // $this->dispatch('hideLoadingScreen');
+    }
+    public function getWeatherAnimation()
+    {
+        // Get relevant weather data
+        $rainRate = (float)$this->weather_data['rain']['rate'] ?? 0;
+        $solarRadiation = (float)$this->weather_data['solar']['radiation'] ?? 0;
+        $humidity = (float)$this->weather_data['temperature']['humidity'] ?? 0;
+        $condition = $this->weather_data['temperature']['condition'] ?? '';
+
+        // Determine if it's day or night based on solar radiation
+        $isDay = $solarRadiation > 0;
+
+        // Determine weather animation based on conditions
+        if ($rainRate > 0) {
+            if ($rainRate >= 7.6) {
+                return $isDay ? 'rainstormdaylight' : 'rainstormnight';
+            } elseif ($rainRate >= 2.5) {
+                return $isDay ? 'raindaylight' : 'rainnight';
+            } else {
+                return $isDay ? 'raindaylight' : 'rainnight';
+            }
+        }
+
+        // Check other weather conditions
+        if ($condition === 'Cerah') {
+            return $isDay ? 'sunnydaylight' : 'sunnynight';
+        } elseif ($condition === 'Cerah Berawan') {
+            return $isDay ? 'cloudydaylight' : 'cloudnight';
+        } elseif (in_array($condition, ['Berawan', 'Berkabut'])) {
+            return $isDay ? 'cloudydaylight' : 'cloudnight';
+        }
+
+        // Default animation
+        return $isDay ? 'sunnydaylight' : 'sunnynight';
     }
 
     private function setDefaultWeatherData()
@@ -396,7 +439,41 @@ class Dashboardaws extends Component implements HasForms, HasTable
             ->whereDate('date', '<=', Carbon::today()->addDays(5))
             ->get();
     }
+    public function getWeatherIcon($code)
+    {
+        $icons = [
+            0 => '☀️', // Clear sky
+            1 => '🌤️', // Mainly clear
+            2 => '⛅', // Partly cloudy
+            3 => '☁️', // Overcast
+            45 => '🌫️', // Fog
+            48 => '🌫️', // Depositing rime fog
+            51 => '🌧️', // Light drizzle
+            53 => '🌧️', // Moderate drizzle
+            55 => '🌧️', // Dense drizzle
+            56 => '🌧️', // Light freezing drizzle
+            57 => '🌧️', // Dense freezing drizzle
+            61 => '🌦️', // Slight rain
+            63 => '🌧️', // Moderate rain
+            65 => '🌧️', // Heavy rain
+            66 => '🌧️', // Light freezing rain
+            67 => '🌧️', // Heavy freezing rain
+            71 => '🌨️', // Slight snow fall
+            73 => '🌨️', // Moderate snow fall
+            75 => '🌨️', // Heavy snow fall
+            77 => '❄️', // Snow grains
+            80 => '🌦️', // Slight rain showers
+            81 => '🌧️', // Moderate rain showers
+            82 => '🌧️', // Violent rain showers
+            85 => '🌨️', // Slight snow showers
+            86 => '🌨️', // Heavy snow showers
+            95 => '⛈️', // Thunderstorm
+            96 => '⛈️', // Thunderstorm with slight hail
+            99 => '⛈️', // Thunderstorm with heavy hail
+        ];
 
+        return $icons[$code] ?? '❓';
+    }
     // Fetch Wind Statistics
     private function fetchWindStatistics()
     {
@@ -1007,5 +1084,61 @@ class Dashboardaws extends Component implements HasForms, HasTable
         $this->fetchPressureLevels();
         $this->fetchRainfallStatistics();
         $this->fetchUVIndex();
+    }
+
+    private function calculateComfortLevel($temperature, $humidity)
+    {
+        // Simple comfort level calculation based on temperature and humidity
+        $discomfortIndex = ($temperature * 1.8 + 32) - (0.55 - 0.0055 * $humidity) * (($temperature * 1.8 + 32) - 58);
+
+        if ($discomfortIndex < 70) {
+            return [
+                'label' => 'Comfortable',
+                'icon' => '😊',
+                'color' => 'text-green-500'
+            ];
+        } elseif ($discomfortIndex < 80) {
+            return [
+                'label' => 'Slightly Warm',
+                'icon' => '😐',
+                'color' => 'text-yellow-500'
+            ];
+        } else {
+            return [
+                'label' => 'Uncomfortable',
+                'icon' => '😓',
+                'color' => 'text-red-500'
+            ];
+        }
+    }
+
+    private function calculateDewPoint($temperature, $humidity)
+    {
+        // Magnus formula for dew point calculation
+        $a = 17.27;
+        $b = 237.7;
+
+        $alpha = (($a * $temperature) / ($b + $temperature)) + log($humidity / 100);
+        return ($b * $alpha) / ($a - $alpha);
+    }
+
+    private function calculateHeatIndex($temperature, $humidity)
+    {
+        // Simplified heat index calculation
+        $tempF = ($temperature * 9 / 5) + 32;
+        $heatIndexF = 0.5 * ($tempF + 61.0 + (($tempF - 68.0) * 1.2) + ($humidity * 0.094));
+
+        if ($tempF >= 80) {
+            // More accurate calculation for higher temperatures
+            $heatIndexF = -42.379 + (2.04901523 * $tempF) + (10.14333127 * $humidity)
+                - (0.22475541 * $tempF * $humidity) - (6.83783 * pow(10, -3) * $tempF * $tempF)
+                - (5.481717 * pow(10, -2) * $humidity * $humidity)
+                + (1.22874 * pow(10, -3) * $tempF * $tempF * $humidity)
+                + (8.5282 * pow(10, -4) * $tempF * $humidity * $humidity)
+                - (1.99 * pow(10, -6) * $tempF * $tempF * $humidity * $humidity);
+        }
+
+        // Convert back to Celsius
+        return ($heatIndexF - 32) * 5 / 9;
     }
 }
