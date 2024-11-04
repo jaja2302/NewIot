@@ -152,7 +152,7 @@
                             </div>
                         </div>
                     </div>
-
+                    <!-- maps  -->
                     <div class="weather-card rounded-lg shadow-lg p-6 col-span-full mt-4">
                         <h2 class="text-2xl font-bold mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

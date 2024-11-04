@@ -1,8 +1,7 @@
 <div class="min-h-screen">
     @section('title', 'AWS Dashboard')
-
     <div class="container mx-auto px-4 py-6">
-        <!-- Header Section - Improved layout -->
+
         <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl shadow-lg p-6 mb-8">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
                 <!-- Title -->
@@ -45,14 +44,11 @@
 
         <!-- Main weather content container -->
         <div class="flex flex-wrap -mx-4">
-            <!-- Left column: Circle cards and Location Info + Today's Highlights -->
-            <div class="w-full lg:w-3/4 px-4 mb-8 lg:mb-0">
+            <div class="w-full lg:w-3/4 px-4">
                 <!-- Circle cards -->
-
                 <div class="weather-card mb-6 rounded-lg shadow-lg p-2 sm:p-4 md:p-6 bg-black text-white">
                     <div class="flex flex-wrap justify-center">
 
-                        <!-- Top row with 3 circles -->
                         <div class="flex flex-wrap justify-center w-full mb-4 sm:mb-6">
                             <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
                                 <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-yellow-400 flex items-center justify-center">
@@ -117,28 +113,6 @@
                         </div>
                     </div>
 
-                    <!-- Sunrise Info -->
-                    <div class="mt-6 relative">
-                        <div class="sun-path">
-                            {{--
-
-                                @php
-                            $sunPosition = $this->calculateSunPosition();
-                            @endphp
-                            @if ($sunPosition >= 0)
-                            <div class="sun" style="left: {{ $sunPosition }}%;">
-                            <span class="sun-icon">🌞</span>
-                        </div>
-                        @else
-                        <div class="moon" style="left: 50%;"> <!-- Centered for nighttime -->
-                            <span class="moon-icon">🌙</span>
-                        </div>
-                        @endif
-                        --}}
-                        <div class="moon" style="left: 50%;"> <!-- Centered for nighttime -->
-                            <span class="moon-icon">🌙</span>
-                        </div>
-                    </div>
                     <div class="mt-6 relative">
                         <div class="grid grid-cols-3 gap-4">
                             <!-- Comfort Level -->
@@ -180,224 +154,213 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
-            </div>
 
-            <div class="weather-card rounded-lg shadow-lg p-6 col-span-full mt-4">
-                <h2 class="text-2xl font-bold mb-4 flex items-center">
-                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                    </svg>
-                    Peta Cuaca
-                </h2>
-                <div class="relative">
-
-                    <div wire:ignore id="weatherMap" class="h-[400px] rounded-lg z-10"></div>
-
-                    <!-- Toggle Button - Added -->
-                    <button id="toggleWeatherInfo"
-                        class="absolute top-4 right-4 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg z-20 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-layer-group"></i>
-                    </button>
-
-                    <!-- Weather info overlay - Updated with toggle functionality -->
-                    <div id="weatherInfoOverlay"
-                        class="absolute bottom-4 right-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg z-20 w-full max-w-[300px] sm:max-w-[320px] transition-all duration-300 transform">
-                        <div class="text-base font-semibold mb-4 border-b pb-2">Cuaca Saat Ini</div>
-                        <div class="space-y-2">
-                            <div class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                                <div class="w-4 h-4 bg-blue-500/30 rounded-full mr-3 flex-shrink-0"></div>
-                                <span class="text-xs sm:text-sm">Suhu: {{ $weather_data['temperature']['current'] ?? 'N/A' }}°C</span>
-                            </div>
-                            <div class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                                <div class="w-4 h-4 bg-red-500/30 rounded-full mr-3 flex-shrink-0"></div>
-                                <span class="text-xs sm:text-sm">Hujan: {{ $weather_data['rain']['rate'] ?? 'N/A' }} mm</span>
-                            </div>
-                            <div class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                                <div class="w-4 h-4 bg-gray-500/30 rounded-full mr-3 flex-shrink-0"></div>
-                                <span class="text-xs sm:text-sm">Kelembaban Luar Ruangan: {{ $weather_data['temperature']['humidity'] ?? 'N/A' }}%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right column -->
-        <div class="w-full lg:w-1/4 px-4">
-            <div class="space-y-4">
-
-                <div class="weather-card rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden" style="min-height: 250px;">
-                    <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white flex items-center">
+                <!-- maps  -->
+                <div class="weather-card rounded-lg shadow-lg p-6 col-span-full mt-4">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center">
                         <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
                         </svg>
-                        Cuaca Saat Ini
+                        Peta Cuaca
                     </h2>
+                    <div class="relative">
 
-                    <!-- Weather Animation -->
-                    <div id="weatherAnimationContainer" wire:ignore class="nav-icon lottie-animation h-40 mb-4"></div>
-                    <!-- <div id="weather-background" class="absolute inset-0"></div> -->
+                        <div wire:ignore id="weatherMap" class="h-[400px] rounded-lg z-10"></div>
 
-                    <!-- Current Conditions -->
-                    <div class="space-y-3 mb-6">
-                        <div class="flex items-center gap-2 mb-4 dark:text-white">
-                            <i class="fas fa-sun text-yellow-400"></i>
-                            <span class="font-semibold text-gray-800 dark:text-white">UV Index</span>
-                        </div>
-                        <div class="text-4xl font-bold mb-3 text-gray-800 dark:text-white">{{ $weather_data['uv']['value'] }} UVI</div>
-                        <div class="inline-block bg-green-500 text-white text-xs px-3 py-1 rounded-full font-medium dark:text-white">
-                            {{ $weather_data['uv']['level'] }}
-                        </div>
-                        <p class="text-gray-700 mt-4 dark:text-white">{{ $weather_data['uv']['description'] }}</p>
-                        <div class="mt-4 text-sm text-gray-700 dark:text-white">
-                            <div class="flex justify-between items-center">
-                                <span>Max UV Hari Ini {{ $selectedDate }}:</span>
-                                <span>{{ $weather_data['uv']['max_today'] }} UVI</span>
+                        <!-- Toggle Button - Added -->
+                        <button id="toggleWeatherInfo"
+                            class="absolute top-4 right-4 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg z-20 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-layer-group"></i>
+                        </button>
+
+                        <!-- Weather info overlay - Updated with dynamic data -->
+                        <div id="weatherInfoOverlay" class="absolute bottom-4 right-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg z-20 w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] transition-all duration-300 transform">
+
+                            <!-- Rainfall Data Card -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 mt-4 shadow-sm weather-card">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <i class="fas fa-cloud-rain text-blue-500 text-sm sm:text-base"></i>
+                                    <span class="font-semibold text-sm sm:text-base">Rainfall Data</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 sm:gap-4">
+                                    <div class="text-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <div class="text-base sm:text-lg font-bold">{{ $weather_data['rain']['rate'] }} mm/h</div>
+                                        <div class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Tingkat Saat Ini</div>
+                                    </div>
+                                    <div class="text-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <div class="text-base sm:text-lg font-bold">{{ $weather_data['rain']['today'] }} mm</div>
+                                        <div class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Hari Ini</div>
+                                    </div>
+                                    <div class="text-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <div class="text-base sm:text-lg font-bold">{{ $weather_data['rain']['weekly'] }} mm</div>
+                                        <div class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Minggu Ini</div>
+                                    </div>
+                                    <div class="text-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <div class="text-base sm:text-lg font-bold">{{ $weather_data['rain']['monthly'] }} mm</div>
+                                        <div class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Bulan Ini</div>
+                                    </div>
+                                </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Rainfall Data Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm weather-card">
-                    <div class="flex items-center gap-2 mb-4">
-                        <i class="fas fa-cloud-rain text-blue-500"></i>
-                        <span class="font-semibold">Rainfall Data</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div class="text-lg font-bold">0 mm/h</div>
-                            <div class="text-xs text-gray-600 dark:text-gray-400">Tingkat Saat Ini</div>
-                        </div>
-                        <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div class="text-lg font-bold">35.3 mm</div>
-                            <div class="text-xs text-gray-600 dark:text-gray-400">Hari Ini</div>
-                        </div>
-                        <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div class="text-lg font-bold">116.8 mm</div>
-                            <div class="text-xs text-gray-600 dark:text-gray-400">Minggu Ini</div>
-                        </div>
-                        <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div class="text-lg font-bold">296.9 mm</div>
-                            <div class="text-xs text-gray-600 dark:text-gray-400">Bulan Ini</div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Right column -->
+            <div class="w-full lg:w-1/4 px-4 mt-4 lg:mt-0">
+                <div class="h-full bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 rounded-lg shadow-lg">
 
+                    <div class="weather-card rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden" style="min-height: 250px;">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                            </svg>
+                            Cuaca Saat Ini
+                        </h2>
 
-                <!-- Wind Status Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm weather-card">
-                    <div class="flex items-center gap-2 mb-6">
-                        <i class="fas fa-wind text-blue-500 text-xl"></i>
-                        <span class="font-semibold text-lg">Angin Status</span>
-                    </div>
+                        <!-- Weather Animation -->
+                        <div id="weatherAnimationContainer" wire:ignore class="nav-icon lottie-animation h-40 mb-4"></div>
+                        <!-- <div id="weather-background" class="absolute inset-0"></div> -->
 
-                    <!-- Wind Stats Grid -->
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <!-- Max Gust -->
-                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                            <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Max Gust</div>
-                            <div class="text-2xl font-bold text-blue-500">{{ $weather_data['wind']['gust'] }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">km/h</div>
-                        </div>
-
-                        <!-- Wind Direction -->
-                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                            <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Direction</div>
-                            <div class="text-2xl font-bold text-blue-500">{{ $weather_data['wind']['direction'] }}°</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">degrees</div>
-                        </div>
-                    </div>
-
-                    <!-- Compass -->
-                    <div class="relative w-48 h-48 mx-auto ">
-                        <!-- Compass Circle -->
-                        <div class="absolute inset-0 border-4 border-gray-200 dark:border-gray-600 rounded-full"></div>
-                        <div class="absolute inset-2 border-2 border-gray-100 dark:border-gray-700 rounded-full"></div>
-
-                        <!-- Direction Labels -->
-                        <div class="absolute inset-0">
-                            <span class="absolute top-2 left-1/2 -translate-x-1/2 font-bold text-gray-700 dark:text-gray-300">N</span>
-                            <span class="absolute right-2 top-1/2 -translate-y-1/2 font-bold text-gray-700 dark:text-gray-300">E</span>
-                            <span class="absolute bottom-2 left-1/2 -translate-x-1/2 font-bold text-gray-700 dark:text-gray-300">S</span>
-                            <span class="absolute left-2 top-1/2 -translate-y-1/2 font-bold text-gray-700 dark:text-gray-300">W</span>
-                        </div>
-
-                        <!-- Direction Arrow -->
-                        <div class="absolute inset-0 transition-transform duration-300" style="transform: rotate({{ $weather_data['wind']['direction'] }}deg)">
-                            <div class="absolute top-1/2 left-1/2 w-1 h-24 -translate-x-1/2 -translate-y-1/2 origin-center">
-                                <div class="w-4 h-4 -mt-1 mx-auto bg-red-500 rounded-full"></div>
-                                <div class="w-1 h-full bg-gradient-to-b from-red-500 to-transparent"></div>
+                        <!-- Current Conditions -->
+                        <div class="space-y-3 mb-6">
+                            <div class="flex items-center gap-2 mb-4 dark:text-white">
+                                <i class="fas fa-sun text-yellow-400"></i>
+                                <span class="font-semibold text-gray-800 dark:text-white">UV Index</span>
+                            </div>
+                            <div class="text-4xl font-bold mb-3 text-gray-800 dark:text-white">{{ $weather_data['uv']['value'] }} UVI</div>
+                            <div class="inline-block bg-green-500 text-white text-xs px-3 py-1 rounded-full font-medium dark:text-white">
+                                {{ $weather_data['uv']['level'] }}
+                            </div>
+                            <p class="text-gray-700 mt-4 dark:text-white">{{ $weather_data['uv']['description'] }}</p>
+                            <div class="mt-4 text-sm text-gray-700 dark:text-white">
+                                <div class="flex justify-between items-center">
+                                    <span>Max UV Hari Ini {{ $selectedDate }}:</span>
+                                    <span>{{ $weather_data['uv']['max_today'] }} UVI</span>
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Center Speed Display -->
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <div class="text-center bg-white dark:bg-gray-800 rounded-full p-3">
-                                <div class="text-xl font-bold text-gray-800 dark:text-gray-200">{{ $weather_data['wind']['speed'] }}</div>
+
+                    <!-- Wind Status Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm weather-card">
+                        <div class="flex items-center gap-2 mb-6">
+                            <i class="fas fa-wind text-blue-500 text-xl"></i>
+                            <span class="font-semibold text-lg">Angin Status</span>
+                        </div>
+
+                        <!-- Wind Stats Grid -->
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <!-- Max Gust -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Max Gust</div>
+                                <div class="text-2xl font-bold text-blue-500">{{ $weather_data['wind']['gust'] }}</div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400">km/h</div>
                             </div>
+
+                            <!-- Wind Direction -->
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Direction</div>
+                                <div class="text-2xl font-bold text-blue-500">{{ $weather_data['wind']['direction'] }}°</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">degrees</div>
+                            </div>
+                        </div>
+
+                        <!-- Compass -->
+                        <div class="relative w-48 h-48 mx-auto ">
+                            <!-- Compass Circle -->
+                            <div class="absolute inset-0 border-4 border-gray-200 dark:border-gray-600 rounded-full"></div>
+                            <div class="absolute inset-2 border-2 border-gray-100 dark:border-gray-700 rounded-full"></div>
+
+                            <!-- Direction Labels -->
+                            <div class="absolute inset-0">
+                                <span class="absolute top-2 left-1/2 -translate-x-1/2 font-bold text-gray-700 dark:text-gray-300">N</span>
+                                <span class="absolute right-2 top-1/2 -translate-y-1/2 font-bold text-gray-700 dark:text-gray-300">E</span>
+                                <span class="absolute bottom-2 left-1/2 -translate-x-1/2 font-bold text-gray-700 dark:text-gray-300">S</span>
+                                <span class="absolute left-2 top-1/2 -translate-y-1/2 font-bold text-gray-700 dark:text-gray-300">W</span>
+                            </div>
+
+                            <!-- Direction Arrow -->
+                            <div class="absolute inset-0 transition-transform duration-300" style="transform: rotate({{ $weather_data['wind']['direction'] }}deg)">
+                                <div class="absolute top-1/2 left-1/2 w-1 h-24 -translate-x-1/2 -translate-y-1/2 origin-center">
+                                    <div class="w-4 h-4 -mt-1 mx-auto bg-red-500 rounded-full"></div>
+                                    <div class="w-1 h-full bg-gradient-to-b from-red-500 to-transparent"></div>
+                                </div>
+                            </div>
+
+                            <!-- Center Speed Display -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="text-center bg-white dark:bg-gray-800 rounded-full p-3">
+                                    <div class="text-xl font-bold text-gray-800 dark:text-gray-200">{{ $weather_data['wind']['speed'] }}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">km/h</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Indicator -->
+                        <div class="mt-6 flex justify-center">
+                            @php
+                            $windSpeed = (float)$weather_data['wind']['speed'];
+                            $statusClass = match(true) {
+                            $windSpeed >= 30 => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                            $windSpeed >= 15 => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                            default => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            };
+                            $statusText = match(true) {
+                            $windSpeed >= 30 => 'Strong Wind',
+                            $windSpeed >= 15 => 'Moderate Wind',
+                            default => 'Light Wind'
+                            };
+                            @endphp
+                            <span class="px-4 py-2 rounded-full text-sm font-medium {{ $statusClass }}">
+                                {{ $statusText }}
+                            </span>
                         </div>
                     </div>
 
-                    <!-- Status Indicator -->
-                    <div class="mt-6 flex justify-center">
-                        @php
-                        $windSpeed = (float)$weather_data['wind']['speed'];
-                        $statusClass = match(true) {
-                        $windSpeed >= 30 => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-                        $windSpeed >= 15 => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-                        default => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                        };
-                        $statusText = match(true) {
-                        $windSpeed >= 30 => 'Strong Wind',
-                        $windSpeed >= 15 => 'Moderate Wind',
-                        default => 'Light Wind'
-                        };
-                        @endphp
-                        <span class="px-4 py-2 rounded-full text-sm font-medium {{ $statusClass }}">
-                            {{ $statusText }}
-                        </span>
-                    </div>
+
                 </div>
-
-
             </div>
         </div>
-    </div>
-
-    <!-- Temperature Chart -->
-    <div class="mt-4 weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
-        <div class="flex items-center gap-2 mb-6">
-            <i class="fas fa-temperature-high text-red-500"></i>
-            <h2 class="font-semibold text-gray-800 dark:text-white">Riwayat Suhu {{ $selectedDate }}</h2>
-        </div>
-        <div wire:ignore class="h-[400px]">
-            <div id="temperatureChart" class="w-full h-full"></div>
-        </div>
-    </div>
-
-    <!-- Rainfall Chart -->
-    <div class="mt-4 weather-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
-        <div class="flex items-center gap-2 mb-6">
-            <i class="fas fa-cloud-rain text-blue-500"></i>
-            <h2 class="font-semibold text-gray-800 dark:text-white">Riwayat Curah Hujan {{ $selectedDate }}</h2>
-        </div>
-        <div wire:ignore class="h-[400px]">
-            <div id="rainfallChart" class="w-full h-full"></div>
-        </div>
-    </div>
-    <div class="mt-4">
-        <h2 class="flex items-center gap-2 mb-4 font-semibold text-gray-800 dark:text-white">
-            <i class="fas fa-history text-blue-500"></i>
-            Riwayat Data Tabel
-        </h2>
-        {{$this->table}}
-    </div>
 
 
+
+
+        <!-- Temperature Chart -->
+        <div class="mt-4 weather-card bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
+            <div class="flex items-center gap-2 mb-4">
+                <i class="fas fa-temperature-high text-red-500"></i>
+                <h2 class="font-semibold text-gray-800 dark:text-white">Riwayat Suhu {{ $selectedDate }}</h2>
+            </div>
+            <div wire:ignore class="h-[250px]">
+                <div id="temperatureChart" class="w-full h-full"></div>
+            </div>
+        </div>
+
+        <!-- Rainfall Chart -->
+        <div class="mt-4 weather-card bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
+            <div class="flex items-center gap-2 mb-4">
+                <i class="fas fa-cloud-rain text-blue-500"></i>
+                <h2 class="font-semibold text-gray-800 dark:text-white">Riwayat Curah Hujan {{ $selectedDate }}</h2>
+            </div>
+            <div wire:ignore class="h-[250px]">
+                <div id="rainfallChart" class="w-full h-full"></div>
+            </div>
+        </div>
+
+        <!-- tabel data  -->
+        <div class="mt-4">
+            <h2 class="flex items-center gap-2 mb-4 font-semibold text-gray-800 dark:text-white">
+                <i class="fas fa-history text-blue-500"></i>
+                Riwayat Data Tabel
+            </h2>
+            {{$this->table}}
+        </div>
+
+    </div>
 </div>
 <script type="module">
     document.addEventListener('livewire:initialized', function() {
@@ -407,7 +370,7 @@
         const chartOptions = {
             chart: {
                 type: 'line',
-                height: 400,
+                height: 300,
                 zoomType: 'x',
                 panning: true,
                 panKey: 'shift',
