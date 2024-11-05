@@ -25,8 +25,8 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($data['data'] as $key => $record)
-        @foreach($record as $key2 => $item)
+
+        @foreach($data['data'] as $key => $item)
         <tr>
             <td style="background-color: {{$item['date'] == 'Avarage' ? 'blue' : ''}}; color:{{$item['date'] == 'Avarage' ? 'white' : 'black'}}">{{ $item['date'] == 'Avarage' ? $key : $item['date'] }}</td>
             <td style="background-color: {{$item['date'] == 'Avarage' ? 'blue' : ''}}; color:{{$item['date'] == 'Avarage' ? 'white' : 'black'}} ">{{ $item['windspeedkmh'] }}</td>
@@ -49,89 +49,89 @@
             <td style="background-color: {{$item['date'] == 'Avarage' ? 'blue' : ''}}; color:{{$item['date'] == 'Avarage' ? 'white' : 'black'}}">{{ $item['maxdailygust'] }}</td>
         </tr>
         @endforeach
-        @endforeach
+
     </tbody>
 </table>
 
 @elseif($data['title'] !== 'Mingguan')
 
 
-<table>
+<table style="border-collapse: collapse;">
     <tr>
-        <td>Parameter</td>
-        <td>Satuan</td>
-        <td>Nilai</td>
+        <td style="border: 1px solid black; text-align: left;">Parameter</td>
+        <td style="border: 1px solid black; text-align: left;">Satuan</td>
+        <td style="border: 1px solid black; text-align: left;">Nilai</td>
     </tr>
 
     <tr>
-        <td>Kecepatan Angin</td>
-        <td>(km/jam)</td>
-        <td>{{$data['data']['bulanan']['windspeedkmh']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Kecepatan Angin</td>
+        <td style="border: 1px solid black; text-align: left;">(km/jam)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['windspeedkmh']}}</td>
     </tr>
     <tr>
-        <td>Arah Angin</td>
-        <td>(derajat)</td>
-        <td>{{$data['data']['bulanan']['winddir']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Arah Angin</td>
+        <td style="border: 1px solid black; text-align: left;">(derajat)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['winddir']}}</td>
     </tr>
     <tr>
-        <td>Tingkat Hujan</td>
-        <td>(mm/5 menit)</td>
-        <td>{{$data['data']['bulanan']['rain_rate']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Tingkat Hujan</td>
+        <td style="border: 1px solid black; text-align: left;">(mm/5 menit)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['rain_rate']}}</td>
     </tr>
     <tr>
-        <td>Suhu Dalam Ruangan</td>
-        <td>(°C)</td>
-        <td>{{$data['data']['bulanan']['temp_in']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Suhu Dalam Ruangan</td>
+        <td style="border: 1px solid black; text-align: left;">(°C)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['temp_in']}}</td>
     </tr>
     <tr>
-        <td>Suhu Luar Ruangan</td>
-        <td>(°C)</td>
-        <td>{{$data['data']['bulanan']['temp_out']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Suhu Luar Ruangan</td>
+        <td style="border: 1px solid black; text-align: left;">(°C)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['temp_out']}}</td>
     </tr>
     <tr>
-        <td>Kelembaban Dalam Ruangan</td>
-        <td>(%)</td>
-        <td>{{$data['data']['bulanan']['hum_in']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Kelembaban Dalam Ruangan</td>
+        <td style="border: 1px solid black; text-align: left;">(%)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['hum_in']}}</td>
     </tr>
     <tr>
-        <td>Kelembaban Luar Ruangan</td>
-        <td>(%)</td>
-        <td>{{$data['data']['bulanan']['hum_out']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Kelembaban Luar Ruangan</td>
+        <td style="border: 1px solid black; text-align: left;">(%)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['hum_out']}}</td>
     </tr>
     <tr>
-        <td>UV</td>
-        <td>(indeks)</td>
-        <td>{{$data['data']['bulanan']['uv']}}</td>
+        <td style="border: 1px solid black; text-align: left;">UV</td>
+        <td style="border: 1px solid black; text-align: left;">(indeks)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['uv']}}</td>
     </tr>
     <tr>
-        <td>Hembusan Angin</td>
-        <td>(km/jam)</td>
-        <td>{{$data['data']['bulanan']['wind_gust']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Hembusan Angin</td>
+        <td style="border: 1px solid black; text-align: left;">(km/jam)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['wind_gust']}}</td>
     </tr>
     <tr>
-        <td>Tekanan Udara Relatif</td>
-        <td>(hPa)</td>
-        <td>{{$data['data']['bulanan']['air_press_rel']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Tekanan Udara Relatif</td>
+        <td style="border: 1px solid black; text-align: left;">(hPa)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['air_press_rel']}}</td>
     </tr>
     <tr>
-        <td>Tekanan Udara Absolut</td>
-        <td>(hPa)</td>
-        <td>{{$data['data']['bulanan']['air_press_abs']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Tekanan Udara Absolut</td>
+        <td style="border: 1px solid black; text-align: left;">(hPa)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['air_press_abs']}}</td>
     </tr>
     <tr>
-        <td>Radiasi Matahari</td>
-        <td>(W/m²)</td>
-        <td>{{$data['data']['bulanan']['solar_radiation']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Radiasi Matahari</td>
+        <td style="border: 1px solid black; text-align: left;">(W/m²)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['solar_radiation']}}</td>
     </tr>
     <tr>
-        <td>Curah Hujan Bulanan</td>
-        <td>(mm)</td>
-        <td>{{$data['data']['bulanan']['monthlyrainmm']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Curah Hujan Bulanan</td>
+        <td style="border: 1px solid black; text-align: left;">(mm)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['monthlyrainmm']}}</td>
     </tr>
     <tr>
-        <td>Hembusan Angin Harian Maksimal</td>
-        <td>(km/jam)</td>
-        <td>{{$data['data']['bulanan']['maxdailygust']}}</td>
+        <td style="border: 1px solid black; text-align: left;">Hembusan Angin Harian Maksimal</td>
+        <td style="border: 1px solid black; text-align: left;">(km/jam)</td>
+        <td style="border: 1px solid black; text-align: left;">{{$data['data']['bulanan']['maxdailygust']}}</td>
     </tr>
 </table>
 
@@ -144,6 +144,7 @@
             <td colspan="{{count($data['data'])}}" style="border: 1px solid black; text-align: center;">Nilai</td>
         </tr>
         <tr>
+
             @foreach($data['data'] as $key => $item)
             <td style="border: 1px solid black; text-align: center;">{{$key}}</td>
             @endforeach
@@ -171,10 +172,10 @@
 
     @foreach($parameters as $param)
     <tr>
-        <td style="border: 1px solid black; text-align: center;">{{$param['name']}}</td>
-        <td style="border: 1px solid black; text-align: center;">{{$param['unit']}}</td>
+        <td style="border: 1px solid black; text-align: left;">{{$param['name']}}</td>
+        <td style="border: 1px solid black; text-align: left;">{{$param['unit']}}</td>
         @foreach($data['data'] as $item)
-        <td style="border: 1px solid black; text-align: center;">{{$item[$param['key']]}}</td>
+        <td style="border: 1px solid black; text-align: left;">{{$item[$param['key']]}}</td>
         @endforeach
     </tr>
     @endforeach

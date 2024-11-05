@@ -592,20 +592,21 @@ class Dashboardaws extends Component implements HasForms, HasTable
                                                         $data_mingguan = $this->datamingguan($state);
                                                         $data_harian = $this->dataharian($state);
 
-                                                        $data = [
-                                                            'Mingguan' => [
-                                                                'title' => 'Mingguan',
-                                                                'data' => $data_mingguan,
+                                                        $data = array_merge(
+                                                            [
+                                                                'Bulanan' => [
+                                                                    'title' => 'Bulanan',
+                                                                    'data' => $data_bulanan,
+                                                                ],
+                                                                'Mingguan' => [
+                                                                    'title' => 'Mingguan',
+                                                                    'data' => $data_mingguan,
+                                                                ],
                                                             ],
-                                                            'Bulanan' => [
-                                                                'title' => 'Bulanan',
-                                                                'data' => $data_bulanan,
-                                                            ],
-                                                            'Harian' => [
-                                                                'title' => 'Harian',
-                                                                'data' => $data_harian,
-                                                            ],
-                                                        ];
+                                                            $data_harian
+                                                        );
+
+
                                                         // dd($data);
 
                                                         return Excel::download(
@@ -885,11 +886,11 @@ class Dashboardaws extends Component implements HasForms, HasTable
 
         $data_harian = json_decode(json_encode($data_harian), true);
 
-        // dd($data_harian);
+
 
         $data_harian = $this->getavaragebyfiltermonth($data_harian);
 
-
+        // dd($data_harian);
 
         return $data_harian;
     }
@@ -1017,19 +1018,19 @@ class Dashboardaws extends Component implements HasForms, HasTable
             }
             $value['avarage']['id'] = $iddata;
             $value['avarage']['date'] = 'Avarage';
-            $value['avarage']['windspeedkmh'] = $windspeedkmhp / $data_count;
-            $value['avarage']['winddir'] = $winddir_sum / $data_count;
-            $value['avarage']['rain_rate'] = $dailyrainmm;
-            $value['avarage']['rain_today'] = $rain_today_sum / $data_count;
-            $value['avarage']['temp_in'] = $temp_in_sum / $data_count;
-            $value['avarage']['temp_out'] = $temp_out_sum / $data_count;
-            $value['avarage']['hum_in'] = $hum_in_sum / $data_count;
-            $value['avarage']['hum_out'] = $hum_out_sum / $data_count;
-            $value['avarage']['uv'] = $uv_sum / $data_count;
-            $value['avarage']['wind_gust'] = $wind_gust_sum / $data_count;
-            $value['avarage']['air_press_rel'] = $air_press_rel_sum / $data_count;
-            $value['avarage']['air_press_abs'] = $air_press_abs_sum / $data_count;
-            $value['avarage']['solar_radiation'] = $solar_radiation_sum / $data_count;
+            $value['avarage']['windspeedkmh'] = round($windspeedkmhp / $data_count, 3);
+            $value['avarage']['winddir'] = round($winddir_sum / $data_count, 3);
+            $value['avarage']['rain_rate'] = round($dailyrainmm, 3);
+            $value['avarage']['rain_today'] = round($rain_today_sum / $data_count, 3);
+            $value['avarage']['temp_in'] = round($temp_in_sum / $data_count, 3);
+            $value['avarage']['temp_out'] = round($temp_out_sum / $data_count, 3);
+            $value['avarage']['hum_in'] = round($hum_in_sum / $data_count, 3);
+            $value['avarage']['hum_out'] = round($hum_out_sum / $data_count, 3);
+            $value['avarage']['uv'] = round($uv_sum / $data_count, 3);
+            $value['avarage']['wind_gust'] = round($wind_gust_sum / $data_count, 3);
+            $value['avarage']['air_press_rel'] = round($air_press_rel_sum / $data_count, 3);
+            $value['avarage']['air_press_abs'] = round($air_press_abs_sum / $data_count, 3);
+            $value['avarage']['solar_radiation'] = round($solar_radiation_sum / $data_count, 3);
             $value['avarage']['dailyRainIn'] = $dailyRainIn;
             $value['avarage']['dailyrainmm'] = $dailyrainmm;
             $value['avarage']['raintodaymm'] = $raintodaymm;
@@ -1040,7 +1041,13 @@ class Dashboardaws extends Component implements HasForms, HasTable
             $value['avarage']['maxdailygust'] = $maxdailygust;
         }
 
-        return $data;
+        $newdata = [];
+        foreach ($data as $key => $value) {
+            $newdata[$key]['title'] = 'Harian';
+            $newdata[$key]['data'] = $value;
+        }
+
+        return $newdata;
     }
 
     private function datamingguan($state)
@@ -1147,19 +1154,19 @@ class Dashboardaws extends Component implements HasForms, HasTable
             }
             $newdata[$key]['id'] = $iddata;
             $newdata[$key]['date'] = 'Avarage';
-            $newdata[$key]['windspeedkmh'] = $windspeedkmhp / $data_count;
-            $newdata[$key]['winddir'] = $winddir_sum / $data_count;
-            $newdata[$key]['rain_rate'] = $dailyrainmm;
-            $newdata[$key]['rain_today'] = $rain_today_sum / $data_count;
-            $newdata[$key]['temp_in'] = $temp_in_sum / $data_count;
-            $newdata[$key]['temp_out'] = $temp_out_sum / $data_count;
-            $newdata[$key]['hum_in'] = $hum_in_sum / $data_count;
-            $newdata[$key]['hum_out'] = $hum_out_sum / $data_count;
-            $newdata[$key]['uv'] = $uv_sum / $data_count;
-            $newdata[$key]['wind_gust'] = $wind_gust_sum / $data_count;
-            $newdata[$key]['air_press_rel'] = $air_press_rel_sum / $data_count;
-            $newdata[$key]['air_press_abs'] = $air_press_abs_sum / $data_count;
-            $newdata[$key]['solar_radiation'] = $solar_radiation_sum / $data_count;
+            $newdata[$key]['windspeedkmh'] = round($windspeedkmhp / $data_count, 3);
+            $newdata[$key]['winddir'] = round($winddir_sum / $data_count, 3);
+            $newdata[$key]['rain_rate'] = round($dailyrainmm, 3);
+            $newdata[$key]['rain_today'] = round($rain_today_sum / $data_count, 3);
+            $newdata[$key]['temp_in'] = round($temp_in_sum / $data_count, 3);
+            $newdata[$key]['temp_out'] = round($temp_out_sum / $data_count, 3);
+            $newdata[$key]['hum_in'] = round($hum_in_sum / $data_count, 3);
+            $newdata[$key]['hum_out'] = round($hum_out_sum / $data_count, 3);
+            $newdata[$key]['uv'] = round($uv_sum / $data_count, 3);
+            $newdata[$key]['wind_gust'] = round($wind_gust_sum / $data_count, 3);
+            $newdata[$key]['air_press_rel'] = round($air_press_rel_sum / $data_count, 3);
+            $newdata[$key]['air_press_abs'] = round($air_press_abs_sum / $data_count, 3);
+            $newdata[$key]['solar_radiation'] = round($solar_radiation_sum / $data_count, 3);
             $newdata[$key]['dailyRainIn'] = $dailyRainIn;
             $newdata[$key]['dailyrainmm'] = $dailyrainmm;
             $newdata[$key]['raintodaymm'] = $raintodaymm;
