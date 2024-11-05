@@ -586,18 +586,27 @@ class Dashboardaws extends Component implements HasForms, HasTable
                                                                 ->send();
                                                             $action->halt();
                                                         }
-                                                        $data_harian = $this->dataharian($state);
-                                                        // dd($data_harian);
 
-                                                        $data_mingguan = $this->datamingguan($state);
                                                         $data_bulanan = $this->databulanan($state);
+                                                        // dd($data_bulanan);
+                                                        $data_mingguan = $this->datamingguan($state);
+                                                        $data_harian = $this->dataharian($state);
 
                                                         $data = [
-                                                            'Harian' => $data_harian,
-                                                            'Mingguan' => $data_mingguan,
-                                                            'Bulanan' => $data_bulanan
+                                                            'Mingguan' => [
+                                                                'title' => 'Mingguan',
+                                                                'data' => $data_mingguan,
+                                                            ],
+                                                            'Bulanan' => [
+                                                                'title' => 'Bulanan',
+                                                                'data' => $data_bulanan,
+                                                            ],
+                                                            'Harian' => [
+                                                                'title' => 'Harian',
+                                                                'data' => $data_harian,
+                                                            ],
                                                         ];
-
+                                                        // dd($data);
 
                                                         return Excel::download(
                                                             new Weatherexcelyearmonth($data),
@@ -1033,23 +1042,38 @@ class Dashboardaws extends Component implements HasForms, HasTable
 
         return $data;
     }
+
     private function datamingguan($state)
     {
+        // dd($state['year_month']);
+        // $test = '2024-10';
         $data_mingguan = Weatherstationdata::where('idws', $this->selectedstation)
             ->where('date', 'like', '%' . $state['year_month'] . '%')
             ->orderBy('date', 'asc')
             ->get()
             ->groupBy(function ($item) {
-                // Parse date in UTC to avoid timezone shift issues, then get week of month
                 $date = Carbon::parse($item->date);
-                $weekNumber = $date->weekOfMonth; // Week within the month (1-5)
-                return 'Week ' . $weekNumber;
+
+                // Move the start of the week to the nearest previous Sunday
+                $weekStart = $date->copy()->startOfWeek(Carbon::SUNDAY);
+
+                // Calculate the end of the week, which will be the following Saturday
+                $weekEnd = $weekStart->copy()->endOfWeek(Carbon::SATURDAY);
+
+                // Format output to identify each week uniquely
+                return sprintf(
+                    'Week %d (%s-%s %s)',
+                    $weekStart->weekOfMonth,
+                    $weekStart->format('d'),
+                    $weekEnd->format('d'),
+                    $weekStart->format('M')
+                );
             });
 
         $data_mingguan = json_decode(json_encode($data_mingguan), true);
-        $data_mingguan = $this->getavaragebyfiltermonth($data_mingguan);
         // dd($data_mingguan);
-
+        $data_mingguan = $this->getavaragebyfiltermonth_revision($data_mingguan);
+        // dd($data_mingguan);
         return $data_mingguan;
     }
 
@@ -1065,12 +1089,89 @@ class Dashboardaws extends Component implements HasForms, HasTable
 
         $data_bulanan = json_decode(json_encode($data_bulanan), true);
         // dd($data_bulanan);
-        $data_bulanan = $this->getavaragebyfiltermonth($data_bulanan);
-        // dd($data_bulanan);
+        $data_bulanan = $this->getavaragebyfiltermonth_revision($data_bulanan);
+        // dd($data_bulanan, 'mamam');
 
         return $data_bulanan;
     }
+    private function getavaragebyfiltermonth_revision($data)
+    {
+        // dd($data);
+        $newdata = [];
+        foreach ($data as $key => &$value) {
 
+            $data_count = count($value);
+            $windspeedkmhp = 0;
+            $winddir_sum = 0;
+            $rain_rate_sum = 0;
+            $rain_today_sum = 0;
+            $temp_in_sum = 0;
+            $temp_out_sum = 0;
+            $hum_in_sum = 0;
+            $hum_out_sum = 0;
+            $uv_sum = 0;
+            $wind_gust_sum = 0;
+            $air_press_rel_sum = 0;
+            $air_press_abs_sum = 0;
+            $solar_radiation_sum = 0;
+
+            foreach ($value as $key1 => $value1) {
+                // dd($value1);
+                $windspeedkmhp += $value1['windspeedkmh'] ?? 0;
+                $winddir_sum += $value1['winddir'] ?? 0;
+                $rain_rate_sum += $value1['rain_rate'] ?? 0;
+                if ($value1['rain_today'] == null) {
+                    $rain_today = 0;
+                } else {
+                    $rain_today = $value1['rain_today'];
+                }
+                $rain_today_sum += $rain_today;
+                $temp_in_sum += $value1['temp_in'] ?? 0;
+                $temp_out_sum += $value1['temp_out'] ?? 0;
+                $hum_in_sum += $value1['hum_in'] ?? 0;
+                $hum_out_sum += $value1['hum_out'] ?? 0;
+                $uv_sum += $value1['uv'] ?? 0;
+                $wind_gust_sum += $value1['wind_gust'] ?? 0;
+                $air_press_rel_sum += $value1['air_press_rel'] ?? 0;
+                $air_press_abs_sum += $value1['air_press_abs'] ?? 0;
+                $solar_radiation_sum += $value1['solar_radiation'] ?? 0;
+                $dailyRainIn = $value1['dailyRainIn'];
+                $dailyrainmm = $value1['dailyrainmm'];
+                $raintodaymm = $value1['raintodaymm'];
+                $totalrainmm = $value1['totalrainmm'];
+                $weeklyrainmm = $value1['weeklyrainmm'];
+                $monthlyrainmm = $value1['monthlyrainmm'];
+                $yearlyrainmm = $value1['yearlyrainmm'];
+                $maxdailygust = $value1['maxdailygust'];
+                $iddata = $value1['id'];
+            }
+            $newdata[$key]['id'] = $iddata;
+            $newdata[$key]['date'] = 'Avarage';
+            $newdata[$key]['windspeedkmh'] = $windspeedkmhp / $data_count;
+            $newdata[$key]['winddir'] = $winddir_sum / $data_count;
+            $newdata[$key]['rain_rate'] = $dailyrainmm;
+            $newdata[$key]['rain_today'] = $rain_today_sum / $data_count;
+            $newdata[$key]['temp_in'] = $temp_in_sum / $data_count;
+            $newdata[$key]['temp_out'] = $temp_out_sum / $data_count;
+            $newdata[$key]['hum_in'] = $hum_in_sum / $data_count;
+            $newdata[$key]['hum_out'] = $hum_out_sum / $data_count;
+            $newdata[$key]['uv'] = $uv_sum / $data_count;
+            $newdata[$key]['wind_gust'] = $wind_gust_sum / $data_count;
+            $newdata[$key]['air_press_rel'] = $air_press_rel_sum / $data_count;
+            $newdata[$key]['air_press_abs'] = $air_press_abs_sum / $data_count;
+            $newdata[$key]['solar_radiation'] = $solar_radiation_sum / $data_count;
+            $newdata[$key]['dailyRainIn'] = $dailyRainIn;
+            $newdata[$key]['dailyrainmm'] = $dailyrainmm;
+            $newdata[$key]['raintodaymm'] = $raintodaymm;
+            $newdata[$key]['totalrainmm'] = $totalrainmm;
+            $newdata[$key]['weeklyrainmm'] = $weeklyrainmm;
+            $newdata[$key]['monthlyrainmm'] = $monthlyrainmm;
+            $newdata[$key]['yearlyrainmm'] = $yearlyrainmm;
+            $newdata[$key]['maxdailygust'] = $maxdailygust;
+        }
+
+        return $newdata;
+    }
     public function updatedSelectedDate($value)
     {
         $this->selectedDate = $value;
