@@ -48,13 +48,15 @@
                 <!-- Circle cards -->
                 <div class="weather-card mb-6 rounded-lg shadow-lg p-2 sm:p-4 md:p-6 bg-black text-white">
                     <div class="flex flex-wrap justify-center">
-
+                        @php
+                        $heatIndex = $this->calculateHeatIndex($weather_data['temperature']['current'], $weather_data['temperature']['humidity']);
+                        @endphp
                         <div class="flex flex-wrap justify-center w-full mb-4 sm:mb-6">
                             <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
                                 <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-yellow-400 flex items-center justify-center">
                                     <div class="text-center">
                                         <div class="text-[10px] sm:text-xs text-yellow-300">Terasa Seperti</div>
-                                        <div class="text-lg sm:text-2xl md:text-3xl font-bold text-yellow-400">{{ $weather_data['temperature']['min'] }}°</div>
+                                        <div class="text-lg sm:text-2xl md:text-3xl font-bold text-yellow-400">{{ number_format($heatIndex, 1) }}°</div>
                                         <div class="text-[10px] sm:text-xs text-yellow-300">Aktual: {{ $weather_data['temperature']['current'] }}°C</div>
                                     </div>
                                 </div>
@@ -113,47 +115,8 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 relative">
-                        <div class="grid grid-cols-3 gap-4">
-                            <!-- Comfort Level -->
-                            <div class="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-xl p-4">
-                                <div class="text-sm font-medium mb-2">Comfort Level</div>
-                                @php
-                                $comfort = $this->calculateComfortLevel($weather_data['temperature']['current'], $weather_data['temperature']['humidity']);
-                                @endphp
-                                <div class="flex items-center justify-between">
-                                    <span class="text-2xl font-bold {{ $comfort['color'] }}">
-                                        {{ $comfort['icon'] }}
-                                    </span>
-                                    <span class="text-sm">{{ $comfort['label'] }}</span>
-                                </div>
-                            </div>
 
-                            <!-- Dew Point -->
-                            <div class="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl p-4">
-                                <div class="text-sm font-medium mb-2">Dew Point</div>
-                                @php
-                                $dewPoint = $this->calculateDewPoint($weather_data['temperature']['current'], $weather_data['temperature']['humidity']);
-                                @endphp
-                                <div class="flex items-center justify-between">
-                                    <span class="text-2xl font-bold text-blue-500">💧</span>
-                                    <span class="text-sm">{{ number_format($dewPoint, 1) }}°C</span>
-                                </div>
-                            </div>
 
-                            <!-- Heat Index -->
-                            <div class="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-xl p-4">
-                                <div class="text-sm font-medium mb-2">Heat Index</div>
-                                @php
-                                $heatIndex = $this->calculateHeatIndex($weather_data['temperature']['current'], $weather_data['temperature']['humidity']);
-                                @endphp
-                                <div class="flex items-center justify-between">
-                                    <span class="text-2xl font-bold text-orange-500">🌡️</span>
-                                    <span class="text-sm">{{ number_format($heatIndex, 1) }}°C</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- maps  -->
@@ -397,8 +360,8 @@
                         color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
                     }
                 },
-                tickInterval: 2 * 3600 * 1000,
-                min: new Date(new Date().setHours(0, 0, 0, 0)).getTime(),
+                // tickInterval: 2 * 3600 * 1000,
+                // min: new Date(new Date().setHours(0, 0, 0, 0)).getTime(),
                 max: new Date(new Date().setHours(23, 59, 59, 999)).getTime(),
                 lineColor: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666',
                 tickColor: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#666666'
@@ -629,10 +592,12 @@
 
             // Create a custom popup with weather information
             function createWeatherPopup(data) {
+                // console.log(data);
+
                 return `
                 <div class="p-2">
                     <div class="space-y-1">
-                        <p>💨 Angin: ${data.wind} m/s</p>
+                        <p>💨 Angin: ${data.wind.speed} m/s</p>
                         <p>💧 Kelembaban: ${data.temperature.humidity}%</p>
                     </div>
                 </div>
@@ -746,3 +711,50 @@
     }
 </script>
 </div>
+
+
+
+
+{{--
+                        <div class="mt-6 relative">
+                        <div class="grid grid-cols-3 gap-4">
+      
+                            <div class="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-xl p-4">
+                                <div class="text-sm font-medium mb-2">Comfort Level</div>
+                                @php
+                                $comfort = $this->calculateComfortLevel($weather_data['temperature']['current'], $weather_data['temperature']['humidity']);
+                                @endphp
+                                <div class="flex items-center justify-between">
+                                    <span class="text-2xl font-bold {{ $comfort['color'] }}">
+{{ $comfort['icon'] }}
+</span>
+<span class="text-sm">{{ $comfort['label'] }}</span>
+</div>
+</div>
+
+
+<div class="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl p-4">
+    <div class="text-sm font-medium mb-2">Dew Point</div>
+    @php
+    $dewPoint = $this->calculateDewPoint($weather_data['temperature']['current'], $weather_data['temperature']['humidity']);
+    @endphp
+    <div class="flex items-center justify-between">
+        <span class="text-2xl font-bold text-blue-500">💧</span>
+        <span class="text-sm">{{ number_format($dewPoint, 1) }}°C</span>
+    </div>
+</div>
+
+
+<div class="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-xl p-4">
+    <div class="text-sm font-medium mb-2">Heat Index</div>
+    @php
+    $heatIndex = $this->calculateHeatIndex($weather_data['temperature']['current'], $weather_data['temperature']['humidity']);
+    @endphp
+    <div class="flex items-center justify-between">
+        <span class="text-2xl font-bold text-orange-500">🌡️</span>
+        <span class="text-sm">{{ number_format($heatIndex, 1) }}°C</span>
+    </div>
+</div>
+</div>
+</div>
+--}}

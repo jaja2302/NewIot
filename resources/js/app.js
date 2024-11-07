@@ -6,8 +6,23 @@ import L from 'leaflet';
 window.L = L;
 import 'leaflet/dist/leaflet.css';
 import Highcharts from 'highcharts';
-window.Highcharts = Highcharts;
+import HighchartsAccessibility from 'highcharts/modules/accessibility';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import lottie from 'lottie-web';
 
+window.lottie = lottie;
+
+// Initialize the accessibility module
+HighchartsAccessibility(Highcharts);
+Highcharts.setOptions({
+    accessibility: {
+        enabled: false
+    }
+});
+window.Highcharts = Highcharts;
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+import 'leaflet-defaulticon-compatibility';
 function initializeScrollNavigation(upRoute, downRoute, options = {}) {
     // Adjusted default settings
     const config = {

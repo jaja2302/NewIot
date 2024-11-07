@@ -18,8 +18,11 @@
         "vite": "^5.0"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-free": "^6.6.0",
         "highcharts": "^11.4.8",
         "jquery": "^3.7.1",
-        "leaflet": "^1.9.4"
+        "leaflet": "^1.9.4",
+        "leaflet-defaulticon-compatibility": "^0.1.2",
+        "lottie-web": "^5.12.2"
     }
 }

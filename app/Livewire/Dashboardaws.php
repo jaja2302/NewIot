@@ -69,7 +69,7 @@ class Dashboardaws extends Component implements HasForms, HasTable
     public function mount()
     {
         $this->selectedDate = Carbon::now('Asia/Jakarta')->format('Y-m-d');
-        // $this->selectedDate = '2024-10-18';
+        // $this->selectedDate = '2024-11-05';
         $list_station = DB::connection('mysql')->table('weather_station_list')->where('flags', 1)->get();
         $this->list_station = $list_station;
 
@@ -174,6 +174,24 @@ class Dashboardaws extends Component implements HasForms, HasTable
                 ];
             });
 
+        // // Fill missing hours with dummy data
+        // $complete_data = collect();
+        // for ($hour = 0; $hour < 24; $hour++) {
+        //     $hour_key = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00';
+
+        //     if ($historical_data->has($hour_key)) {
+        //         $complete_data[$hour_key] = $historical_data[$hour_key];
+        //     } else {
+        //         $complete_data[$hour_key] = [
+        //             'date' => Carbon::parse($this->selectedDate)->format('Y-m-d') . ' ' . $hour_key . ':00',
+        //             'temp_out' => 0,
+        //             'rain_rate' => 0
+        //         ];
+        //     }
+        // }
+
+        // $historical_data = $complete_data;
+        // dd($historical_data);
         $temp_data = [];
         $rain_data = [];
 
@@ -197,7 +215,7 @@ class Dashboardaws extends Component implements HasForms, HasTable
                 ];
             }
         }
-
+        // dd($temp_data, $rain_data);
         $this->tempChartData = $temp_data;
 
         // Emit event with new data
