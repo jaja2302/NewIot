@@ -9,9 +9,9 @@ import Highcharts from 'highcharts';
 import HighchartsAccessibility from 'highcharts/modules/accessibility';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import lottie from 'lottie-web';
-
+import * as d3 from "d3";
 window.lottie = lottie;
-
+window.d3 = d3;
 // Initialize the accessibility module
 HighchartsAccessibility(Highcharts);
 Highcharts.setOptions({

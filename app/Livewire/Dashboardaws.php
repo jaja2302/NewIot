@@ -157,66 +157,66 @@ class Dashboardaws extends Component implements HasForms, HasTable
 
     private function generateChartData($station_id)
     {
-        // Get data for the selected date and group by hour
-        $historical_data = Weatherstationdata::where('idws', $station_id)
-            ->whereDate('date', $this->selectedDate)
-            ->orderBy('date', 'asc')
-            ->get()
-            ->groupBy(function ($item) {
-                return Carbon::parse($item->date)->format('H:00'); // Group by hour
-            })
-            ->map(function ($hourData) {
-                // Calculate average values for each hour
-                return [
-                    'date' => $hourData->first()->date, // Get first record's timestamp
-                    'temp_out' => $hourData->avg('temp_out'),
-                    'rain_rate' => $hourData->sum('rain_rate') // Sum for rainfall
-                ];
-            });
-
-        // // Fill missing hours with dummy data
-        // $complete_data = collect();
-        // for ($hour = 0; $hour < 24; $hour++) {
-        //     $hour_key = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00';
-
-        //     if ($historical_data->has($hour_key)) {
-        //         $complete_data[$hour_key] = $historical_data[$hour_key];
-        //     } else {
-        //         $complete_data[$hour_key] = [
-        //             'date' => Carbon::parse($this->selectedDate)->format('Y-m-d') . ' ' . $hour_key . ':00',
-        //             'temp_out' => 0,
-        //             'rain_rate' => 0
-        //         ];
-        //     }
-        // }
-
-        // $historical_data = $complete_data;
-        // dd($historical_data);
+        // Initialize empty arrays
         $temp_data = [];
         $rain_data = [];
 
-        foreach ($historical_data as $hour => $data) {
-            // Convert to UTC timestamp in milliseconds
-            $timestamp = strtotime($data['date']) * 1000;
+        try {
+            // Get data for the selected date and group by hour
+            $historical_data = Weatherstationdata::where('idws', $station_id)
+                ->whereDate('date', $this->selectedDate)
+                ->orderBy('date', 'asc')
+                ->get()
+                ->groupBy(function ($item) {
+                    return Carbon::parse($item->date)->format('H:00');
+                })
+                ->map(function ($hourData) {
+                    return [
+                        'date' => $hourData->first()->date,
+                        'temp_out' => $hourData->avg('temp_out'),
+                        'rain_rate' => $hourData->sum('rain_rate')
+                    ];
+                });
 
-            // Temperature data
-            if ($data['temp_out'] !== null) {
-                $temp_data[] = [
-                    $timestamp,
-                    round((float)$data['temp_out'], 1)
-                ];
+            foreach ($historical_data as $hour => $data) {
+                $timestamp = strtotime($data['date']) * 1000;
+
+                // Temperature data
+                if ($data['temp_out'] !== null) {
+                    $temp_data[] = [
+                        $timestamp,
+                        round((float)$data['temp_out'], 1)
+                    ];
+                }
+
+                // Rainfall data
+                if ($data['rain_rate'] !== null) {
+                    $rain_data[] = [
+                        $timestamp,
+                        round((float)$data['rain_rate'], 2)
+                    ];
+                }
             }
 
-            // Rainfall data
-            if ($data['rain_rate'] !== null) {
-                $rain_data[] = [
-                    $timestamp,
-                    round((float)$data['rain_rate'], 2)
-                ];
+            // If no data found, add dummy point to prevent errors
+            if (empty($temp_data)) {
+                $timestamp = strtotime($this->selectedDate) * 1000;
+                $temp_data[] = [$timestamp, 0];
             }
+            if (empty($rain_data)) {
+                $timestamp = strtotime($this->selectedDate) * 1000;
+                $rain_data[] = [$timestamp, 0];
+            }
+        } catch (\Exception $e) {
+            // Log error and set default data
+            \Log::error('Error generating chart data: ' . $e->getMessage());
+            $timestamp = strtotime($this->selectedDate) * 1000;
+            $temp_data = [[$timestamp, 0]];
+            $rain_data = [[$timestamp, 0]];
         }
-        // dd($temp_data, $rain_data);
+
         $this->tempChartData = $temp_data;
+        $this->rainChartData = $rain_data;
 
         // Emit event with new data
         $this->dispatch('chartDataUpdated', [
