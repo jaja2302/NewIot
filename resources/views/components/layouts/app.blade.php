@@ -89,7 +89,7 @@
             <div class="fixed top-0 w-full bg-gray-100 p-4 z-10">
                 <div class="scrolling-text-container">
                     <p class="scrolling-text text-sm text-gray-700">
-                        IoT Weather Station dan Water Level: Sistem kami menyediakan data real-time dari sensor...
+                        Selamat datang di Sistem Pemantauan IoT kami: Pengumpulan dan analisis data lingkungan secara real-time melalui jaringan terpadu Stasiun Cuaca dan pemantauan Tinggi Muka Air kami. Memberikan pengukuran presisi untuk pengambilan keputusan yang tepat.
                     </p>
                 </div>
             </div>

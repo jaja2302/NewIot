@@ -9,6 +9,7 @@ class Waterlevel extends Model
     //
     protected $table = 'water_level';
     protected $guarded = ['id'];
+    public $timestamps = false;
 
     public function waterlevellist()
     {

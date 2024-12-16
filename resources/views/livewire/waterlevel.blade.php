@@ -1,13 +1,39 @@
 <div class="min-h-screen">
     @section('title', 'Water Level Monitoring')
-
     <div class="container mx-auto px-4 py-6">
         <!-- Page Title -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Water Level Monitoring</h1>
             <p class="text-gray-600 dark:text-gray-400 mt-2">Real-time water level monitoring and analysis dashboard</p>
         </div>
+        @if (SuperAdmin())
+        <x-filament::modal :close-by-clicking-away="false" id="waterlevel-modal">
+            <x-slot name="trigger">
+                <x-filament::button icon="heroicon-o-arrow-up-tray">
+                    Insert Data
+                </x-filament::button>
+            </x-slot>
+            <x-slot name="heading">
+                Excel Water Level
+            </x-slot>
+            <x-slot name="description">
+                Insert Data Excel Water Level here
+            </x-slot>
+            <form wire:submit="saveForm" wire:loading.attr="disabled">
+                {{ $this->form }}
 
+                <div class="flex justify-end gap-x-3 mt-6">
+                    <x-filament::button
+                        type="submit"
+                        wire:loading.attr="disabled"
+                        wire:loading.class="opacity-50 cursor-wait">
+                        <span wire:loading.remove>Upload</span>
+                        <span wire:loading>Processing...</span>
+                    </x-filament::button>
+                </div>
+            </form>
+        </x-filament::modal>
+        @endif
         <!-- Top Grid: Filters and Map -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <!-- Filters Card -->

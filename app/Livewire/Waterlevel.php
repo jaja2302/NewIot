@@ -20,6 +20,11 @@ use Illuminate\Database\Eloquent\Collection;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\WaterlevelExcel;
 use Illuminate\Support\Carbon;
+use Filament\Forms\Form;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
+use App\Imports\WaterlevelImport;
+use Filament\Notifications\Notification;
 
 class Waterlevel extends Component implements HasForms, HasTable
 {
@@ -33,7 +38,9 @@ class Waterlevel extends Component implements HasForms, HasTable
     // Add loading flags
     public $isLoadingStations = false;
     public $isLoadingMapMarker = false;
+    use InteractsWithForms;
 
+    public ?array $data = [];
     // Add wire:model binding for date
     public $selectedDate;
 
@@ -41,6 +48,9 @@ class Waterlevel extends Component implements HasForms, HasTable
     public function mount()
     {
         $this->selectedDate = date('Y-m-d');
+        $this->form->fill();
+        // $permission = permission();
+        // dd($permission);
     }
 
     use InteractsWithTable;
@@ -209,5 +219,64 @@ class Waterlevel extends Component implements HasForms, HasTable
                         );
                     })
             ]);
+    }
+
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                FileUpload::make('file')
+                    ->acceptedFileTypes(['text/csv', 'application/csv'])
+                    ->storeFiles(false)
+                    ->required(),
+                // ...
+            ])
+            ->statePath('data');
+    }
+    public function saveForm(): void
+    {
+        $data = $this->form->getState();
+
+        try {
+            // Show loading notification
+            Notification::make()
+                ->title('Uploading...')
+                ->info()
+                ->send();
+
+            // Get initial count
+            $initialCount = ModelsWaterlevel::count();
+
+            Excel::import(new WaterlevelImport, $data['file']);
+
+            // Get final count
+            $finalCount = ModelsWaterlevel::count();
+            $newRecords = $finalCount - $initialCount;
+
+            // Reset the form
+            $this->form->fill();
+
+            // Show success notification with count
+            Notification::make()
+                ->title('Data imported successfully!')
+                ->body("Added {$newRecords} new records.")
+                ->success()
+                ->send();
+
+            // \Log::info('Import completed', [
+            //     'initial_count' => $initialCount,
+            //     'final_count' => $finalCount,
+            //     'new_records' => $newRecords
+            // ]);
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Error importing data')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+
+            // \Log::error('Import error: ' . $e->getMessage());
+        }
     }
 }
