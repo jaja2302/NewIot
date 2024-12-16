@@ -603,6 +603,59 @@
             let chartType = 'area';
             let yAxisTitle = '';
             let chartOptions = {};
+
+            // Define style configurations for each category
+            const styleConfigs = {
+                suhu: {
+                    colors: ['#22c55e'], // Green
+                    gradient: {
+                        shade: 'dark',
+                        type: "vertical",
+                        shadeIntensity: 0.5,
+                        gradientToColors: ['#ef4444'], // Red
+                        inverseColors: true,
+                        opacityFrom: 0.8,
+                        opacityTo: 0.2,
+                    }
+                },
+                rainfall: {
+                    colors: ['#3b82f6'], // Blue
+                    gradient: {
+                        shade: 'dark',
+                        type: "vertical",
+                        shadeIntensity: 0.5,
+                        gradientToColors: ['#1d4ed8'], // Darker Blue
+                        inverseColors: false,
+                        opacityFrom: 0.8,
+                        opacityTo: 0.2,
+                    }
+                },
+                wind: {
+                    colors: ['#8b5cf6'], // Purple
+                    gradient: {
+                        shade: 'dark',
+                        type: "vertical",
+                        shadeIntensity: 0.5,
+                        gradientToColors: ['#6d28d9'], // Darker Purple
+                        inverseColors: false,
+                        opacityFrom: 0.8,
+                        opacityTo: 0.2,
+                    }
+                },
+                humidity: {
+                    colors: ['#06b6d4'], // Cyan
+                    gradient: {
+                        shade: 'dark',
+                        type: "vertical",
+                        shadeIntensity: 0.5,
+                        gradientToColors: ['#0891b2'], // Darker Cyan
+                        inverseColors: false,
+                        opacityFrom: 0.8,
+                        opacityTo: 0.2,
+                    }
+                }
+            };
+
             // Select data based on current view and period
             switch (currentPeriod) {
                 case 'today':
@@ -670,6 +723,9 @@
                     break;
             }
 
+            // Get the style config for current view
+            const currentStyle = styleConfigs[currentView];
+
             // Update chart options
             const newOptions = {
                 series: [{
@@ -679,9 +735,43 @@
                 chart: {
                     type: chartType
                 },
+                colors: currentStyle.colors,
+                fill: {
+                    type: 'gradient',
+                    gradient: currentStyle.gradient
+                },
                 yaxis: {
                     title: {
                         text: yAxisTitle
+                    }
+                },
+                // Customize markers based on the type
+                markers: {
+                    size: 4,
+                    colors: currentStyle.colors,
+                    strokeColors: "#fff",
+                    strokeWidth: 2,
+                    hover: {
+                        size: 7,
+                    }
+                },
+                // Customize tooltip
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            switch (currentView) {
+                                case 'suhu':
+                                    return val.toFixed(1) + "°C";
+                                case 'rainfall':
+                                    return val.toFixed(1) + " mm/h";
+                                case 'wind':
+                                    return val.toFixed(1) + " km/h";
+                                case 'humidity':
+                                    return val.toFixed(1) + "%";
+                                default:
+                                    return val;
+                            }
+                        }
                     }
                 }
             };
