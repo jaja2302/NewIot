@@ -23,6 +23,8 @@ window.Highcharts = Highcharts;
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet-defaulticon-compatibility';
+import ApexCharts from 'apexcharts'
+window.ApexCharts = ApexCharts;
 function initializeScrollNavigation(upRoute, downRoute, options = {}) {
     // Adjusted default settings
     const config = {

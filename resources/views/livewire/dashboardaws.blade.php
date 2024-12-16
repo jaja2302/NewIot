@@ -48,9 +48,6 @@
                 <!-- Circle cards -->
                 <div class="weather-card mb-6 rounded-lg shadow-lg p-2 sm:p-4 md:p-6 bg-black text-white">
                     <div class="flex flex-wrap justify-center">
-                        @php
-                        $heatIndex = $this->calculateHeatIndex($weather_data['temperature']['current'], $weather_data['temperature']['humidity']);
-                        @endphp
                         <div class="flex flex-wrap justify-center w-full mb-4 sm:mb-6">
                             <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
                                 <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-yellow-400 flex items-center justify-center">
@@ -302,14 +299,33 @@
 
                 <!-- Toggle Buttons -->
                 <div class="flex gap-2">
-                    <button id="tempButton"
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out active-chart-btn">
-                        <i class="fas fa-temperature-high mr-1"></i>Suhu
-                    </button>
-                    <button id="rainButton"
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
-                        <i class="fas fa-cloud-rain mr-1"></i>Curah Hujan
-                    </button>
+                    <!-- Data Period Toggles -->
+                    <div class="flex gap-2 mr-4">
+                        <button id="todayButton"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-blue-500 text-white">
+                            <i class="fas fa-calendar-day mr-1"></i>Today
+                        </button>
+                        <button id="weekButton"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
+                            <i class="fas fa-calendar-week mr-1"></i>Week
+                        </button>
+                        <button id="monthButton"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
+                            <i class="fas fa-calendar-alt mr-1"></i>Month
+                        </button>
+                    </div>
+
+                    <!-- Data Type Toggles -->
+                    <div class="flex gap-2">
+                        <button id="tempButton"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-blue-500 text-white">
+                            <i class="fas fa-temperature-high mr-1"></i>Suhu
+                        </button>
+                        <button id="rainButton"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
+                            <i class="fas fa-cloud-rain mr-1"></i>Curah Hujan
+                        </button>
+                    </div>
                 </div>
             </div>
             <div wire:ignore class="h-[400px]">
@@ -328,163 +344,44 @@
 
     </div>
 </div>
-<!-- In your layout file -->
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-<script type="text/javascript">
+<script type="module">
     document.addEventListener('livewire:initialized', function() {
         let chart;
         let currentView = 'temperature';
+        let currentPeriod = 'today';
 
-        // Initial chart options for temperature data
+        // Chart options
         const options = {
             series: [{
                 name: 'Temperature',
-                data: Array.isArray(@js($tempChartData)) ? @js($tempChartData) : []
+                data: @js($tempChartData)
             }],
             chart: {
                 type: 'area',
-                height: 400,
-                animations: {
-                    enabled: true,
-                    easing: 'easeinout',
-                    speed: 800,
-                    animateGradually: {
-                        enabled: true,
-                        delay: 150
-                    },
-                    dynamicAnimation: {
-                        enabled: true,
-                        speed: 350
-                    }
-                },
-                toolbar: {
-                    show: true,
-                    tools: {
-                        download: true,
-                        selection: true,
-                        zoom: true,
-                        zoomin: true,
-                        zoomout: true,
-                        pan: true,
-                        reset: true
-                    },
-                    autoSelected: 'zoom'
-                },
-                dropShadow: {
-                    enabled: true,
-                    top: 3,
-                    left: 2,
-                    blur: 4,
-                    opacity: 0.2
-                }
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 3
-            },
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    shadeIntensity: 1,
-                    opacityFrom: 0.7,
-                    opacityTo: 0.2,
-                    stops: [0, 90, 100]
+                height: 350,
+                zoom: {
+                    enabled: true
                 }
             },
             dataLabels: {
                 enabled: false
             },
-            grid: {
-                borderColor: '#f1f1f1',
-                xaxis: {
-                    lines: {
-                        show: true
-                    }
-                },
-                yaxis: {
-                    lines: {
-                        show: true
-                    }
-                },
-                padding: {
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    left: 0
-                }
+            stroke: {
+                curve: 'smooth'
             },
-            markers: {
-                size: 4,
-                colors: ['#fff'],
-                strokeColors: '#3B82F6',
-                strokeWidth: 2,
-                hover: {
-                    size: 7,
+            xaxis: {
+                type: 'datetime'
+            },
+            yaxis: {
+                title: {
+                    text: 'Temperature (°C)'
                 }
             },
             tooltip: {
-                theme: 'dark',
                 x: {
                     format: 'dd MMM yyyy HH:mm'
-                },
-                y: {
-                    formatter: function(value, {
-                        series,
-                        seriesIndex,
-                        dataPointIndex,
-                        w
-                    }) {
-                        if (w.config.series[0].name === 'Temperature') {
-                            const category = getTemperatureCategory(value);
-                            return `${value}°C (${category.label})`;
-                        } else {
-                            return `${value} mm`;
-                        }
-                    }
-                },
-                fixed: {
-                    enabled: false,
-                    position: 'topRight'
                 }
-            },
-            xaxis: {
-                type: 'datetime',
-                labels: {
-                    style: {
-                        colors: '#666',
-                        fontSize: '12px'
-                    },
-                    datetimeFormatter: {
-                        year: 'yyyy',
-                        month: 'MMM',
-                        day: 'dd',
-                        hour: 'HH:mm'
-                    }
-                }
-            },
-            yaxis: {
-                labels: {
-                    style: {
-                        colors: '#666',
-                        fontSize: '12px'
-                    }
-                }
-            },
-            theme: {
-                mode: 'light',
-                palette: 'palette1'
-            },
-            responsive: [{
-                breakpoint: 768,
-                options: {
-                    chart: {
-                        height: 300
-                    },
-                    markers: {
-                        size: 3
-                    }
-                }
-            }]
+            }
         };
 
         // Initialize chart
@@ -494,95 +391,96 @@
             chart.render();
         }
 
-        // Add click event listeners to buttons
+        // Button elements
         const tempButton = document.getElementById('tempButton');
         const rainButton = document.getElementById('rainButton');
+        const todayButton = document.getElementById('todayButton');
+        const weekButton = document.getElementById('weekButton');
+        const monthButton = document.getElementById('monthButton');
 
-        tempButton.addEventListener('click', () => {
-            currentView = 'temperature';
-            updateChartView();
-            tempButton.classList.add('active-chart-btn');
-            rainButton.classList.remove('active-chart-btn');
-        });
+        // Button click handlers
+        tempButton?.addEventListener('click', () => switchView('temperature'));
+        rainButton?.addEventListener('click', () => switchView('rainfall'));
+        todayButton?.addEventListener('click', () => switchPeriod('today'));
+        weekButton?.addEventListener('click', () => switchPeriod('week'));
+        monthButton?.addEventListener('click', () => switchPeriod('month'));
 
-        rainButton.addEventListener('click', () => {
-            currentView = 'rainfall';
-            updateChartView();
-            rainButton.classList.add('active-chart-btn');
-            tempButton.classList.remove('active-chart-btn');
-        });
+        function switchView(view) {
+            currentView = view;
+            updateButtons();
+            updateChart();
+        }
 
-        // Function to update chart view based on current selection
-        function updateChartView() {
+        function switchPeriod(period) {
+            currentPeriod = period;
+            updateButtons();
+            updateChart();
+        }
+
+        function updateButtons() {
+            // Update view buttons
+            tempButton.className = getButtonClasses(currentView === 'temperature');
+            rainButton.className = getButtonClasses(currentView === 'rainfall');
+
+            // Update period buttons
+            todayButton.className = getButtonClasses(currentPeriod === 'today');
+            weekButton.className = getButtonClasses(currentPeriod === 'week');
+            monthButton.className = getButtonClasses(currentPeriod === 'month');
+        }
+
+        function getButtonClasses(isActive) {
+            const baseClasses = 'px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out';
+            return isActive ?
+                `${baseClasses} bg-blue-500 text-white` :
+                `${baseClasses} bg-gray-100 text-gray-700 hover:bg-gray-200`;
+        }
+
+        function updateChart() {
             if (!chart) return;
 
-            const options = currentView === 'temperature' ? {
+            let chartData;
+            const isTemperature = currentView === 'temperature';
+
+            // Select data based on current view and period
+            switch (currentPeriod) {
+                case 'today':
+                    chartData = isTemperature ? @js($tempChartData) : @js($rainChartData);
+                    break;
+                case 'week':
+                    chartData = isTemperature ? @js($tempChartData_7days) : @js($rainChartData_7days);
+                    break;
+                case 'month':
+                    chartData = isTemperature ? @js($tempChartData_month) : @js($rainChartData_month);
+                    break;
+            }
+
+            // Update chart options
+            const newOptions = {
                 series: [{
-                    name: 'Temperature',
-                    data: Array.isArray(@js($tempChartData)) ? @js($tempChartData) : []
+                    name: isTemperature ? 'Temperature' : 'Rainfall',
+                    data: chartData || []
                 }],
                 chart: {
-                    type: 'area'
+                    type: isTemperature ? 'area' : 'bar'
                 },
                 yaxis: {
                     title: {
-                        text: 'Temperature (°C)'
-                    }
-                }
-            } : {
-                series: [{
-                    name: 'Rainfall',
-                    data: Array.isArray(@js($rainChartData)) ? @js($rainChartData) : []
-                }],
-                chart: {
-                    type: 'bar'
-                },
-                yaxis: {
-                    title: {
-                        text: 'Rainfall (mm/h)'
+                        text: isTemperature ? 'Temperature (°C)' : 'Rainfall (mm/h)'
                     }
                 }
             };
 
-            chart.updateOptions(options);
+            chart.updateOptions(newOptions, false, true);
         }
 
-        // Listen for Livewire events to update chart data
+        // Listen for Livewire events
         Livewire.on('chartDataUpdated', (data) => {
-            try {
-                // Check if chart exists and is initialized
-                if (!chart || typeof chart.updateOptions !== 'function') return;
+            if (!data || !data[0]) return;
 
-                // Validate incoming data
-                if (!data || !data[0]) return;
+            const chartData = data[0];
 
-                const chartData = data[0];
-
-                // Validate chart data structure
-                if (!chartData || !chartData.tempData || !chartData.rainData) return;
-
-                // Prepare the data with fallbacks
-                const tempData = Array.isArray(chartData.tempData) ? chartData.tempData : [];
-                const rainData = Array.isArray(chartData.rainData) ? chartData.rainData : [];
-
-                // First, clear the existing series
-                chart.updateSeries([]);
-
-                // Then update with new options after a short delay
-                setTimeout(() => {
-                    const newOptions = {
-                        series: [{
-                            name: currentView === 'temperature' ? 'Temperature' : 'Rainfall',
-                            data: currentView === 'temperature' ? tempData : rainData
-                        }]
-                    };
-
-                    try {
-                        chart.updateOptions(newOptions, false, true);
-                    } catch {} // Silently catch any errors during update
-                }, 0);
-
-            } catch {} // Silently catch any errors
+            // Update chart with new data while maintaining current view and period
+            updateChart();
         });
 
         Livewire.on('showLoadingScreen', () => {
