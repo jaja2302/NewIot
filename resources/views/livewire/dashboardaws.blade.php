@@ -345,7 +345,7 @@
     </div>
 </div>
 <script type="module">
-    document.addEventListener('livewire:initialized', function() {
+    $(document).on('livewire:initialized', function() {
         let chart;
         let currentView = 'temperature';
         let currentPeriod = 'today';
@@ -385,25 +385,18 @@
         };
 
         // Initialize chart
-        const chartContainer = document.querySelector("#combinedChart");
-        if (chartContainer) {
-            chart = new ApexCharts(chartContainer, options);
+        const $chartContainer = $("#combinedChart");
+        if ($chartContainer.length) {
+            chart = new ApexCharts($chartContainer[0], options);
             chart.render();
         }
 
-        // Button elements
-        const tempButton = document.getElementById('tempButton');
-        const rainButton = document.getElementById('rainButton');
-        const todayButton = document.getElementById('todayButton');
-        const weekButton = document.getElementById('weekButton');
-        const monthButton = document.getElementById('monthButton');
-
         // Button click handlers
-        tempButton?.addEventListener('click', () => switchView('temperature'));
-        rainButton?.addEventListener('click', () => switchView('rainfall'));
-        todayButton?.addEventListener('click', () => switchPeriod('today'));
-        weekButton?.addEventListener('click', () => switchPeriod('week'));
-        monthButton?.addEventListener('click', () => switchPeriod('month'));
+        $('#tempButton').on('click', () => switchView('temperature'));
+        $('#rainButton').on('click', () => switchView('rainfall'));
+        $('#todayButton').on('click', () => switchPeriod('today'));
+        $('#weekButton').on('click', () => switchPeriod('week'));
+        $('#monthButton').on('click', () => switchPeriod('month'));
 
         function switchView(view) {
             currentView = view;
@@ -419,13 +412,13 @@
 
         function updateButtons() {
             // Update view buttons
-            tempButton.className = getButtonClasses(currentView === 'temperature');
-            rainButton.className = getButtonClasses(currentView === 'rainfall');
+            $('#tempButton').attr('class', getButtonClasses(currentView === 'temperature'));
+            $('#rainButton').attr('class', getButtonClasses(currentView === 'rainfall'));
 
             // Update period buttons
-            todayButton.className = getButtonClasses(currentPeriod === 'today');
-            weekButton.className = getButtonClasses(currentPeriod === 'week');
-            monthButton.className = getButtonClasses(currentPeriod === 'month');
+            $('#todayButton').attr('class', getButtonClasses(currentPeriod === 'today'));
+            $('#weekButton').attr('class', getButtonClasses(currentPeriod === 'week'));
+            $('#monthButton').attr('class', getButtonClasses(currentPeriod === 'month'));
         }
 
         function getButtonClasses(isActive) {
@@ -476,33 +469,27 @@
         // Listen for Livewire events
         Livewire.on('chartDataUpdated', (data) => {
             if (!data || !data[0]) return;
-
-            const chartData = data[0];
-
-            // Update chart with new data while maintaining current view and period
             updateChart();
         });
 
         Livewire.on('showLoadingScreen', () => {
             showLoadingScreen();
         });
+
         Livewire.on('hideLoadingScreen', () => {
             hideLoadingScreen();
         });
 
-        // Update your select and input elements to trigger loading screen immediately
-        document.getElementById('station').addEventListener('change', function() {
+        // Update select and input elements to trigger loading screen
+        $('#station').on('change', function() {
             showLoadingScreen();
         });
 
-        const dateInput = document.querySelector('input[type="date"]');
-        if (dateInput) {
-            dateInput.addEventListener('change', function() {
-                showLoadingScreen();
-            });
-        }
-        if (@json($station_lat) !== 0 && @json($station_lon) !== 0) {
+        $('input[type="date"]').on('change', function() {
+            showLoadingScreen();
+        });
 
+        if (@json($station_lat) !== 0 && @json($station_lon) !== 0) {
             const map = L.map('weatherMap').setView([@json($station_lat), @json($station_lon)], 8);
 
             // Add OpenStreetMap tile layer
@@ -510,10 +497,7 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            // Create a custom popup with weather information
             function createWeatherPopup(data) {
-                // console.log(data);
-
                 return `
                 <div class="p-2">
                     <div class="space-y-1">
@@ -521,7 +505,7 @@
                         <p>💧 Kelembaban: ${data.temperature.humidity}%</p>
                     </div>
                 </div>
-            `;
+                `;
             }
 
             // Add marker for current location with weather info
@@ -530,18 +514,16 @@
                 .bindPopup(createWeatherPopup(@json($weather_data)))
                 .openPopup();
 
-            // Create weather overlay using the current weather data
+            // Create weather overlay
             const weatherCircle = L.circle([@json($station_lat), @json($station_lon)], {
                 color: 'blue',
                 fillColor: '#3b82f6',
                 fillOpacity: 0.2,
-                radius: 30000 // 30km radius
+                radius: 30000
             }).addTo(map);
 
             // Update map when location changes
             Livewire.on('updateMapMarker', (data) => {
-                // console.log(data);dad 
-
                 const newLatLng = [data[0].lat, data[0].lon];
                 map.setView(newLatLng, 8);
                 marker.setLatLng(newLatLng)
@@ -552,75 +534,58 @@
 
             initLottieAnimation(@json($weatheranimation));
 
-
             Livewire.on('weatherAnimationUpdated', (data) => {
-                const animationName = data[0];
-
-                initLottieAnimation(animationName);
+                initLottieAnimation(data[0]);
             });
-
         }
 
-        // Add this new section for toggle functionality
-        const toggleButton = document.getElementById('toggleWeatherInfo');
-        const weatherOverlay = document.getElementById('weatherInfoOverlay');
+        // Toggle functionality
+        const $toggleButton = $('#toggleWeatherInfo');
+        const $weatherOverlay = $('#weatherInfoOverlay');
         let isVisible = true;
 
-        // Load saved state from localStorage
+        // Load saved state
         const savedState = localStorage.getItem('weatherOverlayVisible');
         if (savedState !== null) {
             isVisible = savedState === 'true';
             updateOverlayVisibility();
         }
 
-        toggleButton.addEventListener('click', function() {
+        $toggleButton.on('click', function() {
             isVisible = !isVisible;
             updateOverlayVisibility();
-            // Save state to localStorage
             localStorage.setItem('weatherOverlayVisible', isVisible);
         });
 
         function updateOverlayVisibility() {
             if (isVisible) {
-                weatherOverlay.style.opacity = '1';
-                weatherOverlay.style.transform = 'translateX(0)';
-                weatherOverlay.style.pointerEvents = 'auto';
+                $weatherOverlay.css({
+                    'opacity': '1',
+                    'transform': 'translateX(0)',
+                    'pointer-events': 'auto'
+                });
             } else {
-                weatherOverlay.style.opacity = '0';
-                weatherOverlay.style.transform = 'translateX(100%)';
-                weatherOverlay.style.pointerEvents = 'none';
+                $weatherOverlay.css({
+                    'opacity': '0',
+                    'transform': 'translateX(100%)',
+                    'pointer-events': 'none'
+                });
             }
         }
 
-        // Add some CSS for smoother transitions
-        const style = document.createElement('style');
-        style.textContent = `
-            .temp-area {
-                transition: opacity 0.75s ease-in-out;
-            }
-            .rain-line {
-                transition: opacity 0.75s ease-in-out;
-            }
-        `;
-        document.head.appendChild(style);
+        // Add CSS for transitions
+        $('<style>')
+            .text(`
+                .temp-area {
+                    transition: opacity 0.75s ease-in-out;
+                }
+                .rain-line {
+                    transition: opacity 0.75s ease-in-out;
+                }
+            `)
+            .appendTo('head');
     });
 
-    // Move these functions outside the event listener so they're accessible
-    function showLoadingScreen() {
-        const loadingScreen = document.getElementById('loading-screen');
-        loadingScreen.style.display = 'flex';
-        loadingScreen.classList.add('visible');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function hideLoadingScreen() {
-        const loadingScreen = document.getElementById('loading-screen');
-        loadingScreen.classList.remove('visible');
-        setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            document.body.style.overflow = '';
-        }, 300);
-    }
 
     function initLottieAnimation(animationName) {
         // console.log(animationName);
@@ -640,34 +605,6 @@
             autoplay: true,
             path: `/weather/${animationName}.json`
         });
-    }
-
-    // Add this temperature classification function
-    function getTemperatureCategory(temp) {
-        if (temp >= 35) return {
-            label: 'Very Hot',
-            color: '#FF4444'
-        };
-        if (temp >= 30) return {
-            label: 'Hot',
-            color: '#FF8C00'
-        };
-        if (temp >= 25) return {
-            label: 'Warm',
-            color: '#FFD700'
-        };
-        if (temp >= 20) return {
-            label: 'Mild',
-            color: '#98FB98'
-        };
-        if (temp >= 15) return {
-            label: 'Cool',
-            color: '#87CEEB'
-        };
-        return {
-            label: 'Cold',
-            color: '#4169E1'
-        };
     }
 </script>
 </div>
