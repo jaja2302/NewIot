@@ -365,30 +365,188 @@
                 data: @js($tempChartData)
             }],
             chart: {
-                type: 'area',
                 height: 350,
-                zoom: {
-                    enabled: true
+                type: 'area',
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    speed: 800,
+                    animateGradually: {
+                        enabled: true,
+                        delay: 150
+                    },
+                    dynamicAnimation: {
+                        enabled: true,
+                        speed: 350
+                    }
+                },
+                toolbar: {
+                    show: true,
+                    tools: {
+                        download: true,
+                        selection: true,
+                        zoom: true,
+                        zoomin: true,
+                        zoomout: true,
+                        pan: true,
+                        reset: true
+                    },
+                    autoSelected: 'zoom'
+                },
+                dropShadow: {
+                    enabled: true,
+                    color: '#000',
+                    top: 18,
+                    left: 7,
+                    blur: 10,
+                    opacity: 0.2
+                },
+                background: 'transparent'
+            },
+            colors: ['#00E396', '#FEB019', '#FF4560', '#775DD0'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shade: 'dark',
+                    type: "vertical",
+                    shadeIntensity: 0.5,
+                    gradientToColors: undefined,
+                    inverseColors: true,
+                    opacityFrom: 0.8,
+                    opacityTo: 0.2,
+                    stops: [0, 100],
                 }
             },
             dataLabels: {
                 enabled: false
             },
             stroke: {
-                curve: 'smooth'
+                curve: 'smooth',
+                width: 3,
+                dashArray: [0, 8, 5]
+            },
+            grid: {
+                borderColor: '#e0e0e0',
+                strokeDashArray: 5,
+                xaxis: {
+                    lines: {
+                        show: true
+                    }
+                },
+                yaxis: {
+                    lines: {
+                        show: true
+                    }
+                },
+                padding: {
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: 0
+                },
+            },
+            markers: {
+                size: 4,
+                colors: ["#FFA41B"],
+                strokeColors: "#fff",
+                strokeWidth: 2,
+                hover: {
+                    size: 7,
+                }
             },
             xaxis: {
-                type: 'datetime'
+                type: 'datetime',
+                labels: {
+                    style: {
+                        colors: '#666',
+                        fontSize: '12px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: 400,
+                    },
+                    datetimeFormatter: {
+                        year: 'yyyy',
+                        month: "MMM 'yy",
+                        day: 'dd MMM',
+                        hour: 'HH:mm'
+                    }
+                },
+                tooltip: {
+                    enabled: false
+                }
             },
             yaxis: {
                 title: {
-                    text: 'Temperature (°C)'
+                    text: 'Temperature (°C)',
+                    style: {
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                    }
+                },
+                labels: {
+                    style: {
+                        colors: '#666',
+                        fontSize: '12px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: 400,
+                    }
                 }
             },
             tooltip: {
+                enabled: true,
+                shared: true,
+                intersect: false,
                 x: {
                     format: 'dd MMM yyyy HH:mm'
-                }
+                },
+                y: {
+                    formatter: function(val) {
+                        return val.toFixed(1) + "°C"
+                    }
+                },
+                theme: 'dark',
+                style: {
+                    fontSize: '12px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                },
+                marker: {
+                    show: true,
+                },
+                fixed: {
+                    enabled: false,
+                    position: 'topRight',
+                    offsetX: 0,
+                    offsetY: 0,
+                },
+            },
+            legend: {
+                show: true,
+                position: 'top',
+                horizontalAlign: 'right',
+                floating: true,
+                offsetY: -25,
+                offsetX: -5,
+                markers: {
+                    width: 12,
+                    height: 12,
+                    strokeWidth: 0,
+                    strokeColor: '#fff',
+                    radius: 12,
+                    customHTML: undefined,
+                    onClick: undefined,
+                    offsetX: 0,
+                    offsetY: 0
+                },
+            },
+            theme: {
+                mode: 'light',
+                palette: 'palette1',
+                monochrome: {
+                    enabled: false,
+                    color: '#255aee',
+                    shadeTo: 'light',
+                    shadeIntensity: 0.65
+                },
             }
         };
 
@@ -444,7 +602,7 @@
             let chartData;
             let chartType = 'area';
             let yAxisTitle = '';
-
+            let chartOptions = {};
             // Select data based on current view and period
             switch (currentPeriod) {
                 case 'today':
