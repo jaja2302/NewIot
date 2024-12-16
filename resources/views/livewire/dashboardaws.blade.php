@@ -1,43 +1,4 @@
 <div class="min-h-screen">
-    <style>
-        .active-chart-btn {
-            background-color: #3B82F6;
-            color: white;
-            transform: scale(1.05);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        #tempButton,
-        #rainButton {
-            background-color: #f3f4f6;
-            color: #374151;
-            transition: all 0.3s ease;
-        }
-
-        #tempButton:hover,
-        #rainButton:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        .apexcharts-canvas {
-            transition: all 0.3s ease;
-        }
-
-        .apexcharts-tooltip {
-            backdrop-filter: blur(6px);
-            background: rgba(0, 0, 0, 0.8) !important;
-            border: none !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
-        }
-
-        .apexcharts-xaxistooltip {
-            backdrop-filter: blur(6px);
-            background: rgba(0, 0, 0, 0.8) !important;
-            border: none !important;
-            color: white !important;
-        }
-    </style>
     @section('title', 'AWS Dashboard')
     <div class="container mx-auto px-4 py-6">
 
@@ -372,23 +333,13 @@
 <script type="text/javascript">
     document.addEventListener('livewire:initialized', function() {
         let chart;
+        let currentView = 'temperature';
 
-        // Ensure data is properly formatted with default values
-        const tempData = (@js($tempChartData) || []).map(d => ({
-            x: new Date(d[0]),
-            y: parseFloat(d[1]) || 0
-        }));
-
-        const rainData = (@js($rainChartData) || []).map(d => ({
-            x: new Date(d[0]),
-            y: parseFloat(d[1]) || 0
-        }));
-
-        // Initial chart options
+        // Initial chart options for temperature data
         const options = {
             series: [{
                 name: 'Temperature',
-                data: tempData
+                data: Array.isArray(@js($tempChartData)) ? @js($tempChartData) : []
             }],
             chart: {
                 type: 'area',
@@ -539,164 +490,101 @@
         // Initialize chart
         const chartContainer = document.querySelector("#combinedChart");
         if (chartContainer) {
-            try {
-                chart = new ApexCharts(chartContainer, options);
-                chart.render();
-
-                // Add click event listeners to buttons after chart is initialized
-                const tempButton = document.getElementById('tempButton');
-                const rainButton = document.getElementById('rainButton');
-
-                if (tempButton && rainButton) {
-                    tempButton.addEventListener('click', function() {
-                        handleChartChange('temperature');
-                    });
-
-                    rainButton.addEventListener('click', function() {
-                        handleChartChange('rainfall');
-                    });
-                }
-            } catch (error) {
-                console.error('Error initializing chart:', error);
-            }
+            chart = new ApexCharts(chartContainer, options);
+            chart.render();
         }
 
-        // Separate function to handle chart changes
-        function handleChartChange(type) {
-            if (!chart) {
-                console.error('Chart not initialized');
-                return;
-            }
+        // Add click event listeners to buttons
+        const tempButton = document.getElementById('tempButton');
+        const rainButton = document.getElementById('rainButton');
 
-            const tempButton = document.getElementById('tempButton');
-            const rainButton = document.getElementById('rainButton');
-
-            if (!tempButton || !rainButton) {
-                console.error('Chart buttons not found');
-                return;
-            }
-
-            // Remove active class from both buttons
-            tempButton.classList.remove('active-chart-btn');
+        tempButton.addEventListener('click', () => {
+            currentView = 'temperature';
+            updateChartView();
+            tempButton.classList.add('active-chart-btn');
             rainButton.classList.remove('active-chart-btn');
+        });
 
-            try {
-                if (type === 'temperature') {
-                    tempButton.classList.add('active-chart-btn');
-                    const formattedTempData = (@js($tempChartData) || []).map(d => ({
-                        x: new Date(d[0]),
-                        y: parseFloat(d[1]) || 0
-                    }));
+        rainButton.addEventListener('click', () => {
+            currentView = 'rainfall';
+            updateChartView();
+            rainButton.classList.add('active-chart-btn');
+            tempButton.classList.remove('active-chart-btn');
+        });
 
-                    chart.updateOptions({
-                        colors: ['#3B82F6'],
-                        title: {
-                            text: 'Temperature Data',
-                            align: 'left'
-                        },
-                        yaxis: {
-                            title: {
-                                text: 'Temperature (°C)'
-                            }
-                        },
-                        fill: {
-                            type: 'gradient',
-                            gradient: {
-                                shadeIntensity: 1,
-                                opacityFrom: 0.7,
-                                opacityTo: 0.2,
-                                stops: [0, 90, 100],
-                                colorStops: [{
-                                        offset: 0,
-                                        color: '#3B82F6',
-                                        opacity: 0.7
-                                    },
-                                    {
-                                        offset: 100,
-                                        color: '#93C5FD',
-                                        opacity: 0.2
-                                    }
-                                ]
-                            }
-                        }
-                    });
-
-                    chart.updateSeries([{
-                        name: 'Temperature',
-                        data: formattedTempData
-                    }]);
-                } else {
-                    rainButton.classList.add('active-chart-btn');
-                    const formattedRainData = (@js($rainChartData) || []).map(d => ({
-                        x: new Date(d[0]),
-                        y: parseFloat(d[1]) || 0
-                    }));
-
-                    chart.updateOptions({
-                        colors: ['#60A5FA'],
-                        title: {
-                            text: 'Rainfall Data',
-                            align: 'left'
-                        },
-                        yaxis: {
-                            title: {
-                                text: 'Rainfall (mm)'
-                            }
-                        },
-                        fill: {
-                            type: 'gradient',
-                            gradient: {
-                                shadeIntensity: 1,
-                                opacityFrom: 0.7,
-                                opacityTo: 0.2,
-                                stops: [0, 90, 100],
-                                colorStops: [{
-                                        offset: 0,
-                                        color: '#60A5FA',
-                                        opacity: 0.7
-                                    },
-                                    {
-                                        offset: 100,
-                                        color: '#BFDBFE',
-                                        opacity: 0.2
-                                    }
-                                ]
-                            }
-                        }
-                    });
-
-                    chart.updateSeries([{
-                        name: 'Rainfall',
-                        data: formattedRainData
-                    }]);
-                }
-            } catch (error) {
-                console.error('Error updating chart:', error);
-            }
-        }
-
-        // Listen for Livewire events
-        Livewire.on('chartDataUpdated', (data) => {
+        // Function to update chart view based on current selection
+        function updateChartView() {
             if (!chart) return;
 
+            const options = currentView === 'temperature' ? {
+                series: [{
+                    name: 'Temperature',
+                    data: Array.isArray(@js($tempChartData)) ? @js($tempChartData) : []
+                }],
+                chart: {
+                    type: 'area'
+                },
+                yaxis: {
+                    title: {
+                        text: 'Temperature (°C)'
+                    }
+                }
+            } : {
+                series: [{
+                    name: 'Rainfall',
+                    data: Array.isArray(@js($rainChartData)) ? @js($rainChartData) : []
+                }],
+                chart: {
+                    type: 'bar'
+                },
+                yaxis: {
+                    title: {
+                        text: 'Rainfall (mm/h)'
+                    }
+                }
+            };
+
+            chart.updateOptions(options);
+        }
+
+        // Listen for Livewire events to update chart data
+        Livewire.on('chartDataUpdated', (data) => {
             try {
-                const newData = (data.tempData || []).map(d => ({
-                    x: new Date(d[0]),
-                    y: parseFloat(d[1]) || 0
-                }));
+                // Check if chart exists and is initialized
+                if (!chart || typeof chart.updateOptions !== 'function') return;
 
-                chart.updateSeries([{
-                    data: newData
-                }]);
-            } catch (error) {
-                console.error('Error updating chart data:', error);
-            }
+                // Validate incoming data
+                if (!data || !data[0]) return;
+
+                const chartData = data[0];
+
+                // Validate chart data structure
+                if (!chartData || !chartData.tempData || !chartData.rainData) return;
+
+                // Prepare the data with fallbacks
+                const tempData = Array.isArray(chartData.tempData) ? chartData.tempData : [];
+                const rainData = Array.isArray(chartData.rainData) ? chartData.rainData : [];
+
+                // First, clear the existing series
+                chart.updateSeries([]);
+
+                // Then update with new options after a short delay
+                setTimeout(() => {
+                    const newOptions = {
+                        series: [{
+                            name: currentView === 'temperature' ? 'Temperature' : 'Rainfall',
+                            data: currentView === 'temperature' ? tempData : rainData
+                        }]
+                    };
+
+                    try {
+                        chart.updateOptions(newOptions, false, true);
+                    } catch {} // Silently catch any errors during update
+                }, 0);
+
+            } catch {} // Silently catch any errors
         });
 
-        Livewire.on('changepage', () => {
-            changePage()
-
-        });
         Livewire.on('showLoadingScreen', () => {
             showLoadingScreen();
         });
