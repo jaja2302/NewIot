@@ -1,4 +1,43 @@
 <div class="min-h-screen">
+    <style>
+        .active-chart-btn {
+            background-color: #3B82F6;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        #tempButton,
+        #rainButton {
+            background-color: #f3f4f6;
+            color: #374151;
+            transition: all 0.3s ease;
+        }
+
+        #tempButton:hover,
+        #rainButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .apexcharts-canvas {
+            transition: all 0.3s ease;
+        }
+
+        .apexcharts-tooltip {
+            backdrop-filter: blur(6px);
+            background: rgba(0, 0, 0, 0.8) !important;
+            border: none !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .apexcharts-xaxistooltip {
+            backdrop-filter: blur(6px);
+            background: rgba(0, 0, 0, 0.8) !important;
+            border: none !important;
+            color: white !important;
+        }
+    </style>
     @section('title', 'AWS Dashboard')
     <div class="container mx-auto px-4 py-6">
 
@@ -303,13 +342,11 @@
                 <!-- Toggle Buttons -->
                 <div class="flex gap-2">
                     <button id="tempButton"
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out active-chart-btn"
-                        onclick="toggleChartData('temperature')">
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out active-chart-btn">
                         <i class="fas fa-temperature-high mr-1"></i>Suhu
                     </button>
                     <button id="rainButton"
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out"
-                        onclick="toggleChartData('rainfall')">
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
                         <i class="fas fa-cloud-rain mr-1"></i>Curah Hujan
                     </button>
                 </div>
@@ -330,318 +367,332 @@
 
     </div>
 </div>
-<script type="module">
+<!-- In your layout file -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script type="text/javascript">
     document.addEventListener('livewire:initialized', function() {
-        // Initialize D3 chart
-        const margin = {
-            top: 20,
-            right: 30,
-            bottom: 30,
-            left: 60
-        };
-        const width = document.getElementById('combinedChart').offsetWidth - margin.left - margin.right;
-        const height = 400 - margin.top - margin.bottom;
+        let chart;
 
-        // Create SVG container
-        const svg = d3.select('#combinedChart')
-            .append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
-            .attr('transform', `translate(${margin.left},${margin.top})`);
-
-        // Parse the data with error handling
+        // Ensure data is properly formatted with default values
         const tempData = (@js($tempChartData) || []).map(d => ({
-            date: new Date(d[0]),
-            value: d[1]
+            x: new Date(d[0]),
+            y: parseFloat(d[1]) || 0
         }));
 
         const rainData = (@js($rainChartData) || []).map(d => ({
-            date: new Date(d[0]),
-            value: d[1]
+            x: new Date(d[0]),
+            y: parseFloat(d[1]) || 0
         }));
 
-        // Scales
-        const x = d3.scaleTime()
-            .domain(d3.extent(tempData, d => d.date))
-            .range([0, width]);
+        // Initial chart options
+        const options = {
+            series: [{
+                name: 'Temperature',
+                data: tempData
+            }],
+            chart: {
+                type: 'area',
+                height: 400,
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    speed: 800,
+                    animateGradually: {
+                        enabled: true,
+                        delay: 150
+                    },
+                    dynamicAnimation: {
+                        enabled: true,
+                        speed: 350
+                    }
+                },
+                toolbar: {
+                    show: true,
+                    tools: {
+                        download: true,
+                        selection: true,
+                        zoom: true,
+                        zoomin: true,
+                        zoomout: true,
+                        pan: true,
+                        reset: true
+                    },
+                    autoSelected: 'zoom'
+                },
+                dropShadow: {
+                    enabled: true,
+                    top: 3,
+                    left: 2,
+                    blur: 4,
+                    opacity: 0.2
+                }
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.7,
+                    opacityTo: 0.2,
+                    stops: [0, 90, 100]
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            grid: {
+                borderColor: '#f1f1f1',
+                xaxis: {
+                    lines: {
+                        show: true
+                    }
+                },
+                yaxis: {
+                    lines: {
+                        show: true
+                    }
+                },
+                padding: {
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: 0
+                }
+            },
+            markers: {
+                size: 4,
+                colors: ['#fff'],
+                strokeColors: '#3B82F6',
+                strokeWidth: 2,
+                hover: {
+                    size: 7,
+                }
+            },
+            tooltip: {
+                theme: 'dark',
+                x: {
+                    format: 'dd MMM yyyy HH:mm'
+                },
+                y: {
+                    formatter: function(value, {
+                        series,
+                        seriesIndex,
+                        dataPointIndex,
+                        w
+                    }) {
+                        if (w.config.series[0].name === 'Temperature') {
+                            const category = getTemperatureCategory(value);
+                            return `${value}°C (${category.label})`;
+                        } else {
+                            return `${value} mm`;
+                        }
+                    }
+                },
+                fixed: {
+                    enabled: false,
+                    position: 'topRight'
+                }
+            },
+            xaxis: {
+                type: 'datetime',
+                labels: {
+                    style: {
+                        colors: '#666',
+                        fontSize: '12px'
+                    },
+                    datetimeFormatter: {
+                        year: 'yyyy',
+                        month: 'MMM',
+                        day: 'dd',
+                        hour: 'HH:mm'
+                    }
+                }
+            },
+            yaxis: {
+                labels: {
+                    style: {
+                        colors: '#666',
+                        fontSize: '12px'
+                    }
+                }
+            },
+            theme: {
+                mode: 'light',
+                palette: 'palette1'
+            },
+            responsive: [{
+                breakpoint: 768,
+                options: {
+                    chart: {
+                        height: 300
+                    },
+                    markers: {
+                        size: 3
+                    }
+                }
+            }]
+        };
 
-        const yTemp = d3.scaleLinear()
-            .domain([0, d3.max(tempData, d => d.value) * 1.2])
-            .range([height, 0]);
+        // Initialize chart
+        const chartContainer = document.querySelector("#combinedChart");
+        if (chartContainer) {
+            try {
+                chart = new ApexCharts(chartContainer, options);
+                chart.render();
 
-        const yRain = d3.scaleLinear()
-            .domain([0, d3.max(rainData, d => d.value) * 1.2])
-            .range([height, 0]);
+                // Add click event listeners to buttons after chart is initialized
+                const tempButton = document.getElementById('tempButton');
+                const rainButton = document.getElementById('rainButton');
 
-        // Add X axis
-        svg.append('g')
-            .attr('class', 'x-axis')
-            .attr('transform', `translate(0,${height})`)
-            .call(d3.axisBottom(x).tickFormat(d3.timeFormat('%H:%M')));
+                if (tempButton && rainButton) {
+                    tempButton.addEventListener('click', function() {
+                        handleChartChange('temperature');
+                    });
 
-        // Add Y axis
-        const yAxisTemp = svg.append('g')
-            .attr('class', 'y-axis-temp')
-            .call(d3.axisLeft(yTemp));
-
-        const yAxisRain = svg.append('g')
-            .attr('class', 'y-axis-rain')
-            .style('opacity', 0)
-            .call(d3.axisLeft(yRain));
-
-        // Add gradient definition
-        const gradient = svg.append("defs")
-            .append("linearGradient")
-            .attr("id", "temperature-gradient")
-            .attr("gradientUnits", "userSpaceOnUse")
-            .attr("x1", 0)
-            .attr("y1", 0)
-            .attr("x2", 0)
-            .attr("y2", height);
-
-        gradient.append("stop")
-            .attr("offset", "0%")
-            .attr("stop-color", "rgba(0, 255, 255, 0.5)");
-
-        gradient.append("stop")
-            .attr("offset", "100%")
-            .attr("stop-color", "rgba(0, 100, 255, 0.1)");
-
-        // Create line generators
-        const tempArea = d3.area()
-            .x(d => x(d.date))
-            .y0(height)
-            .y1(d => yTemp(d.value))
-            .curve(d3.curveMonotoneX);
-
-        const rainLine = d3.line()
-            .x(d => x(d.date))
-            .y(d => yRain(d.value))
-            .curve(d3.curveMonotoneX);
-
-        // Add the paths
-        const tempPath = svg.append('path')
-            .datum(tempData)
-            .attr('class', 'temp-area')
-            .attr('fill', 'url(#temperature-gradient)')
-            .attr('stroke', 'rgba(0, 150, 255, 0.8)')
-            .attr('stroke-width', 2)
-            .attr('d', tempArea);
-
-        const rainPath = svg.append('path')
-            .datum(rainData)
-            .attr('class', 'rain-line')
-            .attr('fill', 'none')
-            .attr('stroke', '#3B82F6')
-            .attr('stroke-width', 2)
-            .attr('opacity', 0)
-            .attr('d', rainLine);
-
-        // Create tooltip
-        const tooltip = d3.select('#combinedChart')
-            .append('div')
-            .attr('class', 'tooltip')
-            .style('opacity', 0)
-            .style('position', 'absolute')
-            .style('background-color', 'rgba(255, 255, 255, 0.9)')
-            .style('padding', '8px')
-            .style('border-radius', '4px')
-            .style('box-shadow', '0 2px 4px rgba(0,0,0,0.1)')
-            .style('pointer-events', 'none')
-            .style('font-size', '12px');
-
-        // Add dots for temperature
-        const tempDots = svg.selectAll('.temp-dot')
-            .data(tempData)
-            .enter()
-            .append('circle')
-            .attr('class', 'temp-dot')
-            .attr('cx', d => x(d.date))
-            .attr('cy', d => yTemp(d.value))
-            .attr('r', 4)
-            .attr('fill', '#EF4444')
-            .on('mouseover', function(event, d) {
-                const dot = d3.select(this);
-                dot.attr('r', 6);
-
-                tooltip.transition()
-                    .duration(200)
-                    .style('opacity', 1);
-
-                tooltip.html(`
-                    <div class="font-semibold">Temperature</div>
-                    <div>Time: ${d3.timeFormat('%H:%M')(d.date)}</div>
-                    <div>Value: ${d.value}°C</div>
-                `)
-                    .style('left', (event.pageX + 10) + 'px')
-                    .style('top', (event.pageY - 10) + 'px');
-            })
-            .on('mouseout', function() {
-                const dot = d3.select(this);
-                dot.attr('r', 4);
-
-                tooltip.transition()
-                    .duration(500)
-                    .style('opacity', 0);
-            });
-
-        // Add dots for rainfall
-        const rainDots = svg.selectAll('.rain-dot')
-            .data(rainData)
-            .enter()
-            .append('circle')
-            .attr('class', 'rain-dot')
-            .attr('cx', d => x(d.date))
-            .attr('cy', d => yRain(d.value))
-            .attr('r', 4)
-            .attr('fill', '#3B82F6')
-            .style('opacity', 0)
-            .on('mouseover', function(event, d) {
-                const dot = d3.select(this);
-                dot.attr('r', 6);
-
-                tooltip.transition()
-                    .duration(200)
-                    .style('opacity', 1);
-
-                tooltip.html(`
-                    <div class="font-semibold">Rainfall</div>
-                    <div>Time: ${d3.timeFormat('%H:%M')(d.date)}</div>
-                    <div>Value: ${d.value} mm</div>
-                `)
-                    .style('left', (event.pageX + 10) + 'px')
-                    .style('top', (event.pageY - 10) + 'px');
-            })
-            .on('mouseout', function() {
-                const dot = d3.select(this);
-                dot.attr('r', 4);
-
-                tooltip.transition()
-                    .duration(500)
-                    .style('opacity', 0);
-            });
-
-        // Toggle function
-        window.toggleChartData = function(type) {
-            const duration = 750;
-
-            if (type === 'temperature') {
-                d3.select('#tempButton').attr('class', 'px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out active-chart-btn');
-                d3.select('#rainButton').attr('class', 'px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out inactive-chart-btn');
-
-                tempPath.transition().duration(duration).style('opacity', 1);
-                rainPath.transition().duration(duration).style('opacity', 0);
-                tempDots.transition().duration(duration).style('opacity', 1);
-                rainDots.transition().duration(duration).style('opacity', 0);
-                yAxisTemp.transition().duration(duration).style('opacity', 1);
-                yAxisRain.transition().duration(duration).style('opacity', 0);
-            } else {
-                d3.select('#rainButton').attr('class', 'px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out active-chart-btn');
-                d3.select('#tempButton').attr('class', 'px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out inactive-chart-btn');
-
-                tempPath.transition().duration(duration).style('opacity', 0);
-                rainPath.transition().duration(duration).style('opacity', 1);
-                tempDots.transition().duration(duration).style('opacity', 0);
-                rainDots.transition().duration(duration).style('opacity', 1);
-                yAxisTemp.transition().duration(duration).style('opacity', 0);
-                yAxisRain.transition().duration(duration).style('opacity', 1);
+                    rainButton.addEventListener('click', function() {
+                        handleChartChange('rainfall');
+                    });
+                }
+            } catch (error) {
+                console.error('Error initializing chart:', error);
             }
         }
 
-        // Initialize with temperature view
-        toggleChartData('temperature');
+        // Separate function to handle chart changes
+        function handleChartChange(type) {
+            if (!chart) {
+                console.error('Chart not initialized');
+                return;
+            }
 
-        // Update chart when Livewire updates
+            const tempButton = document.getElementById('tempButton');
+            const rainButton = document.getElementById('rainButton');
+
+            if (!tempButton || !rainButton) {
+                console.error('Chart buttons not found');
+                return;
+            }
+
+            // Remove active class from both buttons
+            tempButton.classList.remove('active-chart-btn');
+            rainButton.classList.remove('active-chart-btn');
+
+            try {
+                if (type === 'temperature') {
+                    tempButton.classList.add('active-chart-btn');
+                    const formattedTempData = (@js($tempChartData) || []).map(d => ({
+                        x: new Date(d[0]),
+                        y: parseFloat(d[1]) || 0
+                    }));
+
+                    chart.updateOptions({
+                        colors: ['#3B82F6'],
+                        title: {
+                            text: 'Temperature Data',
+                            align: 'left'
+                        },
+                        yaxis: {
+                            title: {
+                                text: 'Temperature (°C)'
+                            }
+                        },
+                        fill: {
+                            type: 'gradient',
+                            gradient: {
+                                shadeIntensity: 1,
+                                opacityFrom: 0.7,
+                                opacityTo: 0.2,
+                                stops: [0, 90, 100],
+                                colorStops: [{
+                                        offset: 0,
+                                        color: '#3B82F6',
+                                        opacity: 0.7
+                                    },
+                                    {
+                                        offset: 100,
+                                        color: '#93C5FD',
+                                        opacity: 0.2
+                                    }
+                                ]
+                            }
+                        }
+                    });
+
+                    chart.updateSeries([{
+                        name: 'Temperature',
+                        data: formattedTempData
+                    }]);
+                } else {
+                    rainButton.classList.add('active-chart-btn');
+                    const formattedRainData = (@js($rainChartData) || []).map(d => ({
+                        x: new Date(d[0]),
+                        y: parseFloat(d[1]) || 0
+                    }));
+
+                    chart.updateOptions({
+                        colors: ['#60A5FA'],
+                        title: {
+                            text: 'Rainfall Data',
+                            align: 'left'
+                        },
+                        yaxis: {
+                            title: {
+                                text: 'Rainfall (mm)'
+                            }
+                        },
+                        fill: {
+                            type: 'gradient',
+                            gradient: {
+                                shadeIntensity: 1,
+                                opacityFrom: 0.7,
+                                opacityTo: 0.2,
+                                stops: [0, 90, 100],
+                                colorStops: [{
+                                        offset: 0,
+                                        color: '#60A5FA',
+                                        opacity: 0.7
+                                    },
+                                    {
+                                        offset: 100,
+                                        color: '#BFDBFE',
+                                        opacity: 0.2
+                                    }
+                                ]
+                            }
+                        }
+                    });
+
+                    chart.updateSeries([{
+                        name: 'Rainfall',
+                        data: formattedRainData
+                    }]);
+                }
+            } catch (error) {
+                console.error('Error updating chart:', error);
+            }
+        }
+
+        // Listen for Livewire events
         Livewire.on('chartDataUpdated', (data) => {
-            const chartData = data[0];
+            if (!chart) return;
 
-            if (chartData && chartData.tempData && chartData.rainData) {
-                // Update the data
-                const newTempData = chartData.tempData.map(d => ({
-                    date: new Date(d[0]),
-                    value: d[1]
+            try {
+                const newData = (data.tempData || []).map(d => ({
+                    x: new Date(d[0]),
+                    y: parseFloat(d[1]) || 0
                 }));
 
-                const newRainData = chartData.rainData.map(d => ({
-                    date: new Date(d[0]),
-                    value: d[1]
-                }));
-
-                // Update scales
-                x.domain(d3.extent(newTempData, d => d.date));
-                yTemp.domain([0, d3.max(newTempData, d => d.value) * 1.2]);
-                yRain.domain([0, d3.max(newRainData, d => d.value) * 1.2]);
-
-                // Update axes
-                svg.select('.x-axis')
-                    .transition()
-                    .duration(750)
-                    .call(d3.axisBottom(x).tickFormat(d3.timeFormat('%H:%M')));
-
-                svg.select('.y-axis-temp')
-                    .transition()
-                    .duration(750)
-                    .call(d3.axisLeft(yTemp));
-
-                svg.select('.y-axis-rain')
-                    .transition()
-                    .duration(750)
-                    .call(d3.axisLeft(yRain));
-
-                // Update lines
-                tempPath.datum(newTempData)
-                    .transition()
-                    .duration(750)
-                    .attr('d', tempLine);
-
-                rainPath.datum(newRainData)
-                    .transition()
-                    .duration(750)
-                    .attr('d', rainLine);
-
-                // Update dots
-                const tempDotsUpdate = svg.selectAll('.temp-dot')
-                    .data(newTempData);
-
-                tempDotsUpdate.exit().remove();
-
-                tempDotsUpdate.enter()
-                    .append('circle')
-                    .attr('class', 'temp-dot')
-                    .attr('r', 4)
-                    .attr('fill', '#EF4444')
-                    .merge(tempDotsUpdate)
-                    .transition()
-                    .duration(750)
-                    .attr('cx', d => x(d.date))
-                    .attr('cy', d => yTemp(d.value));
-
-                const rainDotsUpdate = svg.selectAll('.rain-dot')
-                    .data(newRainData);
-
-                rainDotsUpdate.exit().remove();
-
-                rainDotsUpdate.enter()
-                    .append('circle')
-                    .attr('class', 'rain-dot')
-                    .attr('r', 4)
-                    .attr('fill', '#3B82F6')
-                    .merge(rainDotsUpdate)
-                    .transition()
-                    .duration(750)
-                    .attr('cx', d => x(d.date))
-                    .attr('cy', d => yRain(d.value));
+                chart.updateSeries([{
+                    data: newData
+                }]);
+            } catch (error) {
+                console.error('Error updating chart data:', error);
             }
         });
 
-        // // Initial weather animation load
-        // loadWeatherAnimation('{{ $weather_data["temperature"]["condition"] }}', 'weather-background');
-
-        // // Listen for weather updates
-        // Livewire.on('weatherDataUpdated', () => {
-        //     loadWeatherAnimation('{{ $weather_data["temperature"]["condition"] }}', 'weather-background');
-        // });
         Livewire.on('changepage', () => {
             changePage()
 
@@ -803,6 +854,34 @@
             autoplay: true,
             path: `/weather/${animationName}.json`
         });
+    }
+
+    // Add this temperature classification function
+    function getTemperatureCategory(temp) {
+        if (temp >= 35) return {
+            label: 'Very Hot',
+            color: '#FF4444'
+        };
+        if (temp >= 30) return {
+            label: 'Hot',
+            color: '#FF8C00'
+        };
+        if (temp >= 25) return {
+            label: 'Warm',
+            color: '#FFD700'
+        };
+        if (temp >= 20) return {
+            label: 'Mild',
+            color: '#98FB98'
+        };
+        if (temp >= 15) return {
+            label: 'Cool',
+            color: '#87CEEB'
+        };
+        return {
+            label: 'Cold',
+            color: '#4169E1'
+        };
     }
 </script>
 </div>
