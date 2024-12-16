@@ -738,13 +738,19 @@ class CalculationAws
 
     public function generateChartData($station_id, $selectedDate)
     {
-        // Initialize empty arrays
+        // Initialize empty arrays for all parameters
         $temp_data = [];
         $rain_data = [];
+        $wind_data = [];      // New array for wind speed
+        $humidity_data = [];   // New array for humidity
         $temp_data_7days = [];
         $rain_data_7days = [];
+        $wind_data_7days = []; // New array for 7-day wind speed
+        $humidity_data_7days = []; // New array for 7-day humidity
         $temp_data_month = [];
         $rain_data_month = [];
+        $wind_data_month = []; // New array for monthly wind speed
+        $humidity_data_month = []; // New array for monthly humidity
 
         try {
             // 1. Get Today's Data (grouped by hour)
@@ -759,7 +765,9 @@ class CalculationAws
                     return [
                         'date' => $hourData->first()->date,
                         'temp_out' => $hourData->avg('temp_out'),
-                        'rain_rate' => $hourData->sum('rain_rate')
+                        'rain_rate' => $hourData->sum('rain_rate'),
+                        'windspeedkmh' => $hourData->avg('windspeedkmh'), // Add wind speed
+                        'hum_out' => $hourData->avg('hum_out')           // Add humidity
                     ];
                 });
 
@@ -770,9 +778,14 @@ class CalculationAws
                 if ($data['temp_out'] !== null) {
                     $temp_data[] = [$timestamp, round((float)$data['temp_out'], 1)];
                 }
-
                 if ($data['rain_rate'] !== null) {
                     $rain_data[] = [$timestamp, round((float)$data['rain_rate'], 2)];
+                }
+                if ($data['windspeedkmh'] !== null) {
+                    $wind_data[] = [$timestamp, round((float)$data['windspeedkmh'], 1)];
+                }
+                if ($data['hum_out'] !== null) {
+                    $humidity_data[] = [$timestamp, round((float)$data['hum_out'], 1)];
                 }
             }
 
@@ -789,7 +802,9 @@ class CalculationAws
                     return [
                         'date' => $dayData->first()->date,
                         'temp_out' => $dayData->avg('temp_out'),
-                        'rain_rate' => $dayData->sum('rain_rate')
+                        'rain_rate' => $dayData->sum('rain_rate'),
+                        'windspeedkmh' => $dayData->avg('windspeedkmh'),
+                        'hum_out' => $dayData->avg('hum_out')
                     ];
                 });
 
@@ -800,9 +815,14 @@ class CalculationAws
                 if ($data['temp_out'] !== null) {
                     $temp_data_7days[] = [$timestamp, round((float)$data['temp_out'], 1)];
                 }
-
                 if ($data['rain_rate'] !== null) {
                     $rain_data_7days[] = [$timestamp, round((float)$data['rain_rate'], 2)];
+                }
+                if ($data['windspeedkmh'] !== null) {
+                    $wind_data_7days[] = [$timestamp, round((float)$data['windspeedkmh'], 1)];
+                }
+                if ($data['hum_out'] !== null) {
+                    $humidity_data_7days[] = [$timestamp, round((float)$data['hum_out'], 1)];
                 }
             }
 
@@ -819,7 +839,9 @@ class CalculationAws
                     return [
                         'date' => $dayData->first()->date,
                         'temp_out' => $dayData->avg('temp_out'),
-                        'rain_rate' => $dayData->sum('rain_rate')
+                        'rain_rate' => $dayData->sum('rain_rate'),
+                        'windspeedkmh' => $dayData->avg('windspeedkmh'),
+                        'hum_out' => $dayData->avg('hum_out')
                     ];
                 });
 
@@ -830,42 +852,53 @@ class CalculationAws
                 if ($data['temp_out'] !== null) {
                     $temp_data_month[] = [$timestamp, round((float)$data['temp_out'], 1)];
                 }
-
                 if ($data['rain_rate'] !== null) {
                     $rain_data_month[] = [$timestamp, round((float)$data['rain_rate'], 2)];
+                }
+                if ($data['windspeedkmh'] !== null) {
+                    $wind_data_month[] = [$timestamp, round((float)$data['windspeedkmh'], 1)];
+                }
+                if ($data['hum_out'] !== null) {
+                    $humidity_data_month[] = [$timestamp, round((float)$data['hum_out'], 1)];
                 }
             }
 
             // Add default points if no data found
             if (empty($temp_data)) {
                 $timestamp = strtotime($selectedDate) * 1000;
-                $temp_data[] = [$timestamp, 0];
-                $rain_data[] = [$timestamp, 0];
+                $temp_data = $rain_data = $wind_data = $humidity_data = [[$timestamp, 0]];
             }
             if (empty($temp_data_7days)) {
                 $timestamp = strtotime($selectedDate) * 1000;
-                $temp_data_7days[] = [$timestamp, 0];
-                $rain_data_7days[] = [$timestamp, 0];
+                $temp_data_7days = $rain_data_7days = $wind_data_7days = $humidity_data_7days = [[$timestamp, 0]];
             }
             if (empty($temp_data_month)) {
                 $timestamp = strtotime($selectedDate) * 1000;
-                $temp_data_month[] = [$timestamp, 0];
-                $rain_data_month[] = [$timestamp, 0];
+                $temp_data_month = $rain_data_month = $wind_data_month = $humidity_data_month = [[$timestamp, 0]];
             }
         } catch (\Exception $e) {
             \Log::error('Error generating chart data: ' . $e->getMessage());
             $timestamp = strtotime($selectedDate) * 1000;
-            $temp_data = $temp_data_7days = $temp_data_month = [[$timestamp, 0]];
-            $rain_data = $rain_data_7days = $rain_data_month = [[$timestamp, 0]];
+            $default_point = [[$timestamp, 0]];
+            $temp_data = $temp_data_7days = $temp_data_month = $default_point;
+            $rain_data = $rain_data_7days = $rain_data_month = $default_point;
+            $wind_data = $wind_data_7days = $wind_data_month = $default_point;
+            $humidity_data = $humidity_data_7days = $humidity_data_month = $default_point;
         }
 
         return [
             'tempData_today' => $temp_data,
             'rainData_today' => $rain_data,
+            'windData_today' => $wind_data,
+            'humidityData_today' => $humidity_data,
             'tempData_7days' => $temp_data_7days,
             'rainData_7days' => $rain_data_7days,
+            'windData_7days' => $wind_data_7days,
+            'humidityData_7days' => $humidity_data_7days,
             'tempData_month' => $temp_data_month,
-            'rainData_month' => $rain_data_month
+            'rainData_month' => $rain_data_month,
+            'windData_month' => $wind_data_month,
+            'humidityData_month' => $humidity_data_month
         ];
     }
 }

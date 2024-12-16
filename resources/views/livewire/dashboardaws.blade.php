@@ -325,6 +325,14 @@
                             class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
                             <i class="fas fa-cloud-rain mr-1"></i>Curah Hujan
                         </button>
+                        <button id="windButton"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
+                            <i class="fas fa-wind mr-1"></i>Angin
+                        </button>
+                        <button id="humidityButton"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
+                            <i class="fas fa-tint mr-1"></i>Kelembaban
+                        </button>
                     </div>
                 </div>
             </div>
@@ -347,7 +355,7 @@
 <script type="module">
     $(document).on('livewire:initialized', function() {
         let chart;
-        let currentView = 'temperature';
+        let currentView = 'suhu';
         let currentPeriod = 'today';
 
         // Chart options
@@ -392,11 +400,13 @@
         }
 
         // Button click handlers
-        $('#tempButton').on('click', () => switchView('temperature'));
+        $('#tempButton').on('click', () => switchView('suhu'));
         $('#rainButton').on('click', () => switchView('rainfall'));
         $('#todayButton').on('click', () => switchPeriod('today'));
         $('#weekButton').on('click', () => switchPeriod('week'));
         $('#monthButton').on('click', () => switchPeriod('month'));
+        $('#windButton').on('click', () => switchView('wind'));
+        $('#humidityButton').on('click', () => switchView('humidity'));
 
         function switchView(view) {
             currentView = view;
@@ -411,61 +421,115 @@
         }
 
         function updateButtons() {
+            // Base classes
+            const baseClasses = 'px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out';
+            const activeClasses = `${baseClasses} bg-blue-500 text-white`;
+            const inactiveClasses = `${baseClasses} bg-gray-100 text-gray-700 hover:bg-gray-200`;
+
             // Update view buttons
-            $('#tempButton').attr('class', getButtonClasses(currentView === 'temperature'));
-            $('#rainButton').attr('class', getButtonClasses(currentView === 'rainfall'));
+            $('#tempButton').attr('class', currentView === 'suhu' ? activeClasses : inactiveClasses);
+            $('#rainButton').attr('class', currentView === 'rainfall' ? activeClasses : inactiveClasses);
+            $('#windButton').attr('class', currentView === 'wind' ? activeClasses : inactiveClasses);
+            $('#humidityButton').attr('class', currentView === 'humidity' ? activeClasses : inactiveClasses);
 
             // Update period buttons
-            $('#todayButton').attr('class', getButtonClasses(currentPeriod === 'today'));
-            $('#weekButton').attr('class', getButtonClasses(currentPeriod === 'week'));
-            $('#monthButton').attr('class', getButtonClasses(currentPeriod === 'month'));
-        }
-
-        function getButtonClasses(isActive) {
-            const baseClasses = 'px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out';
-            return isActive ?
-                `${baseClasses} bg-blue-500 text-white` :
-                `${baseClasses} bg-gray-100 text-gray-700 hover:bg-gray-200`;
+            $('#todayButton').attr('class', currentPeriod === 'today' ? activeClasses : inactiveClasses);
+            $('#weekButton').attr('class', currentPeriod === 'week' ? activeClasses : inactiveClasses);
+            $('#monthButton').attr('class', currentPeriod === 'month' ? activeClasses : inactiveClasses);
         }
 
         function updateChart() {
             if (!chart) return;
 
             let chartData;
-            const isTemperature = currentView === 'temperature';
+            let chartType = 'area';
+            let yAxisTitle = '';
 
             // Select data based on current view and period
             switch (currentPeriod) {
                 case 'today':
-                    chartData = isTemperature ? @js($tempChartData) : @js($rainChartData);
+                    switch (currentView) {
+                        case 'suhu':
+                            chartData = @js($tempChartData);
+                            yAxisTitle = 'Temperature (°C)';
+                            break;
+                        case 'rainfall':
+                            chartData = @js($rainChartData);
+                            chartType = 'bar';
+                            yAxisTitle = 'Rainfall (mm/h)';
+                            break;
+                        case 'wind':
+                            chartData = @js($windChartData);
+                            yAxisTitle = 'Wind Speed (km/h)';
+                            break;
+                        case 'humidity':
+                            chartData = @js($humidityChartData);
+                            yAxisTitle = 'Humidity (%)';
+                            break;
+                    }
                     break;
                 case 'week':
-                    chartData = isTemperature ? @js($tempChartData_7days) : @js($rainChartData_7days);
+                    switch (currentView) {
+                        case 'suhu':
+                            chartData = @js($tempChartData_7days);
+                            yAxisTitle = 'Temperature (°C)';
+                            break;
+                        case 'rainfall':
+                            chartData = @js($rainChartData_7days);
+                            chartType = 'bar';
+                            yAxisTitle = 'Rainfall (mm/h)';
+                            break;
+                        case 'wind':
+                            chartData = @js($windChartData_7days);
+                            yAxisTitle = 'Wind Speed (km/h)';
+                            break;
+                        case 'humidity':
+                            chartData = @js($humidityChartData_7days);
+                            yAxisTitle = 'Humidity (%)';
+                            break;
+                    }
                     break;
                 case 'month':
-                    chartData = isTemperature ? @js($tempChartData_month) : @js($rainChartData_month);
+                    switch (currentView) {
+                        case 'suhu':
+                            chartData = @js($tempChartData_month);
+                            yAxisTitle = 'Temperature (°C)';
+                            break;
+                        case 'rainfall':
+                            chartData = @js($rainChartData_month);
+                            chartType = 'bar';
+                            yAxisTitle = 'Rainfall (mm/h)';
+                            break;
+                        case 'wind':
+                            chartData = @js($windChartData_month);
+                            yAxisTitle = 'Wind Speed (km/h)';
+                            break;
+                        case 'humidity':
+                            chartData = @js($humidityChartData_month);
+                            yAxisTitle = 'Humidity (%)';
+                            break;
+                    }
                     break;
             }
 
             // Update chart options
             const newOptions = {
                 series: [{
-                    name: isTemperature ? 'Temperature' : 'Rainfall',
+                    name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
                     data: chartData || []
                 }],
                 chart: {
-                    type: isTemperature ? 'area' : 'bar'
+                    type: chartType
                 },
                 yaxis: {
                     title: {
-                        text: isTemperature ? 'Temperature (°C)' : 'Rainfall (mm/h)'
+                        text: yAxisTitle
                     }
                 }
             };
 
             chart.updateOptions(newOptions, false, true);
         }
-
         // Listen for Livewire events
         Livewire.on('chartDataUpdated', (data) => {
             if (!data || !data[0]) return;

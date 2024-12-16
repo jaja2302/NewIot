@@ -43,10 +43,16 @@ class Dashboardaws extends Component implements HasForms, HasTable
     public $selectedstation = 10; // Add default station ID
     public $tempChartData;
     public $rainChartData;
+    public $windChartData;
+    public $humidityChartData;
     public $tempChartData_7days;
     public $rainChartData_7days;
+    public $windChartData_7days;
+    public $humidityChartData_7days;
     public $tempChartData_month;
     public $rainChartData_month;
+    public $windChartData_month;
+    public $humidityChartData_month;
     public $selectedDate; // Remove the initialization here
     public $latest_data;
     public $today_data;
@@ -440,17 +446,29 @@ class Dashboardaws extends Component implements HasForms, HasTable
         // dd($data['tempData_today']);
         $this->tempChartData = $data['tempData_today'];
         $this->rainChartData = $data['rainData_today'];
+        $this->windChartData = $data['windData_today'];
+        $this->humidityChartData = $data['humidityData_today'];
         $this->tempChartData_7days = $data['tempData_7days'];
         $this->rainChartData_7days = $data['rainData_7days'];
+        $this->windChartData_7days = $data['windData_7days'];
+        $this->humidityChartData_7days = $data['humidityData_7days'];
         $this->tempChartData_month = $data['tempData_month'];
         $this->rainChartData_month = $data['rainData_month'];
+        $this->windChartData_month = $data['windData_month'];
+        $this->humidityChartData_month = $data['humidityData_month'];
         $this->dispatch('chartDataUpdated', [
             'tempData' => $data['tempData_today'],
             'rainData' => $data['rainData_today'],
+            'windData' => $data['windData_today'],
+            'humidityData' => $data['humidityData_today'],
             'tempData_7days' => $data['tempData_7days'],
             'rainData_7days' => $data['rainData_7days'],
+            'windData_7days' => $data['windData_7days'],
+            'humidityData_7days' => $data['humidityData_7days'],
             'tempData_month' => $data['tempData_month'],
-            'rainData_month' => $data['rainData_month']
+            'rainData_month' => $data['rainData_month'],
+            'windData_month' => $data['windData_month'],
+            'humidityData_month' => $data['humidityData_month']
         ]);
     }
 }
