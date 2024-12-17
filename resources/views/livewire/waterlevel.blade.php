@@ -1,147 +1,153 @@
 <div class="min-h-screen">
     @section('title', 'Water Level Monitoring')
     <div class="container mx-auto px-4 py-6">
-        <!-- Page Title -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Water Level Monitoring</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-2">Real-time water level monitoring and analysis dashboard</p>
-        </div>
-        @if (SuperAdmin())
-        <x-filament::modal :close-by-clicking-away="false" id="waterlevel-modal">
-            <x-slot name="trigger">
-                <x-filament::button icon="heroicon-o-arrow-up-tray">
-                    Insert Data
-                </x-filament::button>
-            </x-slot>
-            <x-slot name="heading">
-                Excel Water Level
-            </x-slot>
-            <x-slot name="description">
-                Insert Data Excel Water Level here
-            </x-slot>
-            <form wire:submit="saveForm" wire:loading.attr="disabled">
-                {{ $this->form }}
+        <!-- Header Section with Gradient -->
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl shadow-lg p-6 mb-8">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+                <!-- Title -->
+                <h1 class="text-3xl font-bold text-white">
+                    <i class="fas fa-water mr-2"></i>Water Level Monitoring
+                </h1>
 
-                <div class="flex justify-end gap-x-3 mt-6">
-                    <x-filament::button
-                        type="submit"
-                        wire:loading.attr="disabled"
-                        wire:loading.class="opacity-50 cursor-wait">
-                        <span wire:loading.remove>Upload</span>
-                        <span wire:loading>Processing...</span>
-                    </x-filament::button>
-                </div>
-            </form>
-        </x-filament::modal>
-        @endif
+                <!-- Insert Data Button for SuperAdmin -->
+                @if (SuperAdmin())
+                <x-filament::modal :close-by-clicking-away="false" id="waterlevel-modal">
+                    <x-slot name="trigger">
+                        <x-filament::button icon="heroicon-o-arrow-up-tray" class="bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-300">
+                            Insert Data
+                        </x-filament::button>
+                    </x-slot>
+                    <x-slot name="heading">
+                        Excel Water Level
+                    </x-slot>
+                    <x-slot name="description">
+                        Insert Data Excel Water Level here
+                    </x-slot>
+                    <form wire:submit="saveForm" wire:loading.attr="disabled">
+                        {{ $this->form }}
+
+                        <div class="flex justify-end gap-x-3 mt-6">
+                            <x-filament::button
+                                type="submit"
+                                wire:loading.attr="disabled"
+                                wire:loading.class="opacity-50 cursor-wait">
+                                <span wire:loading.remove>Upload</span>
+                                <span wire:loading>Processing...</span>
+                            </x-filament::button>
+                        </div>
+                    </form>
+                </x-filament::modal>
+                @endif
+            </div>
+        </div>
+
         <!-- Top Grid: Filters and Map -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <!-- Filters Card -->
-            <div class="weather-card bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-                <div class="p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                        <i class="fas fa-filter mr-2"></i>Filters
-                    </h2>
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-filter mr-2 text-blue-500"></i>Filters
+                </h2>
 
-                    <!-- Loading States -->
-                    <div wire:loading wire:target="updateSelectedStation"
-                        class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div class="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
-                            <span class="text-sm text-blue-600 dark:text-blue-400">Loading stations...</span>
-                        </div>
+                <!-- Loading States with improved styling -->
+                <div wire:loading wire:target="updateSelectedStation"
+                    class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg animate-pulse">
+                    <div class="flex items-center space-x-3">
+                        <div class="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+                        <span class="text-sm text-blue-600 dark:text-blue-400">Loading stations...</span>
+                    </div>
+                </div>
+
+                <!-- Filter Controls with improved styling -->
+                <div class="space-y-4">
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                        <input type="date" wire:model.live="selectedDate"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                     </div>
 
-                    <div wire:loading wire:target="onChangeStation"
-                        class="mb-4 p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div class="animate-spin rounded-full h-4 w-4 border-2 border-green-500 border-t-transparent"></div>
-                            <span class="text-sm text-green-600 dark:text-green-400">Loading map marker...</span>
-                        </div>
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Wilayah</label>
+                        <select wire:model="selectedWilayah" wire:change="updateSelectedStation($event.target.value)"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
+                            <option value="">Select Wilayah</option>
+                            @foreach($wilayah as $wil)
+                            <option value="{{ $wil->id }}">{{ $wil->nama }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
-                    <!-- Filter Controls -->
-                    <div class="space-y-4">
-                        <div>
-                            <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                            <div class="select-container">
-                                <input type="date" id="date"
-                                    wire:model.live="selectedDate"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                        </div>
-                        <div>
-                            <label for="wilayah" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Wilayah</label>
-                            <div class="select-container">
-                                <select id="wilayah" wire:model="selectedWilayah" wire:change="updateSelectedStation($event.target.value)"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="">Select Wilayah</option>
-                                    @foreach($wilayah as $wil)
-                                    <option value="{{ $wil->id }}">{{ $wil->nama }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label for="station" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Station</label>
-                            <div class="select-container">
-                                <select id="station" wire:model="selectedStation" wire:change="onChangeStation($event.target.value)"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="">Select Station</option>
-                                    @foreach($stations as $station)
-                                    <option value="{{ $station->id }}">{{ $station->location }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Station</label>
+                        <select wire:model="selectedStation" wire:change="onChangeStation($event.target.value)"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
+                            <option value="">Select Station</option>
+                            @foreach($stations as $station)
+                            <option value="{{ $station->id }}">{{ $station->location }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
             </div>
 
-            <!-- Map Container -->
+            <!-- Map Container with improved styling -->
             <div class="lg:col-span-2">
-                <div class="weather-card bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+                <div class="weather-card bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-map-marked-alt mr-2 text-blue-500"></i>Location Map
+                    </h2>
                     <div wire:ignore id="map" class="w-full rounded-lg" style="min-height: 400px;"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Bottom Grid: Chart and Table -->
+        <!-- Bottom Grid: Chart and Table with improved styling -->
         <div class="grid grid-cols-1 gap-6">
             <!-- Chart Card -->
-            <div class="weather-card bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-xl shadow-lg">
                 <div class="p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                        <i class="fas fa-chart-line mr-2"></i>Water Level Trend
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-chart-line mr-2 text-blue-500"></i>Water Level Trend
                     </h2>
-                    <!-- Add a wrapper div with scrolling -->
-                    <div class="overflow-x-auto">
-                        <div class="w-full" style="height: 400px;">
-                            <!-- Set minimum width for the chart container -->
-                            <div wire:ignore id="container" style="min-width: 1200px; width: 100%;"></div>
-                        </div>
+
+                    <!-- Chart Controls -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button type="button" data-period="today" class="period-btn px-4 py-2 rounded-lg text-sm font-medium bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200">
+                            <i class="fas fa-calendar-day mr-1"></i>Today
+                        </button>
+                        <button type="button" data-period="week" class="period-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200">
+                            <i class="fas fa-calendar-week mr-1"></i>Week
+                        </button>
+                        <button type="button" data-period="month" class="period-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200">
+                            <i class="fas fa-calendar-alt mr-1"></i>Month
+                        </button>
+                    </div>
+
+
+                    <!-- Chart Container -->
+                    <div wire:ignore>
+                        <div id="container" class="w-full h-full"></div>
                     </div>
                 </div>
             </div>
 
             <!-- Table Card -->
-            <div class="weather-card bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <div class="weather-card bg-white dark:bg-gray-800 rounded-xl shadow-lg">
                 <div class="p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                        <i class="fas fa-table mr-2"></i>Recent Measurements
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-table mr-2 text-blue-500"></i>Recent Measurements
                     </h2>
                     <div class="overflow-x-auto">
-                        <div>
-                            {{ $this->table }}
-                        </div>
+                        {{ $this->table }}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+
+
     <script type="module">
-        // Move map initialization outside document.ready
         let map = L.map('map', {
             preferCanvas: true,
         }).setView([-2.2745234, 111.61404248], 13);
@@ -154,9 +160,177 @@
 
         // Initialize layerGroup
         let layerGroup = L.layerGroup().addTo(map);
+        $(document).on('livewire:initialized', function() {
+            let chart;
+            let chartData = {};
+            let currentView = 'today';
 
-        // Listen for Livewire events
-        document.addEventListener('livewire:initialized', () => {
+            // Chart configuration
+            const options = {
+                series: [{
+                    name: 'Level In',
+                    data: []
+                }, {
+                    name: 'Level Out',
+                    data: []
+                }, {
+                    name: 'Level Actual',
+                    data: []
+                }, {
+                    name: 'Batas Atas',
+                    data: []
+                }, {
+                    name: 'Batas Bawah',
+                    data: []
+                }],
+                chart: {
+                    type: 'line',
+                    height: 400,
+                    zoom: {
+                        enabled: true
+                    },
+                    animations: {
+                        enabled: true,
+                        easing: 'easeinout',
+                        speed: 800,
+                        animateGradually: {
+                            enabled: true,
+                            delay: 150
+                        },
+                        dynamicAnimation: {
+                            enabled: true,
+                            speed: 350
+                        }
+                    },
+                    toolbar: {
+                        show: true,
+                        tools: {
+                            download: true,
+                            selection: true,
+                            zoom: true,
+                            zoomin: true,
+                            zoomout: true,
+                            pan: true,
+                            reset: true
+                        }
+                    }
+                },
+                colors: ['#2196F3', '#4CAF50', '#FFC107', '#FF5252', '#FF9800'],
+                stroke: {
+                    curve: 'smooth',
+                    width: [3, 3, 3, 2, 2],
+                    dashArray: [0, 0, 0, 5, 5]
+                },
+                markers: {
+                    size: 4,
+                    strokeColors: "#fff",
+                    strokeWidth: 2,
+                    hover: {
+                        size: 7,
+                    }
+                },
+                xaxis: {
+                    type: 'datetime',
+                    labels: {
+                        datetimeUTC: false,
+                        datetimeFormatter: {
+                            year: 'yyyy',
+                            month: "MMM 'yy",
+                            day: 'dd MMM',
+                            hour: 'HH:mm'
+                        }
+                    }
+                },
+                yaxis: {
+                    title: {
+                        text: 'Water Level (m)'
+                    },
+                    labels: {
+                        formatter: (value) => value?.toFixed(2) ?? 0
+                    }
+                },
+                tooltip: {
+                    shared: true,
+                    x: {
+                        format: 'dd MMM yyyy HH:mm'
+                    },
+                    y: {
+                        formatter: function(val) {
+                            return val?.toFixed(2) + ' m' ?? '0 m';
+                        }
+                    }
+                },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'right'
+                }
+            };
+
+            // Initialize chart
+            const chartContainer = document.querySelector('#container');
+            if (chartContainer) {
+                chart = new ApexCharts(chartContainer, options);
+                chart.render();
+            }
+
+            // Listen for chart data updates
+            Livewire.on('updateChartData', (data) => {
+                chartData = data[0];
+                updateChartWithPeriod(currentView);
+            });
+
+            // Period button click handlers
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const period = this.dataset.period;
+                    currentView = period;
+                    updateChartWithPeriod(period);
+                    updateButtonStates();
+                });
+            });
+
+            function updateChartWithPeriod(period) {
+                if (!chartData || !chartData[period]) return;
+
+                const periodData = chartData[period];
+                const seriesData = [{
+                    name: 'Level In',
+                    data: periodData.levelIn || []
+                }, {
+                    name: 'Level Out',
+                    data: periodData.levelOut || []
+                }, {
+                    name: 'Level Actual',
+                    data: periodData.levelActual || []
+                }, {
+                    name: 'Batas Atas',
+                    data: periodData.batasAtas || []
+                }, {
+                    name: 'Batas Bawah',
+                    data: periodData.batasBawah || []
+                }];
+
+                chart.updateSeries(seriesData);
+            }
+
+            function updateButtonStates() {
+                document.querySelectorAll('.period-btn').forEach(btn => {
+                    const period = btn.dataset.period;
+                    if (period === currentView) {
+                        btn.classList.remove('bg-gray-200', 'text-gray-700');
+                        btn.classList.add('bg-blue-500', 'text-white');
+                    } else {
+                        btn.classList.remove('bg-blue-500', 'text-white');
+                        btn.classList.add('bg-gray-200', 'text-gray-700');
+                    }
+                });
+            }
+
+            // Initial button state
+            updateButtonStates();
+
+
+            // maps 
             Livewire.on('updateMapMarker', (eventData) => {
                 // Debug logging
                 // console.log('Raw event data:', eventData);
@@ -197,152 +371,6 @@
                     console.error('Invalid coordinates:', coordinates);
                 }
             });
-            Livewire.on('updateChartData', (data) => {
-                // console.log('Received data:', data); // Debug log
-
-                // Format the data for Highcharts
-                const formattedData = data[0]; // Since your data is in an array
-                const timestamps = formattedData.datetime.map(time => {
-                    // Convert time string to timestamp
-                    const today = new Date();
-                    const [hours, minutes, seconds] = time.split(':');
-                    today.setHours(hours, minutes, seconds);
-                    return today.getTime();
-                });
-
-                // Create series data arrays
-                const levelInData = timestamps.map((time, index) => [time, formattedData.levelIn[index]]);
-                const levelOutData = timestamps.map((time, index) => [time, formattedData.levelOut[index]]);
-                const levelActualData = timestamps.map((time, index) => [time, formattedData.levelActual[index]]);
-
-                // Update each series with new data
-                chart.series[0].setData(levelInData, false);
-                chart.series[1].setData(levelOutData, false);
-                chart.series[2].setData(levelActualData, true); // true to redraw chart once after all series are updated
-            });
-
-
-            // initializeScrollNavigation(
-            //     "{{ route('dashboard') }}", // Up route
-            //     "{{ route('dashboardaws') }}" // Down route
-            // );
-        });
-
-        // Initialize the chart with proper configuration
-        const chart = Highcharts.chart('container', {
-            chart: {
-                type: 'line',
-                height: 400,
-                zoomType: 'x', // Adds horizontal zoom capability
-                panning: true,
-                panKey: 'shift', // Enable panning while holding shift key
-                style: {
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-                },
-                animation: {
-                    duration: 1500,
-                    easing: 'easeOutBounce'
-                },
-                reflow: true
-            },
-            title: {
-                text: 'Water Level Measurements',
-                style: {
-                    fontSize: '16px',
-                    fontWeight: 'bold'
-                }
-            },
-            xAxis: {
-                type: 'datetime',
-                labels: {
-                    format: '{value:%Y-%m-%d %H:%M}',
-                    rotation: -45,
-                    align: 'right'
-                },
-                title: {
-                    text: 'Date & Time'
-                },
-                gridLineWidth: 1,
-                tickInterval: 3600 * 1000, // Show ticks every hour
-                scrollbar: {
-                    enabled: true // Adds a scrollbar to the x-axis
-                },
-                min: null, // Allow dynamic range
-                max: null
-            },
-            yAxis: {
-                title: {
-                    text: 'Water Level (m)'
-                },
-                gridLineWidth: 1
-            },
-            series: [{
-                name: 'Level In',
-                data: [],
-                color: '#2196F3',
-                marker: {
-                    enabled: true,
-                    radius: 4
-                }
-            }, {
-                name: 'Level Out',
-                data: [],
-                color: '#4CAF50',
-                marker: {
-                    enabled: true,
-                    radius: 4
-                }
-            }, {
-                name: 'Level Actual',
-                data: [],
-                color: '#FFC107',
-                marker: {
-                    enabled: true,
-                    radius: 4
-                }
-            }],
-            tooltip: {
-                shared: true,
-                crosshairs: true,
-                formatter: function() {
-                    let tooltip = '<b>' + Highcharts.dateFormat('%Y-%m-%d %H:%M', this.x) + '</b><br/>';
-                    this.points.forEach(function(point) {
-                        tooltip += '<span style="color:' + point.series.color + '">●</span> ' +
-                            point.series.name + ': <b>' + point.y.toFixed(2) + ' m</b><br/>';
-                    });
-                    return tooltip;
-                }
-            },
-            legend: {
-                enabled: true,
-                align: 'center',
-                verticalAlign: 'bottom'
-            },
-            plotOptions: {
-                series: {
-                    animation: {
-                        duration: 1500,
-                        // Custom animation for each line
-                        events: {
-                            afterAnimate: function() {
-                                // Optional: Add any post-animation effects here
-                            }
-                        }
-                    },
-                    lineWidth: 2,
-                    // Add line drawing animation
-                    animation: {
-                        duration: 1500,
-                        defer: 500 // Delay between series
-                    }
-                }
-            },
-            credits: {
-                enabled: false
-            },
-            accessibility: {
-                enabled: false
-            }
         });
     </script>
 </div>

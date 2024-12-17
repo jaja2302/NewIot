@@ -885,7 +885,7 @@ class CalculationAws
             $wind_data = $wind_data_7days = $wind_data_month = $default_point;
             $humidity_data = $humidity_data_7days = $humidity_data_month = $default_point;
         }
-
+        // dd($temp_data_7days);
         return [
             'tempData_today' => $temp_data,
             'rainData_today' => $rain_data,

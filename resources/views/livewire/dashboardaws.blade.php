@@ -304,15 +304,15 @@
                     <div class="flex flex-wrap gap-2 sm:mr-4">
                         <button id="todayButton"
                             class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-blue-500 text-white">
-                            <i class="fas fa-calendar-day mr-1"></i>Today
+                            <i class="fas fa-calendar-day mr-1"></i>Hari Ini
                         </button>
                         <button id="weekButton"
                             class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
-                            <i class="fas fa-calendar-week mr-1"></i>Week
+                            <i class="fas fa-calendar-week mr-1"></i>Minggu Ini
                         </button>
                         <button id="monthButton"
                             class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
-                            <i class="fas fa-calendar-alt mr-1"></i>Month
+                            <i class="fas fa-calendar-alt mr-1"></i>Bulan Ini
                         </button>
                     </div>
 
@@ -333,6 +333,10 @@
                         <button id="humidityButton"
                             class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
                             <i class="fas fa-tint mr-1"></i>Kelembaban
+                        </button>
+                        <button id="rekapButton"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
+                            <i class="fas fa-chart-line mr-1"></i>Rekap
                         </button>
                     </div>
                 </div>
@@ -569,6 +573,7 @@
         $('#monthButton').on('click', () => switchPeriod('month'));
         $('#windButton').on('click', () => switchView('wind'));
         $('#humidityButton').on('click', () => switchView('humidity'));
+        $('#rekapButton').on('click', () => switchView('rekap'));
 
         function switchView(view) {
             currentView = view;
@@ -593,7 +598,7 @@
             $('#rainButton').attr('class', currentView === 'rainfall' ? activeClasses : inactiveClasses);
             $('#windButton').attr('class', currentView === 'wind' ? activeClasses : inactiveClasses);
             $('#humidityButton').attr('class', currentView === 'humidity' ? activeClasses : inactiveClasses);
-
+            $('#rekapButton').attr('class', currentView === 'rekap' ? activeClasses : inactiveClasses);
             // Update period buttons
             $('#todayButton').attr('class', currentPeriod === 'today' ? activeClasses : inactiveClasses);
             $('#weekButton').attr('class', currentPeriod === 'week' ? activeClasses : inactiveClasses);
@@ -607,7 +612,8 @@
             let chartType = 'area';
             let yAxisTitle = '';
             let chartOptions = {};
-
+            let series = [];
+            let yAxisArray = [];
             // Define style configurations for each category
             const styleConfigs = {
                 suhu: {
@@ -660,127 +666,298 @@
                 }
             };
 
-            // Select data based on current view and period
-            switch (currentPeriod) {
-                case 'today':
-                    switch (currentView) {
-                        case 'suhu':
-                            chartData = @js($tempChartData);
-                            yAxisTitle = 'Temperature (°C)';
-                            break;
-                        case 'rainfall':
-                            chartData = @js($rainChartData);
-                            chartType = 'bar';
-                            yAxisTitle = 'Rainfall (mm/h)';
-                            break;
-                        case 'wind':
-                            chartData = @js($windChartData);
-                            yAxisTitle = 'Wind Speed (km/h)';
-                            break;
-                        case 'humidity':
-                            chartData = @js($humidityChartData);
-                            yAxisTitle = 'Humidity (%)';
-                            break;
-                    }
-                    break;
-                case 'week':
-                    switch (currentView) {
-                        case 'suhu':
-                            chartData = @js($tempChartData_7days);
-                            yAxisTitle = 'Temperature (°C)';
-                            break;
-                        case 'rainfall':
-                            chartData = @js($rainChartData_7days);
-                            chartType = 'bar';
-                            yAxisTitle = 'Rainfall (mm/h)';
-                            break;
-                        case 'wind':
-                            chartData = @js($windChartData_7days);
-                            yAxisTitle = 'Wind Speed (km/h)';
-                            break;
-                        case 'humidity':
-                            chartData = @js($humidityChartData_7days);
-                            yAxisTitle = 'Humidity (%)';
-                            break;
-                    }
-                    break;
-                case 'month':
-                    switch (currentView) {
-                        case 'suhu':
-                            chartData = @js($tempChartData_month);
-                            yAxisTitle = 'Temperature (°C)';
-                            break;
-                        case 'rainfall':
-                            chartData = @js($rainChartData_month);
-                            chartType = 'bar';
-                            yAxisTitle = 'Rainfall (mm/h)';
-                            break;
-                        case 'wind':
-                            chartData = @js($windChartData_month);
-                            yAxisTitle = 'Wind Speed (km/h)';
-                            break;
-                        case 'humidity':
-                            chartData = @js($humidityChartData_month);
-                            yAxisTitle = 'Humidity (%)';
-                            break;
-                    }
-                    break;
-            }
+            if (currentView === 'rekap') {
+                // Handle combined view
+                let tempData, rainData, windData, humidityData;
 
-            // Get the style config for current view
-            const currentStyle = styleConfigs[currentView];
+                switch (currentPeriod) {
+                    case 'today':
+                        tempData = @js($tempChartData);
+                        rainData = @js($rainChartData);
+                        windData = @js($windChartData);
+                        humidityData = @js($humidityChartData);
+                        break;
+                    case 'week':
+                        tempData = @js($tempChartData_7days);
+                        rainData = @js($rainChartData_7days);
+                        windData = @js($windChartData_7days);
+                        humidityData = @js($humidityChartData_7days);
+                        break;
+                    case 'month':
+                        tempData = @js($tempChartData_month);
+                        rainData = @js($rainChartData_month);
+                        windData = @js($windChartData_month);
+                        humidityData = @js($humidityChartData_month);
+                        break;
+                }
 
-            // Update chart options
-            const newOptions = {
-                series: [{
-                    name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
-                    data: chartData || []
-                }],
-                chart: {
-                    type: chartType
-                },
-                colors: currentStyle.colors,
-                fill: {
-                    type: 'gradient',
-                    gradient: currentStyle.gradient
-                },
-                yaxis: {
-                    title: {
-                        text: yAxisTitle
+                series = [{
+                        name: 'Temperature',
+                        data: tempData,
+                        type: 'line',
+                        yAxisIndex: 0
+                    },
+                    {
+                        name: 'Rainfall',
+                        data: rainData,
+                        type: 'column',
+                        yAxisIndex: 1
+                    },
+                    {
+                        name: 'Wind Speed',
+                        data: windData,
+                        type: 'line',
+                        yAxisIndex: 2
+                    },
+                    {
+                        name: 'Humidity',
+                        data: humidityData,
+                        type: 'line',
+                        yAxisIndex: 3
                     }
-                },
-                // Customize markers based on the type
-                markers: {
-                    size: 4,
-                    colors: currentStyle.colors,
-                    strokeColors: "#fff",
-                    strokeWidth: 2,
-                    hover: {
-                        size: 7,
+                ];
+
+                yAxisArray = [{
+                        seriesName: 'Temperature',
+                        title: {
+                            text: 'Temperature (°C)',
+                            style: {
+                                color: '#22c55e'
+                            }
+                        },
+                        labels: {
+                            style: {
+                                colors: '#22c55e'
+                            }
+                        },
+                        axisBorder: {
+                            show: true,
+                            color: '#22c55e'
+                        }
+                    },
+                    {
+                        seriesName: 'Rainfall',
+                        opposite: true,
+                        title: {
+                            text: 'Rainfall (mm/h)',
+                            style: {
+                                color: '#3b82f6'
+                            }
+                        },
+                        labels: {
+                            style: {
+                                colors: '#3b82f6'
+                            }
+                        },
+                        axisBorder: {
+                            show: true,
+                            color: '#3b82f6'
+                        }
+                    },
+                    {
+                        seriesName: 'Wind Speed',
+                        opposite: true,
+                        title: {
+                            text: 'Wind Speed (km/h)',
+                            style: {
+                                color: '#8b5cf6'
+                            }
+                        },
+                        labels: {
+                            style: {
+                                colors: '#8b5cf6'
+                            }
+                        },
+                        axisBorder: {
+                            show: true,
+                            color: '#8b5cf6'
+                        }
+                    },
+                    {
+                        seriesName: 'Humidity',
+                        opposite: true,
+                        title: {
+                            text: 'Humidity (%)',
+                            style: {
+                                color: '#06b6d4'
+                            }
+                        },
+                        labels: {
+                            style: {
+                                colors: '#06b6d4'
+                            }
+                        },
+                        axisBorder: {
+                            show: true,
+                            color: '#06b6d4'
+                        }
                     }
-                },
-                // Customize tooltip
-                tooltip: {
-                    y: {
-                        formatter: function(val) {
-                            switch (currentView) {
-                                case 'suhu':
-                                    return val.toFixed(1) + "°C";
-                                case 'rainfall':
-                                    return val.toFixed(1) + " mm/h";
-                                case 'wind':
-                                    return val.toFixed(1) + " km/h";
-                                case 'humidity':
-                                    return val.toFixed(1) + "%";
-                                default:
-                                    return val;
+                ];
+
+                chart.updateOptions({
+                    series: series,
+                    colors: ['#22c55e', '#3b82f6', '#8b5cf6', '#06b6d4'],
+                    stroke: {
+                        curve: 'smooth',
+                        width: [3, 0, 3, 3], // Line width for each series (0 for column)
+                        dashArray: [0, 0, 0, 0]
+                    },
+                    fill: {
+                        type: ['gradient', 'solid', 'gradient', 'gradient'],
+                        gradient: {
+                            shade: 'dark',
+                            type: "vertical",
+                            shadeIntensity: 0.5,
+                            opacityFrom: 0.8,
+                            opacityTo: 0.2,
+                        }
+                    },
+                    yaxis: yAxisArray,
+                    tooltip: {
+                        shared: true,
+                        intersect: false,
+                        y: {
+                            formatter: function(val, {
+                                seriesIndex
+                            }) {
+                                switch (seriesIndex) {
+                                    case 0:
+                                        return val.toFixed(1) + "°C";
+                                    case 1:
+                                        return val.toFixed(1) + " mm/h";
+                                    case 2:
+                                        return val.toFixed(1) + " km/h";
+                                    case 3:
+                                        return val.toFixed(1) + "%";
+                                }
                             }
                         }
                     }
-                }
-            };
+                }, false, true);
+            } else {
 
-            chart.updateOptions(newOptions, false, true);
+                // Select data based on current view and period
+                switch (currentPeriod) {
+                    case 'today':
+                        switch (currentView) {
+                            case 'suhu':
+                                chartData = @js($tempChartData);
+                                yAxisTitle = 'Temperature (°C)';
+                                break;
+                            case 'rainfall':
+                                chartData = @js($rainChartData);
+                                chartType = 'bar';
+                                yAxisTitle = 'Rainfall (mm/h)';
+                                break;
+                            case 'wind':
+                                chartData = @js($windChartData);
+                                yAxisTitle = 'Wind Speed (km/h)';
+                                break;
+                            case 'humidity':
+                                chartData = @js($humidityChartData);
+                                yAxisTitle = 'Humidity (%)';
+                                break;
+                        }
+                        break;
+                    case 'week':
+                        switch (currentView) {
+                            case 'suhu':
+                                chartData = @js($tempChartData_7days);
+                                yAxisTitle = 'Temperature (°C)';
+                                break;
+                            case 'rainfall':
+                                chartData = @js($rainChartData_7days);
+                                chartType = 'bar';
+                                yAxisTitle = 'Rainfall (mm/h)';
+                                break;
+                            case 'wind':
+                                chartData = @js($windChartData_7days);
+                                yAxisTitle = 'Wind Speed (km/h)';
+                                break;
+                            case 'humidity':
+                                chartData = @js($humidityChartData_7days);
+                                yAxisTitle = 'Humidity (%)';
+                                break;
+                        }
+                        break;
+                    case 'month':
+                        switch (currentView) {
+                            case 'suhu':
+                                chartData = @js($tempChartData_month);
+                                yAxisTitle = 'Temperature (°C)';
+                                break;
+                            case 'rainfall':
+                                chartData = @js($rainChartData_month);
+                                chartType = 'bar';
+                                yAxisTitle = 'Rainfall (mm/h)';
+                                break;
+                            case 'wind':
+                                chartData = @js($windChartData_month);
+                                yAxisTitle = 'Wind Speed (km/h)';
+                                break;
+                            case 'humidity':
+                                chartData = @js($humidityChartData_month);
+                                yAxisTitle = 'Humidity (%)';
+                                break;
+                        }
+                        break;
+                }
+
+                // Get the style config for current view
+                const currentStyle = styleConfigs[currentView];
+
+                // Update chart options
+                const newOptions = {
+                    series: [{
+                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                        data: chartData || []
+                    }],
+                    chart: {
+                        type: chartType
+                    },
+                    colors: currentStyle.colors,
+                    fill: {
+                        type: 'gradient',
+                        gradient: currentStyle.gradient
+                    },
+                    yaxis: {
+                        title: {
+                            text: yAxisTitle
+                        }
+                    },
+                    // Customize markers based on the type
+                    markers: {
+                        size: 4,
+                        colors: currentStyle.colors,
+                        strokeColors: "#fff",
+                        strokeWidth: 2,
+                        hover: {
+                            size: 7,
+                        }
+                    },
+                    // Customize tooltip
+                    tooltip: {
+                        y: {
+                            formatter: function(val) {
+                                switch (currentView) {
+                                    case 'suhu':
+                                        return val.toFixed(1) + "°C";
+                                    case 'rainfall':
+                                        return val.toFixed(1) + " mm/h";
+                                    case 'wind':
+                                        return val.toFixed(1) + " km/h";
+                                    case 'humidity':
+                                        return val.toFixed(1) + "%";
+                                    default:
+                                        return val;
+                                }
+                            }
+                        }
+                    }
+                };
+
+                chart.updateOptions(newOptions, false, true);
+            }
         }
         // Listen for Livewire events
         Livewire.on('chartDataUpdated', (data) => {
@@ -805,6 +982,9 @@
             showLoadingScreen();
         });
 
+
+
+        // maps 
         if (@json($station_lat) !== 0 && @json($station_lon) !== 0) {
             const map = L.map('weatherMap').setView([@json($station_lat), @json($station_lon)], 8);
 
