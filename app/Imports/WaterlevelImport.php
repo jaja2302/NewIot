@@ -53,6 +53,19 @@ class WaterlevelImport implements ToModel, WithStartRow, WithCustomCsvSettings
                 ]
             );
 
+            // Check if the record already exists
+            $existingRecord = Waterlevel::where('idwl', $waterLevelList->id)
+                ->where('datetime', $row[2])
+                ->first();
+
+            if ($existingRecord) {
+                // \Log::info('Skipping duplicate record:', [
+                //     'idwl' => $waterLevelList->id,
+                //     'datetime' => $row[2]
+                // ]);
+                return null; // Skip if record exists
+            }
+
             // \Log::info('Station processed:', [
             //     'id' => $waterLevelList->id,
             //     'name' => $stationName,

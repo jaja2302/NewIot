@@ -47,6 +47,7 @@
             <div class="w-full lg:w-3/4 px-4">
                 <!-- Circle cards -->
                 <div class="weather-card mb-6 rounded-lg shadow-lg p-2 sm:p-4 md:p-6 bg-black text-white">
+
                     <div class="flex flex-wrap justify-center">
                         <div class="flex flex-wrap justify-center w-full mb-4 sm:mb-6">
                             <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
@@ -288,35 +289,35 @@
 
 
 
-
         <!-- Temperature Chart -->
         <div class="mt-4 weather-card bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
-            <div class="flex items-center justify-between mb-4">
+            <!-- Header Section -->
+            <div class="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-4">
                 <div class="flex items-center gap-2">
                     <i class="fas fa-chart-line text-blue-500"></i>
                     <h2 class="font-semibold text-gray-800 dark:text-white">Data Riwayat {{ $selectedDate }}</h2>
                 </div>
 
-                <!-- Toggle Buttons -->
-                <div class="flex gap-2">
+                <!-- Toggle Buttons Container -->
+                <div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:gap-2 w-full sm:w-auto">
                     <!-- Data Period Toggles -->
-                    <div class="flex gap-2 mr-4">
+                    <div class="flex flex-wrap gap-2 sm:mr-4">
                         <button id="todayButton"
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-blue-500 text-white">
+                            class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-blue-500 text-white">
                             <i class="fas fa-calendar-day mr-1"></i>Today
                         </button>
                         <button id="weekButton"
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
+                            class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
                             <i class="fas fa-calendar-week mr-1"></i>Week
                         </button>
                         <button id="monthButton"
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
+                            class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out">
                             <i class="fas fa-calendar-alt mr-1"></i>Month
                         </button>
                     </div>
 
                     <!-- Data Type Toggles -->
-                    <div class="flex gap-2">
+                    <div class="grid grid-cols-2 sm:flex gap-2">
                         <button id="tempButton"
                             class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-blue-500 text-white">
                             <i class="fas fa-temperature-high mr-1"></i>Suhu
@@ -336,7 +337,9 @@
                     </div>
                 </div>
             </div>
-            <div wire:ignore class="h-[400px]">
+
+            <!-- Chart Container -->
+            <div wire:ignore class="h-[300px] sm:h-[400px]">
                 <div id="combinedChart" class="w-full h-full"></div>
             </div>
         </div>
@@ -352,6 +355,7 @@
 
     </div>
 </div>
+
 <script type="module">
     $(document).on('livewire:initialized', function() {
         let chart;
@@ -919,4 +923,6 @@
         });
     }
 </script>
+
+
 </div>

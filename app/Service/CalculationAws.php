@@ -741,16 +741,16 @@ class CalculationAws
         // Initialize empty arrays for all parameters
         $temp_data = [];
         $rain_data = [];
-        $wind_data = [];      // New array for wind speed
-        $humidity_data = [];   // New array for humidity
+        $wind_data = [];
+        $humidity_data = [];
         $temp_data_7days = [];
         $rain_data_7days = [];
-        $wind_data_7days = []; // New array for 7-day wind speed
-        $humidity_data_7days = []; // New array for 7-day humidity
+        $wind_data_7days = [];
+        $humidity_data_7days = [];
         $temp_data_month = [];
         $rain_data_month = [];
-        $wind_data_month = []; // New array for monthly wind speed
-        $humidity_data_month = []; // New array for monthly humidity
+        $wind_data_month = [];
+        $humidity_data_month = [];
 
         try {
             // 1. Get Today's Data (grouped by hour)

@@ -257,12 +257,20 @@ class Waterlevel extends Component implements HasForms, HasTable
             // Reset the form
             $this->form->fill();
 
-            // Show success notification with count
-            Notification::make()
-                ->title('Data imported successfully!')
-                ->body("Added {$newRecords} new records.")
-                ->success()
-                ->send();
+            if ($newRecords > 0) {
+                // Show success notification with count
+                Notification::make()
+                    ->title('Data imported successfully!')
+                    ->body("Added {$newRecords} new records.")
+                    ->success()
+                    ->send();
+            } else {
+                Notification::make()
+                    ->title('No records added')
+                    ->body('Duplicate data found.')
+                    ->info()
+                    ->send();
+            }
 
             // \Log::info('Import completed', [
             //     'initial_count' => $initialCount,
