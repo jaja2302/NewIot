@@ -25,6 +25,8 @@ import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility
 import 'leaflet-defaulticon-compatibility';
 import ApexCharts from 'apexcharts'
 window.ApexCharts = ApexCharts;
+import 'leaflet-control-geocoder';
+import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 function initializeScrollNavigation(upRoute, downRoute, options = {}) {
     // Adjusted default settings
     const config = {

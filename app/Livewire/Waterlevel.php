@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 use App\Models\Estate;
 use App\Models\Waterlevel as ModelsWaterlevel;
@@ -45,6 +46,11 @@ class Waterlevel extends Component implements HasForms, HasTable
     public ?array $data = [];
     // Add wire:model binding for date
     public $selectedDate;
+
+    // Add these properties
+    public $selectedStationForCoordinates;
+    public $selectedLat;
+    public $selectedLon;
 
     // Add mount method to set default date
     public function mount()
@@ -433,5 +439,56 @@ class Waterlevel extends Component implements HasForms, HasTable
 
             // \Log::error('Import error: ' . $e->getMessage());
         }
+    }
+
+    // Add this function to handle coordinate updates
+    public function updateStationCoordinates()
+    {
+        $this->validate([
+            'selectedLat' => 'required|numeric',
+            'selectedLon' => 'required|numeric',
+        ]);
+
+        try {
+            $station = Waterlevellist::find($this->selectedStation);
+            $station->update([
+                'lat' => $this->selectedLat,
+                'lon' => $this->selectedLon,
+            ]);
+
+            // After updating coordinates, refresh the map marker
+            $stationData = $this->processStationData($station, ModelsWaterlevel::where('idwl', $this->selectedStation)
+                ->whereDate('datetime', $this->selectedDate)
+                ->get());
+
+            $this->dispatch('updateMapMarker', [
+                'coordinates' => [
+                    'lat' => (float)$this->selectedLat,
+                    'lon' => (float)$this->selectedLon,
+                ],
+                'station' => $stationData
+            ]);
+
+            Notification::make()
+                ->title('Coordinates updated successfully!')
+                ->success()
+                ->send();
+
+            // Close the modal after successful update
+            $this->dispatch('close-modal', ['id' => 'maps-coordinates']);
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Error updating coordinates')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
+    #[On('set-coordinates')]
+    public function setCoordinates($lat, $lng)
+    {
+        $this->selectedLat = $lat;
+        $this->selectedLon = $lng;
     }
 }

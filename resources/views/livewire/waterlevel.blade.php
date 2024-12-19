@@ -37,6 +37,41 @@
                         </div>
                     </form>
                 </x-filament::modal>
+                <x-filament::modal :close-by-clicking-away="false" id="maps-coordinates" width="5xl">
+                    <x-slot name="trigger">
+                        <x-filament::button icon="heroicon-o-map-pin" class="bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-300">
+                            Insert/Update Maps Coordinates
+                        </x-filament::button>
+                    </x-slot>
+                    <x-slot name="heading">
+                        Insert/Update Maps Coordinates
+                    </x-slot>
+                    <x-slot name="description">
+                        Click on the map to select coordinates or search for a location
+                    </x-slot>
+                    <form wire:submit="updateStationCoordinates">
+                        <div class="space-y-4">
+                            <!-- Coordinates Display -->
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Latitude</label>
+                                    <input type="number" step="any" wire:model="selectedLat" class="w-full rounded-lg border-gray-300" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Longitude</label>
+                                    <input type="number" step="any" wire:model="selectedLon" class="w-full rounded-lg border-gray-300" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="flex justify-end mt-4">
+                                <x-filament::button type="submit">
+                                    Save Coordinates
+                                </x-filament::button>
+                            </div>
+                        </div>
+                    </form>
+                </x-filament::modal>
                 @endif
             </div>
         </div>
@@ -148,197 +183,89 @@
 
 
     <script type="module">
-        let map = L.map('map', {
-            preferCanvas: true,
-        }).setView([-2.2745234, 111.61404248], 13);
+        document.addEventListener('livewire:initialized', function() {
+            // Single map instance
+            let map = L.map('map', {
+                preferCanvas: true,
+            }).setView([-2.2745234, 111.61404248], 13);
 
-        // Add tile layer
-        L.tileLayer('http://{s}.google.com/vt?lyrs=s&x={x}&y={y}&z={z}', {
-            maxZoom: 20,
-            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-        }).addTo(map);
+            // Add tile layer
+            L.tileLayer('http://{s}.google.com/vt?lyrs=s&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+            }).addTo(map);
 
-        // Initialize layerGroup
-        let layerGroup = L.layerGroup().addTo(map);
-        $(document).on('livewire:initialized', function() {
-            let chart;
-            let chartData = {};
-            let currentView = 'today';
+            let layerGroup = L.layerGroup().addTo(map);
 
-            // Chart configuration
-            const options = {
-                series: [{
-                    name: 'Level In',
-                    data: []
-                }, {
-                    name: 'Level Out',
-                    data: []
-                }, {
-                    name: 'Level Actual',
-                    data: []
-                }, {
-                    name: 'Batas Atas',
-                    data: []
-                }, {
-                    name: 'Batas Bawah',
-                    data: []
-                }],
-                chart: {
-                    type: 'line',
-                    height: 400,
-                    zoom: {
-                        enabled: true
-                    },
-                    animations: {
-                        enabled: true,
-                        easing: 'easeinout',
-                        speed: 800,
-                        animateGradually: {
-                            enabled: true,
-                            delay: 150
-                        },
-                        dynamicAnimation: {
-                            enabled: true,
-                            speed: 350
-                        }
-                    },
-                    toolbar: {
-                        show: true,
-                        tools: {
-                            download: true,
-                            selection: true,
-                            zoom: true,
-                            zoomin: true,
-                            zoomout: true,
-                            pan: true,
-                            reset: true
-                        }
-                    }
-                },
-                colors: ['#2196F3', '#4CAF50', '#FFC107', '#FF5252', '#FF9800'],
-                stroke: {
-                    curve: 'smooth',
-                    width: [3, 3, 3, 2, 2],
-                    dashArray: [0, 0, 0, 5, 5]
-                },
-                markers: {
-                    size: 4,
-                    strokeColors: "#fff",
-                    strokeWidth: 2,
-                    hover: {
-                        size: 7,
-                    }
-                },
-                xaxis: {
-                    type: 'datetime',
-                    labels: {
-                        datetimeUTC: false,
-                        datetimeFormatter: {
-                            year: 'yyyy',
-                            month: "MMM 'yy",
-                            day: 'dd MMM',
-                            hour: 'HH:mm'
-                        }
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: 'Water Level (m)'
-                    },
-                    labels: {
-                        formatter: (value) => value?.toFixed(2) ?? 0
-                    }
-                },
-                tooltip: {
-                    shared: true,
-                    x: {
-                        format: 'dd MMM yyyy HH:mm'
-                    },
-                    y: {
-                        formatter: function(val) {
-                            return val?.toFixed(2) + ' m' ?? '0 m';
-                        }
-                    }
-                },
-                legend: {
-                    position: 'top',
-                    horizontalAlign: 'right'
+
+            // Add search control functionality
+            const searchControl = L.Control.geocoder({
+                defaultMarkGeocode: false
+            }).addTo(map);
+            let isUpdateMode = false;
+
+
+            // Handle search results
+            searchControl.on('markgeocode', function(e) {
+                const bbox = e.geocode.bbox;
+                const poly = L.polygon([
+                    bbox.getSouthEast(),
+                    bbox.getNorthEast(),
+                    bbox.getNorthWest(),
+                    bbox.getSouthWest()
+                ]);
+                map.fitBounds(poly.getBounds());
+
+                const latlng = e.geocode.center;
+                updateMarkerPosition(latlng);
+            });
+
+            // Handle map clicks
+            map.on('click', function(e) {
+                if (isUpdateMode) {
+                    updateMarkerPosition(e.latlng);
                 }
-            };
-
-            // Initialize chart
-            const chartContainer = document.querySelector('#container');
-            if (chartContainer) {
-                chart = new ApexCharts(chartContainer, options);
-                chart.render();
-            }
-
-            // Listen for chart data updates
-            Livewire.on('updateChartData', (data) => {
-                chartData = data[0];
-                updateChartWithPeriod(currentView);
             });
 
-            // Period button click handlers
-            document.querySelectorAll('.period-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const period = this.dataset.period;
-                    currentView = period;
-                    updateChartWithPeriod(period);
-                    updateButtonStates();
+            let currentMarker = null;
+
+            function updateMarkerPosition(latlng) {
+                // Clear existing marker
+                if (currentMarker) {
+                    map.removeLayer(currentMarker);
+                }
+
+                // Add new marker
+                currentMarker = L.marker(latlng, {
+                    draggable: true
+                }).addTo(map);
+
+                // Update coordinates in Livewire
+                @this.dispatch('set-coordinates', {
+                    lat: latlng.lat,
+                    lng: latlng.lng
                 });
+
+                // Handle marker drag
+                currentMarker.on('dragend', function(event) {
+                    const marker = event.target;
+                    const position = marker.getLatLng();
+                    @this.dispatch('set-coordinates', {
+                        lat: position.lat,
+                        lng: position.lng
+                    });
+                });
+            }
+            Livewire.on('coordinates-set', ({
+                lat,
+                lng
+            }) => {
+                updateMarkerPosition(L.latLng(lat, lng));
             });
 
-            function updateChartWithPeriod(period) {
-                if (!chartData || !chartData[period]) return;
-
-                const periodData = chartData[period];
-                const seriesData = [{
-                    name: 'Level In',
-                    data: periodData.levelIn || []
-                }, {
-                    name: 'Level Out',
-                    data: periodData.levelOut || []
-                }, {
-                    name: 'Level Actual',
-                    data: periodData.levelActual || []
-                }, {
-                    name: 'Batas Atas',
-                    data: periodData.batasAtas || []
-                }, {
-                    name: 'Batas Bawah',
-                    data: periodData.batasBawah || []
-                }];
-
-                chart.updateSeries(seriesData);
-            }
-
-            function updateButtonStates() {
-                document.querySelectorAll('.period-btn').forEach(btn => {
-                    const period = btn.dataset.period;
-                    if (period === currentView) {
-                        btn.classList.remove('bg-gray-200', 'text-gray-700');
-                        btn.classList.add('bg-blue-500', 'text-white');
-                    } else {
-                        btn.classList.remove('bg-blue-500', 'text-white');
-                        btn.classList.add('bg-gray-200', 'text-gray-700');
-                    }
-                });
-            }
-
-            // Initial button state
-            updateButtonStates();
-
-
-            // maps 
+            // maps for station
             Livewire.on('updateMapMarker', (eventData) => {
-                // Debug logging
-                // console.log('Raw event data:', eventData);
-
-                // Extract data from the first element if it's an array
                 const data = Array.isArray(eventData) ? eventData[0] : eventData;
-                // console.log('Processed data:', data);
-
                 const coordinates = data.coordinates;
                 const station = data.station;
 
@@ -367,8 +294,6 @@
                     // Fit bounds with padding
                     map.setView([coordinates.lat, coordinates.lon], 15);
                     marker.openPopup();
-                } else {
-                    console.error('Invalid coordinates:', coordinates);
                 }
             });
         });
