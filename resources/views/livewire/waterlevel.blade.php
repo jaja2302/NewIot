@@ -39,9 +39,14 @@
                 </x-filament::modal>
                 <x-filament::modal :close-by-clicking-away="false" id="maps-coordinates" width="5xl">
                     <x-slot name="trigger">
-                        <x-filament::button icon="heroicon-o-map-pin" class="bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-300">
+                        @if (SuperAdmin())
+                        <x-filament::button
+                            icon="heroicon-o-map-pin"
+                            class="bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-300"
+                            :disabled="!$selectedWilayah || !$selectedStation">
                             Insert/Update Maps Coordinates
                         </x-filament::button>
+                        @endif
                     </x-slot>
                     <x-slot name="heading">
                         Insert/Update Maps Coordinates
@@ -51,6 +56,12 @@
                     </x-slot>
                     <form wire:submit="updateStationCoordinates">
                         <div class="space-y-4">
+                            @if (!$selectedWilayah || !$selectedStation)
+                            <div class="p-4 bg-yellow-50 text-yellow-700 rounded-lg">
+                                Please select both Wilayah and Station before updating coordinates.
+                            </div>
+                            @endif
+
                             <!-- Coordinates Display -->
                             <div class="grid grid-cols-2 gap-4 mb-4">
                                 <div>
@@ -65,7 +76,9 @@
 
                             <!-- Submit Button -->
                             <div class="flex justify-end mt-4">
-                                <x-filament::button type="submit">
+                                <x-filament::button
+                                    type="submit"
+                                    :disabled="!$selectedWilayah || !$selectedStation">
                                     Save Coordinates
                                 </x-filament::button>
                             </div>
@@ -222,7 +235,10 @@
 
             // Handle map clicks
             map.on('click', function(e) {
-                if (isUpdateMode) {
+                // Check if user is SuperAdmin and has selected both wilayah and station
+                const hasRequiredSelections = @json(SuperAdmin() && !empty($selectedWilayah) && !empty($selectedStation));
+
+                if (isUpdateMode && hasRequiredSelections) {
                     updateMarkerPosition(e.latlng);
                 }
             });

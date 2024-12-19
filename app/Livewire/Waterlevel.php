@@ -444,6 +444,26 @@ class Waterlevel extends Component implements HasForms, HasTable
     // Add this function to handle coordinate updates
     public function updateStationCoordinates()
     {
+        // Check if user is SuperAdmin
+        if (!SuperAdmin()) {
+            Notification::make()
+                ->title('Access Denied')
+                ->body('Only SuperAdmin can update coordinates.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        // Check if wilayah and station are selected
+        if (empty($this->selectedWilayah) || empty($this->selectedStation)) {
+            Notification::make()
+                ->title('Validation Error')
+                ->body('Please select both Wilayah and Station before updating coordinates.')
+                ->danger()
+                ->send();
+            return;
+        }
+
         $this->validate([
             'selectedLat' => 'required|numeric',
             'selectedLon' => 'required|numeric',
