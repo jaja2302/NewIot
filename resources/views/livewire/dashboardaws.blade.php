@@ -372,12 +372,94 @@
             let chart;
             let currentView = 'suhu';
             let currentPeriod = 'today';
+            let tempChartData = @json($tempChartData);
+            let rainChartData = @json($rainChartData);
+            let windChartData = @json($windChartData);
+            let humidityChartData = @json($humidityChartData);
+            let tempChartData_7days = @json($tempChartData_7days);
+            let rainChartData_7days = @json($rainChartData_7days);
+            let windChartData_7days = @json($windChartData_7days);
+            let humidityChartData_7days = @json($humidityChartData_7days);
+            let tempChartData_month = @json($tempChartData_month);
+            let rainChartData_month = @json($rainChartData_month);
+            let windChartData_month = @json($windChartData_month);
+            let humidityChartData_month = @json($humidityChartData_month);
+
+            // Add this variable to store the current chart data
+            let currentChartData = null;
+
+            // Define style configurations for each view type
+            const styleConfigs = {
+                suhu: {
+                    colors: ['#22c55e'], // Green
+                    gradient: {
+                        shade: 'dark',
+                        type: "vertical",
+                        shadeIntensity: 0.5,
+                        gradientToColors: ['#16a34a'],
+                        inverseColors: true,
+                        opacityFrom: 0.8,
+                        opacityTo: 0.2,
+                        stops: [0, 100]
+                    }
+                },
+                rainfall: {
+                    colors: ['#3b82f6'], // Blue
+                    gradient: {
+                        shade: 'dark',
+                        type: "vertical",
+                        shadeIntensity: 0.5,
+                        gradientToColors: ['#2563eb'],
+                        inverseColors: true,
+                        opacityFrom: 0.8,
+                        opacityTo: 0.2,
+                        stops: [0, 100]
+                    }
+                },
+                wind: {
+                    colors: ['#8b5cf6'], // Purple
+                    gradient: {
+                        shade: 'dark',
+                        type: "vertical",
+                        shadeIntensity: 0.5,
+                        gradientToColors: ['#7c3aed'],
+                        inverseColors: true,
+                        opacityFrom: 0.8,
+                        opacityTo: 0.2,
+                        stops: [0, 100]
+                    }
+                },
+                humidity: {
+                    colors: ['#06b6d4'], // Cyan
+                    gradient: {
+                        shade: 'dark',
+                        type: "vertical",
+                        shadeIntensity: 0.5,
+                        gradientToColors: ['#0891b2'],
+                        inverseColors: true,
+                        opacityFrom: 0.8,
+                        opacityTo: 0.2,
+                        stops: [0, 100]
+                    }
+                },
+                rekap: {
+                    colors: ['#22c55e', '#3b82f6', '#8b5cf6', '#06b6d4'],
+                    gradient: {
+                        shade: 'dark',
+                        type: "vertical",
+                        shadeIntensity: 0.5,
+                        opacityFrom: 0.8,
+                        opacityTo: 0.2,
+                        stops: [0, 100]
+                    }
+                }
+            };
 
             // Chart options
             const options = {
                 series: [{
                     name: 'Temperature',
-                    data: @js($tempChartData)
+                    data: []
                 }],
                 chart: {
                     height: 350,
@@ -565,11 +647,37 @@
                 }
             };
 
+            // Initialize chart with the data from Livewire properties
+            const initialChartData = {
+                tempChartData: @json($tempChartData ?? []),
+                rainChartData: @json($rainChartData ?? []),
+                windChartData: @json($windChartData ?? []),
+                humidityChartData: @json($humidityChartData ?? []),
+                tempChartData_7days: @json($tempChartData_7days ?? []),
+                rainChartData_7days: @json($rainChartData_7days ?? []),
+                windChartData_7days: @json($windChartData_7days ?? []),
+                humidityChartData_7days: @json($humidityChartData_7days ?? []),
+                tempChartData_month: @json($tempChartData_month ?? []),
+                rainChartData_month: @json($rainChartData_month ?? []),
+                windChartData_month: @json($windChartData_month ?? []),
+                humidityChartData_month: @json($humidityChartData_month ?? [])
+            };
+
             // Initialize chart
             const $chartContainer = $("#combinedChart");
             if ($chartContainer.length) {
                 chart = new ApexCharts($chartContainer[0], options);
                 chart.render();
+
+                // Update chart with initial data
+                currentChartData = initialChartData;
+                updateChart(initialChartData);
+
+                // Listen for subsequent updates
+                Livewire.on('chartDataUpdated', (eventData) => {
+                    currentChartData = eventData[0];
+                    updateChart();
+                });
             }
 
             // Button click handlers
@@ -585,12 +693,14 @@
             function switchView(view) {
                 currentView = view;
                 updateButtons();
+                // Use stored data when switching views
                 updateChart();
             }
 
             function switchPeriod(period) {
                 currentPeriod = period;
                 updateButtons();
+                // Use stored data when switching periods
                 updateChart();
             }
 
@@ -612,66 +722,24 @@
                 $('#monthButton').attr('class', currentPeriod === 'month' ? activeClasses : inactiveClasses);
             }
 
-            function updateChart() {
+            function updateChart(data) {
                 if (!chart) return;
 
-                let chartData;
-                let chartType = 'area';
-                let yAxisTitle = '';
-                let chartOptions = {};
+                // Store the data if provided
+                if (data) {
+                    currentChartData = data;
+                }
+
+                // Use stored data if no new data provided
+                const chartData = data || currentChartData;
+                if (!chartData) return;
+
+                // console.log('Using chart data:', chartData);
+
                 let series = [];
                 let yAxisArray = [];
-                // Define style configurations for each category
-                const styleConfigs = {
-                    suhu: {
-                        colors: ['#22c55e'], // Green
-                        gradient: {
-                            shade: 'dark',
-                            type: "vertical",
-                            shadeIntensity: 0.5,
-                            gradientToColors: ['#ef4444'], // Red
-                            inverseColors: true,
-                            opacityFrom: 0.8,
-                            opacityTo: 0.2,
-                        }
-                    },
-                    rainfall: {
-                        colors: ['#3b82f6'], // Blue
-                        gradient: {
-                            shade: 'dark',
-                            type: "vertical",
-                            shadeIntensity: 0.5,
-                            gradientToColors: ['#1d4ed8'], // Darker Blue
-                            inverseColors: false,
-                            opacityFrom: 0.8,
-                            opacityTo: 0.2,
-                        }
-                    },
-                    wind: {
-                        colors: ['#8b5cf6'], // Purple
-                        gradient: {
-                            shade: 'dark',
-                            type: "vertical",
-                            shadeIntensity: 0.5,
-                            gradientToColors: ['#6d28d9'], // Darker Purple
-                            inverseColors: false,
-                            opacityFrom: 0.8,
-                            opacityTo: 0.2,
-                        }
-                    },
-                    humidity: {
-                        colors: ['#06b6d4'], // Cyan
-                        gradient: {
-                            shade: 'dark',
-                            type: "vertical",
-                            shadeIntensity: 0.5,
-                            gradientToColors: ['#0891b2'], // Darker Cyan
-                            inverseColors: false,
-                            opacityFrom: 0.8,
-                            opacityTo: 0.2,
-                        }
-                    }
-                };
+                let yAxisTitle = ''; // Initialize yAxisTitle
+                let chartType = 'line'; // Default chart type
 
                 if (currentView === 'rekap') {
                     // Handle combined view
@@ -679,22 +747,22 @@
 
                     switch (currentPeriod) {
                         case 'today':
-                            tempData = @js($tempChartData);
-                            rainData = @js($rainChartData);
-                            windData = @js($windChartData);
-                            humidityData = @js($humidityChartData);
+                            tempData = chartData.tempChartData;
+                            rainData = chartData.rainChartData;
+                            windData = chartData.windChartData;
+                            humidityData = chartData.humidityChartData;
                             break;
                         case 'week':
-                            tempData = @js($tempChartData_7days);
-                            rainData = @js($rainChartData_7days);
-                            windData = @js($windChartData_7days);
-                            humidityData = @js($humidityChartData_7days);
+                            tempData = chartData.tempChartData_7days;
+                            rainData = chartData.rainChartData_7days;
+                            windData = chartData.windChartData_7days;
+                            humidityData = chartData.humidityChartData_7days;
                             break;
                         case 'month':
-                            tempData = @js($tempChartData_month);
-                            rainData = @js($rainChartData_month);
-                            windData = @js($windChartData_month);
-                            humidityData = @js($humidityChartData_month);
+                            tempData = chartData.tempChartData_month;
+                            rainData = chartData.rainChartData_month;
+                            windData = chartData.windChartData_month;
+                            humidityData = chartData.humidityChartData_month;
                             break;
                     }
 
@@ -842,26 +910,37 @@
                         }
                     }, false, true);
                 } else {
-
                     // Select data based on current view and period
                     switch (currentPeriod) {
                         case 'today':
                             switch (currentView) {
                                 case 'suhu':
-                                    chartData = @js($tempChartData);
+                                    series = [{
+                                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                                        data: chartData.tempChartData || []
+                                    }];
                                     yAxisTitle = 'Temperature (°C)';
                                     break;
                                 case 'rainfall':
-                                    chartData = @js($rainChartData);
+                                    series = [{
+                                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                                        data: chartData.rainChartData || []
+                                    }];
                                     chartType = 'bar';
                                     yAxisTitle = 'Rainfall (mm/h)';
                                     break;
                                 case 'wind':
-                                    chartData = @js($windChartData);
+                                    series = [{
+                                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                                        data: chartData.windChartData || []
+                                    }];
                                     yAxisTitle = 'Wind Speed (km/h)';
                                     break;
                                 case 'humidity':
-                                    chartData = @js($humidityChartData);
+                                    series = [{
+                                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                                        data: chartData.humidityChartData || []
+                                    }];
                                     yAxisTitle = 'Humidity (%)';
                                     break;
                             }
@@ -869,20 +948,32 @@
                         case 'week':
                             switch (currentView) {
                                 case 'suhu':
-                                    chartData = @js($tempChartData_7days);
+                                    series = [{
+                                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                                        data: chartData.tempChartData_7days || []
+                                    }];
                                     yAxisTitle = 'Temperature (°C)';
                                     break;
                                 case 'rainfall':
-                                    chartData = @js($rainChartData_7days);
+                                    series = [{
+                                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                                        data: chartData.rainChartData_7days || []
+                                    }];
                                     chartType = 'bar';
                                     yAxisTitle = 'Rainfall (mm/h)';
                                     break;
                                 case 'wind':
-                                    chartData = @js($windChartData_7days);
+                                    series = [{
+                                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                                        data: chartData.windChartData_7days || []
+                                    }];
                                     yAxisTitle = 'Wind Speed (km/h)';
                                     break;
                                 case 'humidity':
-                                    chartData = @js($humidityChartData_7days);
+                                    series = [{
+                                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                                        data: chartData.humidityChartData_7days || []
+                                    }];
                                     yAxisTitle = 'Humidity (%)';
                                     break;
                             }
@@ -890,20 +981,32 @@
                         case 'month':
                             switch (currentView) {
                                 case 'suhu':
-                                    chartData = @js($tempChartData_month);
+                                    series = [{
+                                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                                        data: chartData.tempChartData_month || []
+                                    }];
                                     yAxisTitle = 'Temperature (°C)';
                                     break;
                                 case 'rainfall':
-                                    chartData = @js($rainChartData_month);
+                                    series = [{
+                                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                                        data: chartData.rainChartData_month || []
+                                    }];
                                     chartType = 'bar';
                                     yAxisTitle = 'Rainfall (mm/h)';
                                     break;
                                 case 'wind':
-                                    chartData = @js($windChartData_month);
+                                    series = [{
+                                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                                        data: chartData.windChartData_month || []
+                                    }];
                                     yAxisTitle = 'Wind Speed (km/h)';
                                     break;
                                 case 'humidity':
-                                    chartData = @js($humidityChartData_month);
+                                    series = [{
+                                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                                        data: chartData.humidityChartData_month || []
+                                    }];
                                     yAxisTitle = 'Humidity (%)';
                                     break;
                             }
@@ -915,10 +1018,7 @@
 
                     // Update chart options
                     const newOptions = {
-                        series: [{
-                            name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
-                            data: chartData || []
-                        }],
+                        series: series,
                         chart: {
                             type: chartType
                         },
@@ -967,9 +1067,9 @@
                 }
             }
             // Listen for Livewire events
-            Livewire.on('chartDataUpdated', (data) => {
-                if (!data || !data[0]) return;
-                updateChart();
+            Livewire.on('chartDataUpdated', (eventData) => {
+                // Update with new data from server
+                updateChart(eventData[0]);
             });
 
             Livewire.on('showLoadingScreen', () => {

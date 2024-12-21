@@ -88,7 +88,6 @@ class Dashboardaws extends Component implements HasForms, HasTable
     {
         $this->calculationService = $calculationService;
         $this->selectedDate = Carbon::now('Asia/Jakarta')->format('Y-m-d');
-        // $this->selectedDate = '2024-11-05';
         $list_station = DB::connection('mysql')->table('weather_station_list')->where('flags', 1)->get();
         $this->list_station = $list_station;
 
@@ -97,16 +96,49 @@ class Dashboardaws extends Component implements HasForms, HasTable
             ->table('weather_station_list')
             ->where('id', $this->selectedstation)
             ->first();
-
         $this->station_lat = $station->lat;
         $this->station_lon = $station->lon;
         $this->station_loc = $station->loc;
 
+        // Get initial data
         $this->getLatestData($this->selectedstation);
-        $this->generateChartData($this->selectedstation);
-        // $this->fetchLatestData();
-        // $this->fetchTodayData();
-        // $this->fetchFiveDaysAheadData();
+
+        // Generate and immediately dispatch chart data
+        $data = $this->calculationService->generateChartData($this->selectedstation, $this->selectedDate);
+        $this->tempChartData = $data['tempData_today'];
+        $this->rainChartData = $data['rainData_today'];
+        $this->windChartData = $data['windData_today'];
+        $this->humidityChartData = $data['humidityData_today'];
+        $this->tempChartData_7days = $data['tempData_7days'];
+        $this->rainChartData_7days = $data['rainData_7days'];
+        $this->windChartData_7days = $data['windData_7days'];
+        $this->humidityChartData_7days = $data['humidityData_7days'];
+        $this->tempChartData_month = $data['tempData_month'];
+        $this->rainChartData_month = $data['rainData_month'];
+        $this->windChartData_month = $data['windData_month'];
+        $this->humidityChartData_month = $data['humidityData_month'];
+    }
+
+    public function generateChartData($station_id)
+    {
+        $data = $this->calculationService->generateChartData($station_id, $this->selectedDate);
+        logger()->debug('Chart Data Generated:', $data);
+
+        // Remove local property assignments since we'll use dispatch directly
+        $this->dispatch('chartDataUpdated', [
+            'tempChartData' => $data['tempData_today'],
+            'rainChartData' => $data['rainData_today'],
+            'windChartData' => $data['windData_today'],
+            'humidityChartData' => $data['humidityData_today'],
+            'tempChartData_7days' => $data['tempData_7days'],
+            'rainChartData_7days' => $data['rainData_7days'],
+            'windChartData_7days' => $data['windData_7days'],
+            'humidityChartData_7days' => $data['humidityData_7days'],
+            'tempChartData_month' => $data['tempData_month'],
+            'rainChartData_month' => $data['rainData_month'],
+            'windChartData_month' => $data['windData_month'],
+            'humidityChartData_month' => $data['humidityData_month']
+        ]);
     }
 
     public function render()
@@ -437,46 +469,6 @@ class Dashboardaws extends Component implements HasForms, HasTable
     public function fetchFiveDaysAheadData()
     {
         $this->five_days_ahead_data = $this->calculationService->fetchData($this->selectedstation, 'five_days_ahead');
-    }
-
-    public function generateChartData($station_id)
-    {
-        $data = $this->calculationService->generateChartData($station_id, $this->selectedDate);
-
-        // Add debugging logs
-        // \Log::info('Today\'s data:', [
-        //     'temp' => $data['tempData_today'],
-        //     'rain' => $data['rainData_today'],
-        //     'wind' => $data['windData_today'],
-        //     'humidity' => $data['humidityData_today']
-        // ]);
-
-        $this->tempChartData = $data['tempData_today'];
-        $this->rainChartData = $data['rainData_today'];
-        $this->windChartData = $data['windData_today'];
-        $this->humidityChartData = $data['humidityData_today'];
-        $this->tempChartData_7days = $data['tempData_7days'];
-        $this->rainChartData_7days = $data['rainData_7days'];
-        $this->windChartData_7days = $data['windData_7days'];
-        $this->humidityChartData_7days = $data['humidityData_7days'];
-        $this->tempChartData_month = $data['tempData_month'];
-        $this->rainChartData_month = $data['rainData_month'];
-        $this->windChartData_month = $data['windData_month'];
-        $this->humidityChartData_month = $data['humidityData_month'];
-        $this->dispatch('chartDataUpdated', [
-            'tempData' => $data['tempData_today'],
-            'rainData' => $data['rainData_today'],
-            'windData' => $data['windData_today'],
-            'humidityData' => $data['humidityData_today'],
-            'tempData_7days' => $data['tempData_7days'],
-            'rainData_7days' => $data['rainData_7days'],
-            'windData_7days' => $data['windData_7days'],
-            'humidityData_7days' => $data['humidityData_7days'],
-            'tempData_month' => $data['tempData_month'],
-            'rainData_month' => $data['rainData_month'],
-            'windData_month' => $data['windData_month'],
-            'humidityData_month' => $data['humidityData_month']
-        ]);
     }
 
 

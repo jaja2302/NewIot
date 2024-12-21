@@ -765,9 +765,9 @@ class CalculationAws
                     return [
                         'date' => $hourData->first()->date,
                         'temp_out' => $hourData->avg('temp_out'),
-                        'rain_rate' => $hourData->sum('rain_rate'),
-                        'windspeedkmh' => $hourData->avg('windspeedkmh'), // Add wind speed
-                        'hum_out' => $hourData->avg('hum_out')           // Add humidity
+                        'rain_rate' => $hourData->max('rain_rate'),
+                        'windspeedkmh' => $hourData->avg('windspeedkmh'),
+                        'hum_out' => $hourData->avg('hum_out')
                     ];
                 });
 
