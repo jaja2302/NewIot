@@ -865,7 +865,8 @@
                             axisBorder: {
                                 show: true,
                                 color: '#06b6d4'
-                            }
+                            },
+                            max: 100
                         }
                     ];
 
@@ -1030,7 +1031,8 @@
                         yaxis: {
                             title: {
                                 text: yAxisTitle
-                            }
+                            },
+                            max: currentView === 'humidity' ? 100 : undefined
                         },
                         // Customize markers based on the type
                         markers: {

@@ -765,7 +765,7 @@ class CalculationAws
                     return [
                         'date' => $hourData->first()->date,
                         'temp_out' => $hourData->avg('temp_out'),
-                        'rain_rate' => $hourData->max('rain_rate'),
+                        'rain_rate' => $hourData->sum('rain_rate'),
                         'windspeedkmh' => $hourData->avg('windspeedkmh'),
                         'hum_out' => $hourData->avg('hum_out')
                     ];
@@ -773,7 +773,7 @@ class CalculationAws
 
             // Process today's data
             foreach ($today_data as $hour => $data) {
-                $timestamp = strtotime($data['date']) * 1000;
+                $timestamp = strtotime($data['date']) * 1000; // Using exact timestamp of max rain
 
                 if ($data['temp_out'] !== null) {
                     $temp_data[] = [$timestamp, round((float)$data['temp_out'], 1)];
@@ -802,7 +802,7 @@ class CalculationAws
                     return [
                         'date' => $dayData->first()->date,
                         'temp_out' => $dayData->avg('temp_out'),
-                        'rain_rate' => $dayData->sum('rain_rate'),
+                        'rain_rate' => $dayData->max('dailyrainmm'),
                         'windspeedkmh' => $dayData->avg('windspeedkmh'),
                         'hum_out' => $dayData->avg('hum_out')
                     ];
@@ -839,7 +839,7 @@ class CalculationAws
                     return [
                         'date' => $dayData->first()->date,
                         'temp_out' => $dayData->avg('temp_out'),
-                        'rain_rate' => $dayData->sum('rain_rate'),
+                        'rain_rate' => $dayData->max('dailyrainmm'),
                         'windspeedkmh' => $dayData->avg('windspeedkmh'),
                         'hum_out' => $dayData->avg('hum_out')
                     ];
