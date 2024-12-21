@@ -358,720 +358,731 @@
         </div>
 
     </div>
-</div>
 
-<script type="module">
-    $(document).on('livewire:initialized', function() {
-        let chart;
-        let currentView = 'suhu';
-        let currentPeriod = 'today';
+    <!-- Add this hidden div to store popup template -->
+    <div id="mapPopupTemplate" class="hidden">
+        <div class="weather-popup p-2 space-y-1">
+            <p><span class="wind-speed"></span></p>
+            <p><span class="humidity"></span></p>
+        </div>
+    </div>
 
-        // Chart options
-        const options = {
-            series: [{
-                name: 'Temperature',
-                data: @js($tempChartData)
-            }],
-            chart: {
-                height: 350,
-                type: 'area',
-                animations: {
-                    enabled: true,
-                    easing: 'easeinout',
-                    speed: 800,
-                    animateGradually: {
+    <script type="module">
+        $(document).on('livewire:initialized', function() {
+            let chart;
+            let currentView = 'suhu';
+            let currentPeriod = 'today';
+
+            // Chart options
+            const options = {
+                series: [{
+                    name: 'Temperature',
+                    data: @js($tempChartData)
+                }],
+                chart: {
+                    height: 350,
+                    type: 'area',
+                    animations: {
                         enabled: true,
-                        delay: 150
+                        easing: 'easeinout',
+                        speed: 800,
+                        animateGradually: {
+                            enabled: true,
+                            delay: 150
+                        },
+                        dynamicAnimation: {
+                            enabled: true,
+                            speed: 350
+                        }
                     },
-                    dynamicAnimation: {
+                    toolbar: {
+                        show: true,
+                        tools: {
+                            download: true,
+                            selection: true,
+                            zoom: true,
+                            zoomin: true,
+                            zoomout: true,
+                            pan: true,
+                            reset: true
+                        },
+                        autoSelected: 'zoom'
+                    },
+                    dropShadow: {
                         enabled: true,
-                        speed: 350
-                    }
-                },
-                toolbar: {
-                    show: true,
-                    tools: {
-                        download: true,
-                        selection: true,
-                        zoom: true,
-                        zoomin: true,
-                        zoomout: true,
-                        pan: true,
-                        reset: true
+                        color: '#000',
+                        top: 18,
+                        left: 7,
+                        blur: 10,
+                        opacity: 0.2
                     },
-                    autoSelected: 'zoom'
+                    background: 'transparent'
                 },
-                dropShadow: {
-                    enabled: true,
-                    color: '#000',
-                    top: 18,
-                    left: 7,
-                    blur: 10,
-                    opacity: 0.2
-                },
-                background: 'transparent'
-            },
-            colors: ['#00E396', '#FEB019', '#FF4560', '#775DD0'],
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    shade: 'dark',
-                    type: "vertical",
-                    shadeIntensity: 0.5,
-                    gradientToColors: undefined,
-                    inverseColors: true,
-                    opacityFrom: 0.8,
-                    opacityTo: 0.2,
-                    stops: [0, 100],
-                }
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 3,
-                dashArray: [0, 8, 5]
-            },
-            grid: {
-                borderColor: '#e0e0e0',
-                strokeDashArray: 5,
-                xaxis: {
-                    lines: {
-                        show: true
-                    }
-                },
-                yaxis: {
-                    lines: {
-                        show: true
-                    }
-                },
-                padding: {
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    left: 0
-                },
-            },
-            markers: {
-                size: 4,
-                colors: ["#FFA41B"],
-                strokeColors: "#fff",
-                strokeWidth: 2,
-                hover: {
-                    size: 7,
-                }
-            },
-            xaxis: {
-                type: 'datetime',
-                labels: {
-                    style: {
-                        colors: '#666',
-                        fontSize: '12px',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        fontWeight: 400,
-                    },
-                    datetimeFormatter: {
-                        year: 'yyyy',
-                        month: "MMM 'yy",
-                        day: 'dd MMM',
-                        hour: 'HH:mm'
-                    }
-                },
-                tooltip: {
-                    enabled: false
-                }
-            },
-            yaxis: {
-                title: {
-                    text: 'Temperature (°C)',
-                    style: {
-                        fontSize: '14px',
-                        fontWeight: 600,
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                    }
-                },
-                labels: {
-                    style: {
-                        colors: '#666',
-                        fontSize: '12px',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        fontWeight: 400,
-                    }
-                }
-            },
-            tooltip: {
-                enabled: true,
-                shared: true,
-                intersect: false,
-                x: {
-                    format: 'dd MMM yyyy HH:mm'
-                },
-                y: {
-                    formatter: function(val) {
-                        return val.toFixed(1) + "°C"
-                    }
-                },
-                theme: 'dark',
-                style: {
-                    fontSize: '12px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                },
-                marker: {
-                    show: true,
-                },
-                fixed: {
-                    enabled: false,
-                    position: 'topRight',
-                    offsetX: 0,
-                    offsetY: 0,
-                },
-            },
-            legend: {
-                show: true,
-                position: 'top',
-                horizontalAlign: 'right',
-                floating: true,
-                offsetY: -25,
-                offsetX: -5,
-                markers: {
-                    width: 12,
-                    height: 12,
-                    strokeWidth: 0,
-                    strokeColor: '#fff',
-                    radius: 12,
-                    customHTML: undefined,
-                    onClick: undefined,
-                    offsetX: 0,
-                    offsetY: 0
-                },
-            },
-            theme: {
-                mode: 'light',
-                palette: 'palette1',
-                monochrome: {
-                    enabled: false,
-                    color: '#255aee',
-                    shadeTo: 'light',
-                    shadeIntensity: 0.65
-                },
-            }
-        };
-
-        // Initialize chart
-        const $chartContainer = $("#combinedChart");
-        if ($chartContainer.length) {
-            chart = new ApexCharts($chartContainer[0], options);
-            chart.render();
-        }
-
-        // Button click handlers
-        $('#tempButton').on('click', () => switchView('suhu'));
-        $('#rainButton').on('click', () => switchView('rainfall'));
-        $('#todayButton').on('click', () => switchPeriod('today'));
-        $('#weekButton').on('click', () => switchPeriod('week'));
-        $('#monthButton').on('click', () => switchPeriod('month'));
-        $('#windButton').on('click', () => switchView('wind'));
-        $('#humidityButton').on('click', () => switchView('humidity'));
-        $('#rekapButton').on('click', () => switchView('rekap'));
-
-        function switchView(view) {
-            currentView = view;
-            updateButtons();
-            updateChart();
-        }
-
-        function switchPeriod(period) {
-            currentPeriod = period;
-            updateButtons();
-            updateChart();
-        }
-
-        function updateButtons() {
-            // Base classes
-            const baseClasses = 'px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out';
-            const activeClasses = `${baseClasses} bg-blue-500 text-white`;
-            const inactiveClasses = `${baseClasses} bg-gray-100 text-gray-700 hover:bg-gray-200`;
-
-            // Update view buttons
-            $('#tempButton').attr('class', currentView === 'suhu' ? activeClasses : inactiveClasses);
-            $('#rainButton').attr('class', currentView === 'rainfall' ? activeClasses : inactiveClasses);
-            $('#windButton').attr('class', currentView === 'wind' ? activeClasses : inactiveClasses);
-            $('#humidityButton').attr('class', currentView === 'humidity' ? activeClasses : inactiveClasses);
-            $('#rekapButton').attr('class', currentView === 'rekap' ? activeClasses : inactiveClasses);
-            // Update period buttons
-            $('#todayButton').attr('class', currentPeriod === 'today' ? activeClasses : inactiveClasses);
-            $('#weekButton').attr('class', currentPeriod === 'week' ? activeClasses : inactiveClasses);
-            $('#monthButton').attr('class', currentPeriod === 'month' ? activeClasses : inactiveClasses);
-        }
-
-        function updateChart() {
-            if (!chart) return;
-
-            let chartData;
-            let chartType = 'area';
-            let yAxisTitle = '';
-            let chartOptions = {};
-            let series = [];
-            let yAxisArray = [];
-            // Define style configurations for each category
-            const styleConfigs = {
-                suhu: {
-                    colors: ['#22c55e'], // Green
+                colors: ['#00E396', '#FEB019', '#FF4560', '#775DD0'],
+                fill: {
+                    type: 'gradient',
                     gradient: {
                         shade: 'dark',
                         type: "vertical",
                         shadeIntensity: 0.5,
-                        gradientToColors: ['#ef4444'], // Red
+                        gradientToColors: undefined,
                         inverseColors: true,
                         opacityFrom: 0.8,
                         opacityTo: 0.2,
+                        stops: [0, 100],
                     }
                 },
-                rainfall: {
-                    colors: ['#3b82f6'], // Blue
-                    gradient: {
-                        shade: 'dark',
-                        type: "vertical",
-                        shadeIntensity: 0.5,
-                        gradientToColors: ['#1d4ed8'], // Darker Blue
-                        inverseColors: false,
-                        opacityFrom: 0.8,
-                        opacityTo: 0.2,
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: 3,
+                    dashArray: [0, 8, 5]
+                },
+                grid: {
+                    borderColor: '#e0e0e0',
+                    strokeDashArray: 5,
+                    xaxis: {
+                        lines: {
+                            show: true
+                        }
+                    },
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    },
+                    padding: {
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        left: 0
+                    },
+                },
+                markers: {
+                    size: 4,
+                    colors: ["#FFA41B"],
+                    strokeColors: "#fff",
+                    strokeWidth: 2,
+                    hover: {
+                        size: 7,
                     }
                 },
-                wind: {
-                    colors: ['#8b5cf6'], // Purple
-                    gradient: {
-                        shade: 'dark',
-                        type: "vertical",
-                        shadeIntensity: 0.5,
-                        gradientToColors: ['#6d28d9'], // Darker Purple
-                        inverseColors: false,
-                        opacityFrom: 0.8,
-                        opacityTo: 0.2,
+                xaxis: {
+                    type: 'datetime',
+                    labels: {
+                        style: {
+                            colors: '#666',
+                            fontSize: '12px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 400,
+                        },
+                        datetimeFormatter: {
+                            year: 'yyyy',
+                            month: "MMM 'yy",
+                            day: 'dd MMM',
+                            hour: 'HH:mm'
+                        }
+                    },
+                    tooltip: {
+                        enabled: false
                     }
                 },
-                humidity: {
-                    colors: ['#06b6d4'], // Cyan
-                    gradient: {
-                        shade: 'dark',
-                        type: "vertical",
-                        shadeIntensity: 0.5,
-                        gradientToColors: ['#0891b2'], // Darker Cyan
-                        inverseColors: false,
-                        opacityFrom: 0.8,
-                        opacityTo: 0.2,
+                yaxis: {
+                    title: {
+                        text: 'Temperature (°C)',
+                        style: {
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                        }
+                    },
+                    labels: {
+                        style: {
+                            colors: '#666',
+                            fontSize: '12px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 400,
+                        }
                     }
+                },
+                tooltip: {
+                    enabled: true,
+                    shared: true,
+                    intersect: false,
+                    x: {
+                        format: 'dd MMM yyyy HH:mm'
+                    },
+                    y: {
+                        formatter: function(val) {
+                            return val.toFixed(1) + "°C"
+                        }
+                    },
+                    theme: 'dark',
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                    },
+                    marker: {
+                        show: true,
+                    },
+                    fixed: {
+                        enabled: false,
+                        position: 'topRight',
+                        offsetX: 0,
+                        offsetY: 0,
+                    },
+                },
+                legend: {
+                    show: true,
+                    position: 'top',
+                    horizontalAlign: 'right',
+                    floating: true,
+                    offsetY: -25,
+                    offsetX: -5,
+                    markers: {
+                        width: 12,
+                        height: 12,
+                        strokeWidth: 0,
+                        strokeColor: '#fff',
+                        radius: 12,
+                        customHTML: undefined,
+                        onClick: undefined,
+                        offsetX: 0,
+                        offsetY: 0
+                    },
+                },
+                theme: {
+                    mode: 'light',
+                    palette: 'palette1',
+                    monochrome: {
+                        enabled: false,
+                        color: '#255aee',
+                        shadeTo: 'light',
+                        shadeIntensity: 0.65
+                    },
                 }
             };
 
-            if (currentView === 'rekap') {
-                // Handle combined view
-                let tempData, rainData, windData, humidityData;
+            // Initialize chart
+            const $chartContainer = $("#combinedChart");
+            if ($chartContainer.length) {
+                chart = new ApexCharts($chartContainer[0], options);
+                chart.render();
+            }
 
-                switch (currentPeriod) {
-                    case 'today':
-                        tempData = @js($tempChartData);
-                        rainData = @js($rainChartData);
-                        windData = @js($windChartData);
-                        humidityData = @js($humidityChartData);
-                        break;
-                    case 'week':
-                        tempData = @js($tempChartData_7days);
-                        rainData = @js($rainChartData_7days);
-                        windData = @js($windChartData_7days);
-                        humidityData = @js($humidityChartData_7days);
-                        break;
-                    case 'month':
-                        tempData = @js($tempChartData_month);
-                        rainData = @js($rainChartData_month);
-                        windData = @js($windChartData_month);
-                        humidityData = @js($humidityChartData_month);
-                        break;
-                }
+            // Button click handlers
+            $('#tempButton').on('click', () => switchView('suhu'));
+            $('#rainButton').on('click', () => switchView('rainfall'));
+            $('#todayButton').on('click', () => switchPeriod('today'));
+            $('#weekButton').on('click', () => switchPeriod('week'));
+            $('#monthButton').on('click', () => switchPeriod('month'));
+            $('#windButton').on('click', () => switchView('wind'));
+            $('#humidityButton').on('click', () => switchView('humidity'));
+            $('#rekapButton').on('click', () => switchView('rekap'));
 
-                series = [{
-                        name: 'Temperature',
-                        data: tempData,
-                        type: 'line',
-                        yAxisIndex: 0
-                    },
-                    {
-                        name: 'Rainfall',
-                        data: rainData,
-                        type: 'column',
-                        yAxisIndex: 1
-                    },
-                    {
-                        name: 'Wind Speed',
-                        data: windData,
-                        type: 'line',
-                        yAxisIndex: 2
-                    },
-                    {
-                        name: 'Humidity',
-                        data: humidityData,
-                        type: 'line',
-                        yAxisIndex: 3
-                    }
-                ];
+            function switchView(view) {
+                currentView = view;
+                updateButtons();
+                updateChart();
+            }
 
-                yAxisArray = [{
-                        seriesName: 'Temperature',
-                        title: {
-                            text: 'Temperature (°C)',
-                            style: {
-                                color: '#22c55e'
-                            }
-                        },
-                        labels: {
-                            style: {
-                                colors: '#22c55e'
-                            }
-                        },
-                        axisBorder: {
-                            show: true,
-                            color: '#22c55e'
-                        }
-                    },
-                    {
-                        seriesName: 'Rainfall',
-                        opposite: true,
-                        title: {
-                            text: 'Rainfall (mm/h)',
-                            style: {
-                                color: '#3b82f6'
-                            }
-                        },
-                        labels: {
-                            style: {
-                                colors: '#3b82f6'
-                            }
-                        },
-                        axisBorder: {
-                            show: true,
-                            color: '#3b82f6'
-                        }
-                    },
-                    {
-                        seriesName: 'Wind Speed',
-                        opposite: true,
-                        title: {
-                            text: 'Wind Speed (km/h)',
-                            style: {
-                                color: '#8b5cf6'
-                            }
-                        },
-                        labels: {
-                            style: {
-                                colors: '#8b5cf6'
-                            }
-                        },
-                        axisBorder: {
-                            show: true,
-                            color: '#8b5cf6'
-                        }
-                    },
-                    {
-                        seriesName: 'Humidity',
-                        opposite: true,
-                        title: {
-                            text: 'Humidity (%)',
-                            style: {
-                                color: '#06b6d4'
-                            }
-                        },
-                        labels: {
-                            style: {
-                                colors: '#06b6d4'
-                            }
-                        },
-                        axisBorder: {
-                            show: true,
-                            color: '#06b6d4'
-                        }
-                    }
-                ];
+            function switchPeriod(period) {
+                currentPeriod = period;
+                updateButtons();
+                updateChart();
+            }
 
-                chart.updateOptions({
-                    series: series,
-                    colors: ['#22c55e', '#3b82f6', '#8b5cf6', '#06b6d4'],
-                    stroke: {
-                        curve: 'smooth',
-                        width: [3, 0, 3, 3], // Line width for each series (0 for column)
-                        dashArray: [0, 0, 0, 0]
-                    },
-                    fill: {
-                        type: ['gradient', 'solid', 'gradient', 'gradient'],
+            function updateButtons() {
+                // Base classes
+                const baseClasses = 'px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out';
+                const activeClasses = `${baseClasses} bg-blue-500 text-white`;
+                const inactiveClasses = `${baseClasses} bg-gray-100 text-gray-700 hover:bg-gray-200`;
+
+                // Update view buttons
+                $('#tempButton').attr('class', currentView === 'suhu' ? activeClasses : inactiveClasses);
+                $('#rainButton').attr('class', currentView === 'rainfall' ? activeClasses : inactiveClasses);
+                $('#windButton').attr('class', currentView === 'wind' ? activeClasses : inactiveClasses);
+                $('#humidityButton').attr('class', currentView === 'humidity' ? activeClasses : inactiveClasses);
+                $('#rekapButton').attr('class', currentView === 'rekap' ? activeClasses : inactiveClasses);
+                // Update period buttons
+                $('#todayButton').attr('class', currentPeriod === 'today' ? activeClasses : inactiveClasses);
+                $('#weekButton').attr('class', currentPeriod === 'week' ? activeClasses : inactiveClasses);
+                $('#monthButton').attr('class', currentPeriod === 'month' ? activeClasses : inactiveClasses);
+            }
+
+            function updateChart() {
+                if (!chart) return;
+
+                let chartData;
+                let chartType = 'area';
+                let yAxisTitle = '';
+                let chartOptions = {};
+                let series = [];
+                let yAxisArray = [];
+                // Define style configurations for each category
+                const styleConfigs = {
+                    suhu: {
+                        colors: ['#22c55e'], // Green
                         gradient: {
                             shade: 'dark',
                             type: "vertical",
                             shadeIntensity: 0.5,
+                            gradientToColors: ['#ef4444'], // Red
+                            inverseColors: true,
                             opacityFrom: 0.8,
                             opacityTo: 0.2,
                         }
                     },
-                    yaxis: yAxisArray,
-                    tooltip: {
-                        shared: true,
-                        intersect: false,
-                        y: {
-                            formatter: function(val, {
-                                seriesIndex
-                            }) {
-                                switch (seriesIndex) {
-                                    case 0:
-                                        return val.toFixed(1) + "°C";
-                                    case 1:
-                                        return val.toFixed(1) + " mm/h";
-                                    case 2:
-                                        return val.toFixed(1) + " km/h";
-                                    case 3:
-                                        return val.toFixed(1) + "%";
-                                }
-                            }
-                        }
-                    }
-                }, false, true);
-            } else {
-
-                // Select data based on current view and period
-                switch (currentPeriod) {
-                    case 'today':
-                        switch (currentView) {
-                            case 'suhu':
-                                chartData = @js($tempChartData);
-                                yAxisTitle = 'Temperature (°C)';
-                                break;
-                            case 'rainfall':
-                                chartData = @js($rainChartData);
-                                chartType = 'bar';
-                                yAxisTitle = 'Rainfall (mm/h)';
-                                break;
-                            case 'wind':
-                                chartData = @js($windChartData);
-                                yAxisTitle = 'Wind Speed (km/h)';
-                                break;
-                            case 'humidity':
-                                chartData = @js($humidityChartData);
-                                yAxisTitle = 'Humidity (%)';
-                                break;
-                        }
-                        break;
-                    case 'week':
-                        switch (currentView) {
-                            case 'suhu':
-                                chartData = @js($tempChartData_7days);
-                                yAxisTitle = 'Temperature (°C)';
-                                break;
-                            case 'rainfall':
-                                chartData = @js($rainChartData_7days);
-                                chartType = 'bar';
-                                yAxisTitle = 'Rainfall (mm/h)';
-                                break;
-                            case 'wind':
-                                chartData = @js($windChartData_7days);
-                                yAxisTitle = 'Wind Speed (km/h)';
-                                break;
-                            case 'humidity':
-                                chartData = @js($humidityChartData_7days);
-                                yAxisTitle = 'Humidity (%)';
-                                break;
-                        }
-                        break;
-                    case 'month':
-                        switch (currentView) {
-                            case 'suhu':
-                                chartData = @js($tempChartData_month);
-                                yAxisTitle = 'Temperature (°C)';
-                                break;
-                            case 'rainfall':
-                                chartData = @js($rainChartData_month);
-                                chartType = 'bar';
-                                yAxisTitle = 'Rainfall (mm/h)';
-                                break;
-                            case 'wind':
-                                chartData = @js($windChartData_month);
-                                yAxisTitle = 'Wind Speed (km/h)';
-                                break;
-                            case 'humidity':
-                                chartData = @js($humidityChartData_month);
-                                yAxisTitle = 'Humidity (%)';
-                                break;
-                        }
-                        break;
-                }
-
-                // Get the style config for current view
-                const currentStyle = styleConfigs[currentView];
-
-                // Update chart options
-                const newOptions = {
-                    series: [{
-                        name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
-                        data: chartData || []
-                    }],
-                    chart: {
-                        type: chartType
-                    },
-                    colors: currentStyle.colors,
-                    fill: {
-                        type: 'gradient',
-                        gradient: currentStyle.gradient
-                    },
-                    yaxis: {
-                        title: {
-                            text: yAxisTitle
+                    rainfall: {
+                        colors: ['#3b82f6'], // Blue
+                        gradient: {
+                            shade: 'dark',
+                            type: "vertical",
+                            shadeIntensity: 0.5,
+                            gradientToColors: ['#1d4ed8'], // Darker Blue
+                            inverseColors: false,
+                            opacityFrom: 0.8,
+                            opacityTo: 0.2,
                         }
                     },
-                    // Customize markers based on the type
-                    markers: {
-                        size: 4,
-                        colors: currentStyle.colors,
-                        strokeColors: "#fff",
-                        strokeWidth: 2,
-                        hover: {
-                            size: 7,
+                    wind: {
+                        colors: ['#8b5cf6'], // Purple
+                        gradient: {
+                            shade: 'dark',
+                            type: "vertical",
+                            shadeIntensity: 0.5,
+                            gradientToColors: ['#6d28d9'], // Darker Purple
+                            inverseColors: false,
+                            opacityFrom: 0.8,
+                            opacityTo: 0.2,
                         }
                     },
-                    // Customize tooltip
-                    tooltip: {
-                        y: {
-                            formatter: function(val) {
-                                switch (currentView) {
-                                    case 'suhu':
-                                        return val.toFixed(1) + "°C";
-                                    case 'rainfall':
-                                        return val.toFixed(1) + " mm/h";
-                                    case 'wind':
-                                        return val.toFixed(1) + " km/h";
-                                    case 'humidity':
-                                        return val.toFixed(1) + "%";
-                                    default:
-                                        return val;
-                                }
-                            }
+                    humidity: {
+                        colors: ['#06b6d4'], // Cyan
+                        gradient: {
+                            shade: 'dark',
+                            type: "vertical",
+                            shadeIntensity: 0.5,
+                            gradientToColors: ['#0891b2'], // Darker Cyan
+                            inverseColors: false,
+                            opacityFrom: 0.8,
+                            opacityTo: 0.2,
                         }
                     }
                 };
 
-                chart.updateOptions(newOptions, false, true);
+                if (currentView === 'rekap') {
+                    // Handle combined view
+                    let tempData, rainData, windData, humidityData;
+
+                    switch (currentPeriod) {
+                        case 'today':
+                            tempData = @js($tempChartData);
+                            rainData = @js($rainChartData);
+                            windData = @js($windChartData);
+                            humidityData = @js($humidityChartData);
+                            break;
+                        case 'week':
+                            tempData = @js($tempChartData_7days);
+                            rainData = @js($rainChartData_7days);
+                            windData = @js($windChartData_7days);
+                            humidityData = @js($humidityChartData_7days);
+                            break;
+                        case 'month':
+                            tempData = @js($tempChartData_month);
+                            rainData = @js($rainChartData_month);
+                            windData = @js($windChartData_month);
+                            humidityData = @js($humidityChartData_month);
+                            break;
+                    }
+
+                    series = [{
+                            name: 'Temperature',
+                            data: tempData,
+                            type: 'line',
+                            yAxisIndex: 0
+                        },
+                        {
+                            name: 'Rainfall',
+                            data: rainData,
+                            type: 'column',
+                            yAxisIndex: 1
+                        },
+                        {
+                            name: 'Wind Speed',
+                            data: windData,
+                            type: 'line',
+                            yAxisIndex: 2
+                        },
+                        {
+                            name: 'Humidity',
+                            data: humidityData,
+                            type: 'line',
+                            yAxisIndex: 3
+                        }
+                    ];
+
+                    yAxisArray = [{
+                            seriesName: 'Temperature',
+                            title: {
+                                text: 'Temperature (°C)',
+                                style: {
+                                    color: '#22c55e'
+                                }
+                            },
+                            labels: {
+                                style: {
+                                    colors: '#22c55e'
+                                }
+                            },
+                            axisBorder: {
+                                show: true,
+                                color: '#22c55e'
+                            }
+                        },
+                        {
+                            seriesName: 'Rainfall',
+                            opposite: true,
+                            title: {
+                                text: 'Rainfall (mm/h)',
+                                style: {
+                                    color: '#3b82f6'
+                                }
+                            },
+                            labels: {
+                                style: {
+                                    colors: '#3b82f6'
+                                }
+                            },
+                            axisBorder: {
+                                show: true,
+                                color: '#3b82f6'
+                            }
+                        },
+                        {
+                            seriesName: 'Wind Speed',
+                            opposite: true,
+                            title: {
+                                text: 'Wind Speed (km/h)',
+                                style: {
+                                    color: '#8b5cf6'
+                                }
+                            },
+                            labels: {
+                                style: {
+                                    colors: '#8b5cf6'
+                                }
+                            },
+                            axisBorder: {
+                                show: true,
+                                color: '#8b5cf6'
+                            }
+                        },
+                        {
+                            seriesName: 'Humidity',
+                            opposite: true,
+                            title: {
+                                text: 'Humidity (%)',
+                                style: {
+                                    color: '#06b6d4'
+                                }
+                            },
+                            labels: {
+                                style: {
+                                    colors: '#06b6d4'
+                                }
+                            },
+                            axisBorder: {
+                                show: true,
+                                color: '#06b6d4'
+                            }
+                        }
+                    ];
+
+                    chart.updateOptions({
+                        series: series,
+                        colors: ['#22c55e', '#3b82f6', '#8b5cf6', '#06b6d4'],
+                        stroke: {
+                            curve: 'smooth',
+                            width: [3, 0, 3, 3], // Line width for each series (0 for column)
+                            dashArray: [0, 0, 0, 0]
+                        },
+                        fill: {
+                            type: ['gradient', 'solid', 'gradient', 'gradient'],
+                            gradient: {
+                                shade: 'dark',
+                                type: "vertical",
+                                shadeIntensity: 0.5,
+                                opacityFrom: 0.8,
+                                opacityTo: 0.2,
+                            }
+                        },
+                        yaxis: yAxisArray,
+                        tooltip: {
+                            shared: true,
+                            intersect: false,
+                            y: {
+                                formatter: function(val, {
+                                    seriesIndex
+                                }) {
+                                    switch (seriesIndex) {
+                                        case 0:
+                                            return val.toFixed(1) + "°C";
+                                        case 1:
+                                            return val.toFixed(1) + " mm/h";
+                                        case 2:
+                                            return val.toFixed(1) + " km/h";
+                                        case 3:
+                                            return val.toFixed(1) + "%";
+                                    }
+                                }
+                            }
+                        }
+                    }, false, true);
+                } else {
+
+                    // Select data based on current view and period
+                    switch (currentPeriod) {
+                        case 'today':
+                            switch (currentView) {
+                                case 'suhu':
+                                    chartData = @js($tempChartData);
+                                    yAxisTitle = 'Temperature (°C)';
+                                    break;
+                                case 'rainfall':
+                                    chartData = @js($rainChartData);
+                                    chartType = 'bar';
+                                    yAxisTitle = 'Rainfall (mm/h)';
+                                    break;
+                                case 'wind':
+                                    chartData = @js($windChartData);
+                                    yAxisTitle = 'Wind Speed (km/h)';
+                                    break;
+                                case 'humidity':
+                                    chartData = @js($humidityChartData);
+                                    yAxisTitle = 'Humidity (%)';
+                                    break;
+                            }
+                            break;
+                        case 'week':
+                            switch (currentView) {
+                                case 'suhu':
+                                    chartData = @js($tempChartData_7days);
+                                    yAxisTitle = 'Temperature (°C)';
+                                    break;
+                                case 'rainfall':
+                                    chartData = @js($rainChartData_7days);
+                                    chartType = 'bar';
+                                    yAxisTitle = 'Rainfall (mm/h)';
+                                    break;
+                                case 'wind':
+                                    chartData = @js($windChartData_7days);
+                                    yAxisTitle = 'Wind Speed (km/h)';
+                                    break;
+                                case 'humidity':
+                                    chartData = @js($humidityChartData_7days);
+                                    yAxisTitle = 'Humidity (%)';
+                                    break;
+                            }
+                            break;
+                        case 'month':
+                            switch (currentView) {
+                                case 'suhu':
+                                    chartData = @js($tempChartData_month);
+                                    yAxisTitle = 'Temperature (°C)';
+                                    break;
+                                case 'rainfall':
+                                    chartData = @js($rainChartData_month);
+                                    chartType = 'bar';
+                                    yAxisTitle = 'Rainfall (mm/h)';
+                                    break;
+                                case 'wind':
+                                    chartData = @js($windChartData_month);
+                                    yAxisTitle = 'Wind Speed (km/h)';
+                                    break;
+                                case 'humidity':
+                                    chartData = @js($humidityChartData_month);
+                                    yAxisTitle = 'Humidity (%)';
+                                    break;
+                            }
+                            break;
+                    }
+
+                    // Get the style config for current view
+                    const currentStyle = styleConfigs[currentView];
+
+                    // Update chart options
+                    const newOptions = {
+                        series: [{
+                            name: currentView.charAt(0).toUpperCase() + currentView.slice(1),
+                            data: chartData || []
+                        }],
+                        chart: {
+                            type: chartType
+                        },
+                        colors: currentStyle.colors,
+                        fill: {
+                            type: 'gradient',
+                            gradient: currentStyle.gradient
+                        },
+                        yaxis: {
+                            title: {
+                                text: yAxisTitle
+                            }
+                        },
+                        // Customize markers based on the type
+                        markers: {
+                            size: 4,
+                            colors: currentStyle.colors,
+                            strokeColors: "#fff",
+                            strokeWidth: 2,
+                            hover: {
+                                size: 7,
+                            }
+                        },
+                        // Customize tooltip
+                        tooltip: {
+                            y: {
+                                formatter: function(val) {
+                                    switch (currentView) {
+                                        case 'suhu':
+                                            return val.toFixed(1) + "°C";
+                                        case 'rainfall':
+                                            return val.toFixed(1) + " mm/h";
+                                        case 'wind':
+                                            return val.toFixed(1) + " km/h";
+                                        case 'humidity':
+                                            return val.toFixed(1) + "%";
+                                        default:
+                                            return val;
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+                    chart.updateOptions(newOptions, false, true);
+                }
             }
-        }
-        // Listen for Livewire events
-        Livewire.on('chartDataUpdated', (data) => {
-            if (!data || !data[0]) return;
-            updateChart();
-        });
+            // Listen for Livewire events
+            Livewire.on('chartDataUpdated', (data) => {
+                if (!data || !data[0]) return;
+                updateChart();
+            });
 
-        Livewire.on('showLoadingScreen', () => {
-            showLoadingScreen();
-        });
+            Livewire.on('showLoadingScreen', () => {
+                showLoadingScreen();
+            });
 
-        Livewire.on('hideLoadingScreen', () => {
-            hideLoadingScreen();
-        });
+            Livewire.on('hideLoadingScreen', () => {
+                hideLoadingScreen();
+            });
 
-        // Update select and input elements to trigger loading screen
-        $('#station').on('change', function() {
-            showLoadingScreen();
-        });
+            // Update select and input elements to trigger loading screen
+            $('#station').on('change', function() {
+                showLoadingScreen();
+            });
 
-        $('input[type="date"]').on('change', function() {
-            showLoadingScreen();
-        });
-
+            $('input[type="date"]').on('change', function() {
+                showLoadingScreen();
+            });
 
 
-        // maps 
-        if (@json($station_lat) !== 0 && @json($station_lon) !== 0) {
-            const map = L.map('weatherMap').setView([@json($station_lat), @json($station_lon)], 8);
 
-            // Add OpenStreetMap tile layer
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
+            //this make error
+            // maps 
+            if (@json($station_lat) !== 0 && @json($station_lon) !== 0) {
+                const map = L.map('weatherMap').setView([@json($station_lat), @json($station_lon)], 8);
 
-            function createWeatherPopup(data) {
-                return `
-                <div class="p-2">
-                    <div class="space-y-1">
-                        <p>💨 Angin: ${data.wind.speed} m/s</p>
-                        <p>💧 Kelembaban: ${data.temperature.humidity}%</p>
-                    </div>
-                </div>
-                `;
-            }
+                // Add OpenStreetMap tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
 
-            // Add marker for current location with weather info
-            const marker = L.marker([@json($station_lat), @json($station_lon)])
-                .addTo(map)
-                .bindPopup(createWeatherPopup(@json($weather_data)))
-                .openPopup();
+                function createWeatherPopup(data) {
+                    // Clone the template
+                    const $popup = $('#mapPopupTemplate .weather-popup').clone();
 
-            // Create weather overlay
-            const weatherCircle = L.circle([@json($station_lat), @json($station_lon)], {
-                color: 'blue',
-                fillColor: '#3b82f6',
-                fillOpacity: 0.2,
-                radius: 30000
-            }).addTo(map);
+                    // Update content safely
+                    $popup.find('.wind-speed').html(`💨 Angin: ${data.wind.speed} m/s`);
+                    $popup.find('.humidity').html(`💧 Kelembaban: ${data.temperature.humidity}%`);
 
-            // Update map when location changes
-            Livewire.on('updateMapMarker', (data) => {
-                const newLatLng = [data[0].lat, data[0].lon];
-                map.setView(newLatLng, 8);
-                marker.setLatLng(newLatLng)
+                    // Return HTML string
+                    return $popup[0].outerHTML;
+                }
+
+                // Add marker for current location with weather info
+                const marker = L.marker([@json($station_lat), @json($station_lon)])
+                    .addTo(map)
                     .bindPopup(createWeatherPopup(@json($weather_data)))
                     .openPopup();
-                weatherCircle.setLatLng(newLatLng);
-            });
 
-            initLottieAnimation(@json($weatheranimation));
+                // Create weather overlay
+                const weatherCircle = L.circle([@json($station_lat), @json($station_lon)], {
+                    color: 'blue',
+                    fillColor: '#3b82f6',
+                    fillOpacity: 0.2,
+                    radius: 30000
+                }).addTo(map);
 
-            Livewire.on('weatherAnimationUpdated', (data) => {
-                initLottieAnimation(data[0]);
-            });
-        }
-
-        // Toggle functionality
-        const $toggleButton = $('#toggleWeatherInfo');
-        const $weatherOverlay = $('#weatherInfoOverlay');
-        let isVisible = true;
-
-        // Load saved state
-        const savedState = localStorage.getItem('weatherOverlayVisible');
-        if (savedState !== null) {
-            isVisible = savedState === 'true';
-            updateOverlayVisibility();
-        }
-
-        $toggleButton.on('click', function() {
-            isVisible = !isVisible;
-            updateOverlayVisibility();
-            localStorage.setItem('weatherOverlayVisible', isVisible);
-        });
-
-        function updateOverlayVisibility() {
-            if (isVisible) {
-                $weatherOverlay.css({
-                    'opacity': '1',
-                    'transform': 'translateX(0)',
-                    'pointer-events': 'auto'
+                // Update map when location changes
+                Livewire.on('updateMapMarker', (data) => {
+                    const newLatLng = [data[0].lat, data[0].lon];
+                    map.setView(newLatLng, 8);
+                    marker.setLatLng(newLatLng)
+                        .bindPopup(createWeatherPopup(@json($weather_data)))
+                        .openPopup();
+                    weatherCircle.setLatLng(newLatLng);
                 });
-            } else {
-                $weatherOverlay.css({
-                    'opacity': '0',
-                    'transform': 'translateX(100%)',
-                    'pointer-events': 'none'
+
+                initLottieAnimation(@json($weatheranimation));
+
+                Livewire.on('weatherAnimationUpdated', (data) => {
+                    initLottieAnimation(data[0]);
                 });
             }
-        }
 
-        // Add CSS for transitions
-        $('<style>')
-            .text(`
+            // Toggle functionality
+            const $toggleButton = $('#toggleWeatherInfo');
+            const $weatherOverlay = $('#weatherInfoOverlay');
+            let isVisible = true;
+
+            // Load saved state
+            const savedState = localStorage.getItem('weatherOverlayVisible');
+            if (savedState !== null) {
+                isVisible = savedState === 'true';
+                updateOverlayVisibility();
+            }
+            //enderror
+
+
+            // Toggle functionality
+            $toggleButton.on('click', function() {
+                isVisible = !isVisible;
+                updateOverlayVisibility();
+                localStorage.setItem('weatherOverlayVisible', isVisible);
+            });
+
+            function updateOverlayVisibility() {
+                if (isVisible) {
+                    $weatherOverlay.css({
+                        'opacity': '1',
+                        'transform': 'translateX(0)',
+                        'pointer-events': 'auto'
+                    });
+                } else {
+                    $weatherOverlay.css({
+                        'opacity': '0',
+                        'transform': 'translateX(100%)',
+                        'pointer-events': 'none'
+                    });
+                }
+            }
+
+            $('<style>')
+                .text(`
                 .temp-area {
                     transition: opacity 0.75s ease-in-out;
                 }
@@ -1079,30 +1090,29 @@
                     transition: opacity 0.75s ease-in-out;
                 }
             `)
-            .appendTo('head');
-    });
-
-
-    function initLottieAnimation(animationName) {
-        // console.log(animationName);
-
-        const container = document.getElementById('weatherAnimationContainer');
-
-        // Destroy the previous animation if it exists
-        if (container.lottie) {
-            container.lottie.destroy();
-        }
-
-        // Load the new animation
-        container.lottie = lottie.loadAnimation({
-            container: container,
-            renderer: 'svg',
-            loop: true,
-            autoplay: true,
-            path: `/weather/${animationName}.json`
+                .appendTo('head');
         });
-    }
-</script>
+
+        function initLottieAnimation(animationName) {
+            // console.log(animationName);
+
+            const container = document.getElementById('weatherAnimationContainer');
+
+            // Destroy the previous animation if it exists
+            if (container.lottie) {
+                container.lottie.destroy();
+            }
+
+            // Load the new animation
+            container.lottie = lottie.loadAnimation({
+                container: container,
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: `/weather/${animationName}.json`
+            });
+        }
+    </script>
 
 
 </div>

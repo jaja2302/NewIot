@@ -442,8 +442,15 @@ class Dashboardaws extends Component implements HasForms, HasTable
     public function generateChartData($station_id)
     {
         $data = $this->calculationService->generateChartData($station_id, $this->selectedDate);
-        // dd($data);
-        // dd($data['tempData_today']);
+
+        // Add debugging logs
+        // \Log::info('Today\'s data:', [
+        //     'temp' => $data['tempData_today'],
+        //     'rain' => $data['rainData_today'],
+        //     'wind' => $data['windData_today'],
+        //     'humidity' => $data['humidityData_today']
+        // ]);
+
         $this->tempChartData = $data['tempData_today'];
         $this->rainChartData = $data['rainData_today'];
         $this->windChartData = $data['windData_today'];
