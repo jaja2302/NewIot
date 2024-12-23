@@ -284,7 +284,18 @@ class Waterlevel extends Component implements HasForms, HasTable
                 $stationData = $this->processStationData($station, ModelsWaterlevel::where('idwl', $stationId)
                     ->whereDate('datetime', $this->selectedDate)
                     ->get());
-
+                // dd($coordinates);
+                // //     array:2 [▼ // app\Livewire\Waterlevel.php:287
+                // //     "lat" => 0.0
+                // //     "lon" => 0.0
+                // //   ]
+                if ($coordinates['lat'] == 0 && $coordinates['lon'] == 0) {
+                    Notification::make()
+                        ->title('Coordinates water level not found')
+                        ->body('Please update coordinates')
+                        ->danger()
+                        ->send();
+                }
                 // Update map marker
                 $this->dispatch('updateMapMarker', [
                     'coordinates' => $coordinates,
@@ -488,14 +499,13 @@ class Waterlevel extends Component implements HasForms, HasTable
                 ],
                 'station' => $stationData
             ]);
-
             Notification::make()
                 ->title('Coordinates updated successfully!')
                 ->success()
                 ->send();
 
             // Close the modal after successful update
-            $this->dispatch('close-modal', ['id' => 'maps-coordinates']);
+            $this->dispatch('close-modal', id: 'mapscordinates');
         } catch (\Exception $e) {
             Notification::make()
                 ->title('Error updating coordinates')

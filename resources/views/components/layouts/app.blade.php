@@ -17,11 +17,7 @@
     <title>@yield('title', 'IoT SRS SSMS Portal')</title>
 
     @filamentStyles
-    <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/navbar.css'])
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"> -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.14/lottie.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lottie-web@latest"></script> -->
     <script>
         // Check for saved theme preference or use default (light)
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -117,7 +113,7 @@
 
     @filamentScripts
 
-    <script>
+    <script type="module">
         function handleLogout() {
             // Show loading screen
             document.getElementById('loading-screen').style.display = 'flex';

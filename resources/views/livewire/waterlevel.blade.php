@@ -37,7 +37,7 @@
                         </div>
                     </form>
                 </x-filament::modal>
-                <x-filament::modal :close-by-clicking-away="false" id="maps-coordinates" width="5xl">
+                <x-filament::modal :close-by-clicking-away="false" id="mapscordinates" width="5xl">
                     <x-slot name="trigger">
                         @if (SuperAdmin())
                         <x-filament::button
@@ -66,12 +66,30 @@
                             <div class="grid grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Latitude</label>
-                                    <input type="number" step="any" wire:model="selectedLat" class="w-full rounded-lg border-gray-300" readonly>
+                                    <input type="number"
+                                        step="any"
+                                        wire:model="selectedLat"
+                                        class="w-full rounded-lg border-gray-300"
+                                        placeholder="Enter latitude">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Longitude</label>
-                                    <input type="number" step="any" wire:model="selectedLon" class="w-full rounded-lg border-gray-300" readonly>
+                                    <input type="number"
+                                        step="any"
+                                        wire:model="selectedLon"
+                                        class="w-full rounded-lg border-gray-300"
+                                        placeholder="Enter longitude">
                                 </div>
+                            </div>
+
+                            <!-- Add a note about input methods -->
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                <p>You can update coordinates by:</p>
+                                <ul class="list-disc list-inside">
+                                    <li>Clicking directly on the map</li>
+                                    <li>Manually entering the coordinates above</li>
+                                    <li>Using the search function on the map</li>
+                                </ul>
                             </div>
 
                             <!-- Submit Button -->
@@ -246,6 +264,12 @@
             let currentMarker = null;
 
             function updateMarkerPosition(latlng) {
+                // Validate coordinates
+                if (!isValidLatLng(latlng.lat, latlng.lng)) {
+                    console.warn('Invalid coordinates:', latlng);
+                    return;
+                }
+
                 // Clear existing marker
                 if (currentMarker) {
                     map.removeLayer(currentMarker);
@@ -272,15 +296,27 @@
                     });
                 });
             }
-            Livewire.on('coordinates-set', ({
+
+            // Add coordinate validation function
+            function isValidLatLng(lat, lng) {
+                return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+            }
+
+            // Update the Livewire event listener to handle manual input
+            Livewire.on('set-coordinates', ({
                 lat,
                 lng
             }) => {
-                updateMarkerPosition(L.latLng(lat, lng));
+                if (lat && lng) {
+                    updateMarkerPosition(L.latLng(lat, lng));
+                    // If coordinates are valid, center the map on the new position
+                    map.setView([lat, lng], 15);
+                }
             });
 
             // maps for station
             Livewire.on('updateMapMarker', (eventData) => {
+                console.log(eventData);
                 const data = Array.isArray(eventData) ? eventData[0] : eventData;
                 const coordinates = data.coordinates;
                 const station = data.station;
