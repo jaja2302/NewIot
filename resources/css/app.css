@@ -814,3 +814,65 @@ body {
     border: none !important;
     color: white !important;
 }
+
+/* Update the login card styles */
+.login-card {
+    background: white;
+    border-radius: 2rem;
+    box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 8px -4px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    max-width: 500px;
+    padding: 2.5rem;
+    position: relative; /* Ensure card stays above background */
+    z-index: 1;
+}
+
+.dark .login-card {
+    background: #1f2937;
+}
+
+.login-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1), 
+                0 8px 12px -3px rgba(0, 0, 0, 0.05);
+}
+
+/* Style the logo container */
+.login-card .logo-container {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 50%;
+    padding: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Style the form inputs */
+.login-card input {
+    height: 3.5rem;
+    font-size: 1rem;
+    padding: 0 1.25rem;
+}
+
+/* Style the sign in button */
+.login-card button {
+    height: 3.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Update the login page background */
+.login-background {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bfdbfe 100%); /* Single clean gradient */
+    min-height: 100vh;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.dark .login-background {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}

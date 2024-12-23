@@ -123,33 +123,6 @@ function initializeScrollNavigation(upRoute, downRoute, options = {}) {
         }
     });
 
-    // Wheel event handler for desktop
-    main.addEventListener('wheel', (e) => {
-        if (isRedirecting) return;
-        
-        const now = Date.now();
-        if (now - lastScrollTime < config.scrollThreshold) return;
-
-        const scrollTop = main.scrollTop;
-        const scrollHeight = main.scrollHeight;
-        const clientHeight = main.clientHeight;
-
-        if (Math.abs(e.deltaY) > config.scrollTriggerDistance) {
-            // For upward scroll, check if we're within boundaryDistance of the top
-            if (scrollTop <= config.boundaryDistance && e.deltaY < 0) {
-                e.preventDefault();
-                handleDirectionalScroll(false);
-                lastScrollTime = now;
-            } 
-            // For downward scroll, check if we're within boundaryDistance of the bottom
-            else if (scrollTop + clientHeight >= scrollHeight - config.boundaryDistance && e.deltaY > 0) {
-                e.preventDefault();
-                handleDirectionalScroll(true);
-                lastScrollTime = now;
-            }
-        }
-    }, { passive: false });
-
     function handleDirectionalScroll(isScrollingDown) {
         if (isRedirecting) return;
         
@@ -172,9 +145,11 @@ function initializeScrollNavigation(upRoute, downRoute, options = {}) {
 }
 
 $(function() {
+    // Define isLoginPage at the beginning
+    const isLoginPage = window.location.pathname === '/login';
+    
     let sidebarTimer;
     const SIDEBAR_HIDE_DELAY = 1000;
-    const isLoginPage = window.location.pathname === '/login';
     let mobileMenuButton, navbar, sidebarOverlay, $navbar, $sidebarToggle, $main;
 
     // Define all sidebar-related functions at the top level
@@ -284,38 +259,41 @@ $(function() {
         handleResize();
     }
 
-    const $themeToggleBtn = $('#theme-toggle');
-    const $html = $('html');
-
-    function updateThemeIcon() {
-        const isDark = $html.hasClass('dark');
-        $('.fa-sun').toggleClass('hidden', !isDark);
-        $('.fa-moon').toggleClass('hidden', isDark);
-    }
-
-    function setTheme(isDark) {
-        if (isDark) {
-            $html.addClass('dark');
-            localStorage.theme = 'dark';
-        } else {
-            $html.removeClass('dark');
-            localStorage.theme = 'light';
+    const ThemeManager = {
+        init() {
+            this.$themeToggleBtn = $('#theme-toggle');
+            this.$html = $('html');
+            this.setupInitialTheme();
+            this.bindEvents();
+        },
+        
+        updateIcon() {
+            const isDark = this.$html.hasClass('dark');
+            $('.fa-sun').toggleClass('hidden', !isDark);
+            $('.fa-moon').toggleClass('hidden', isDark);
+        },
+        
+        setTheme(isDark) {
+            this.$html.toggleClass('dark', isDark);
+            localStorage.theme = isDark ? 'dark' : 'light';
+            this.updateIcon();
+        },
+        
+        setupInitialTheme() {
+            const isDark = localStorage.theme === 'dark' || 
+                (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            this.setTheme(isDark);
+        },
+        
+        bindEvents() {
+            this.$themeToggleBtn.on('click', () => {
+                this.setTheme(!this.$html.hasClass('dark'));
+            });
         }
-        updateThemeIcon();
-    }
+    };
 
-    // Initialize theme based on localStorage or system preference
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        setTheme(true);
-    } else {
-        setTheme(false);
-    }
-
-    // Theme toggle click handler
-    $themeToggleBtn.on('click', function() {
-        const isDark = !$html.hasClass('dark');
-        setTheme(isDark);
-    });
+    // Initialize theme manager
+    ThemeManager.init();
 
     // Lottie animations
     $('.lottie-animation').each(function() {
@@ -331,6 +309,30 @@ $(function() {
             }
         });
     });
+
+    // Create a LoadingScreen module
+    const LoadingScreen = {
+        show() {
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.style.display = 'flex';
+            loadingScreen.offsetHeight; // Force a reflow
+            loadingScreen.classList.add('visible');
+            document.body.style.overflow = 'hidden';
+        },
+        
+        hide() {
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.classList.remove('visible');
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                document.body.style.overflow = '';
+            }, 300);
+        }
+    };
+
+    // Use it consistently throughout the code
+    window.showLoadingScreen = LoadingScreen.show;
+    window.hideLoadingScreen = LoadingScreen.hide;
 
     // Loading screen and navigation
     const $loadingScreen = $('#loading-screen');
@@ -359,7 +361,7 @@ $(function() {
     $navLinks.on('click', function(e) {
         if (!$(this).attr('href').includes('logout')) {
             e.preventDefault();
-            showLoadingScreen();
+            LoadingScreen.show();
             setTimeout(() => {
                 window.location.href = $(this).attr('href');
             }, 500);
@@ -410,9 +412,36 @@ $(function() {
     // Remove or comment out the existing changePage function since we're using showLoadingScreen directly
     // window.changePage = function() { ... }
 
+    // Move the Sidebar initialization inside the jQuery ready function
+    if (!isLoginPage) {
+        Sidebar.init({
+            mobileMenuButton: document.getElementById('mobile-menu-button'),
+            navbar: document.getElementById('navbar'),
+            overlay: document.getElementById('sidebar-overlay'),
+            $navbar: $('.navbar'),
+            $main: $('main')
+        });
+    }
 });
- // Add the loadWeatherAnimation function
- window.loadWeatherAnimation = function(condition, containerId) {
+
+// For the logout handler error, add this to your global scope:
+window.handleLogout = function() {
+    // Show loading screen before logout
+    if (window.showLoadingScreen) {
+        window.showLoadingScreen();
+    }
+    
+    // Find and submit the logout form
+    const logoutForm = document.getElementById('logout-form');
+    if (logoutForm) {
+        setTimeout(() => {
+            logoutForm.submit();
+        }, 500);
+    }
+};
+
+// Add the loadWeatherAnimation function
+window.loadWeatherAnimation = function(condition, containerId) {
     const isNight = new Date().getHours() >= 18 || new Date().getHours() < 6;
     let animationPath = '';
 
@@ -511,3 +540,100 @@ function handleSwipe() {
         }
     }
 }
+
+const Sidebar = {
+    timer: null,
+    HIDE_DELAY: 1000,
+    
+    init(elements) {
+        this.elements = elements;
+        this.bindEvents();
+        this.handleResize();
+    },
+    
+    bindEvents() {
+        const { mobileMenuButton, overlay, $navbar, $main } = this.elements;
+        
+        // Mobile menu button click
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', () => this.toggle());
+        }
+        
+        // Overlay click
+        if (overlay) {
+            overlay.addEventListener('click', () => this.hide());
+        }
+        
+        // Desktop hover events
+        if (window.innerWidth > 768) {
+            $navbar.on('mouseenter', () => {
+                clearTimeout(this.timer);
+                $navbar.removeClass('collapsed');
+                $main.removeClass('sidebar-collapsed');
+            });
+
+            $navbar.on('mouseleave', () => this.startTimer());
+        }
+        
+        // Window resize event
+        window.addEventListener('resize', () => this.handleResize());
+    },
+    
+    hide() {
+        const { navbar, overlay, mobileMenuButton } = this.elements;
+        navbar.classList.add('hidden');
+        overlay.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        document.querySelector('main').classList.remove('sidebar-open');
+        
+        if (mobileMenuButton) {
+            mobileMenuButton.classList.remove('menu-open');
+        }
+    },
+    
+    toggle() {
+        const { navbar, overlay } = this.elements;
+        navbar.classList.toggle('hidden');
+        overlay.classList.toggle('hidden');
+        document.body.classList.toggle('overflow-hidden');
+        document.querySelector('main').classList.toggle('sidebar-open');
+        
+        if (this.elements.mobileMenuButton) {
+            this.elements.mobileMenuButton.classList.toggle('menu-open');
+        }
+    },
+    
+    handleResize() {
+        const { navbar, overlay, $navbar, $main } = this.elements;
+        
+        if (navbar) {
+            if (window.innerWidth > 768) {
+                navbar.classList.remove('hidden');
+                overlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+                
+                // Setup hover behavior for desktop
+                $navbar.on('mouseenter mouseleave');
+                this.startTimer();
+            } else {
+                $navbar.off('mouseenter mouseleave');
+                clearTimeout(this.timer);
+                navbar.classList.add('hidden');
+                overlay.classList.add('hidden');
+                $navbar.removeClass('collapsed');
+                $main.removeClass('sidebar-collapsed');
+            }
+        }
+    },
+    
+    startTimer() {
+        const { $navbar, $main } = this.elements;
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+            if (!$navbar.is(':hover')) {
+                $navbar.addClass('collapsed');
+                $main.addClass('sidebar-collapsed');
+            }
+        }, this.HIDE_DELAY);
+    }
+};

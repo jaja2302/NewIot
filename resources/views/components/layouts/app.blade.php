@@ -63,8 +63,9 @@
                     <a href="{{ route('dashboardaws') }}" class="navbar__link"><i class="fa-solid fa-cloud"></i><span>Aws</span></a>
                 </li>
                 <li class="navbar__item">
-                    <a href="#" onclick="event.preventDefault(); handleLogout();" class="navbar__link">
-                        <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                    <a href="#" onclick="handleLogout(); return false;" class="navbar__link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
                     </a>
                 </li>
             </ul>
