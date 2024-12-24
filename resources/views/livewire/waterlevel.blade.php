@@ -316,7 +316,7 @@
 
             // maps for station
             Livewire.on('updateMapMarker', (eventData) => {
-                console.log(eventData);
+                // console.log(eventData);
                 const data = Array.isArray(eventData) ? eventData[0] : eventData;
                 const coordinates = data.coordinates;
                 const station = data.station;

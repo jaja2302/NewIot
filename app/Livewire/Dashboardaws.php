@@ -87,8 +87,8 @@ class Dashboardaws extends Component implements HasForms, HasTable
     public function mount(CalculationAws $calculationService)
     {
         $this->calculationService = $calculationService;
-        // $this->selectedDate = Carbon::now('Asia/Jakarta')->format('Y-m-d');
-        $this->selectedDate = '2024-12-06';
+        $this->selectedDate = Carbon::now('Asia/Jakarta')->format('Y-m-d');
+        // $this->selectedDate = '2024-12-16';
         $list_station = DB::connection('mysql')->table('weather_station_list')->where('flags', 1)->get();
         $this->list_station = $list_station;
 
