@@ -428,97 +428,6 @@ class CalculationAws
     }
 
 
-    public function dataharian($state)
-    {
-        $data_harian = Weatherstationdata::where('idws', $this->selectedstation)
-            ->where('date', 'like', '%' . $state['year_month'] . '%')
-            ->orderBy('date', 'asc')
-            ->get()
-            ->groupBy(function ($item) {
-                // Group by the date part in UTC
-                return Carbon::parse($item->date)->isoFormat('D MMMM YYYY');
-            });
-
-        $data_harian = json_decode(json_encode($data_harian), true);
-
-
-
-        $data_harian = $this->getavaragebyfiltermonth($data_harian);
-
-        // dd($data_harian);
-
-        return $data_harian;
-    }
-
-    public function dataperjam($state)
-    {
-        $data_harian = Weatherstationdata::select([
-            '*',
-            DB::raw("DATE_FORMAT(date, '%y-%m-%d') as Tanggal"),
-            DB::raw("DATE_FORMAT(date, '%H') as Jam")
-        ])
-            ->where('idws', $this->selectedstation)
-            ->where('date', 'like', '%' . $state['year_month'] . '%')
-            ->orderBy('date', 'asc')
-            ->get()
-            ->groupBy(['Tanggal', 'Jam']);
-        // dd($data_harian);
-
-        $data_harian = json_decode(json_encode($data_harian), true);
-        //   
-        // dd($data_harian);
-        $data = [];
-        foreach ($data_harian as $date => $hours) {
-            $rain_today = 0;
-            foreach ($hours as $hour => $records) {
-                $avarage = count($records);
-                $windspeedkmh = 0;
-                $winddir_sum = 0;
-                $rain_rate_sum = 0;
-                $temp_in_sum = 0;
-                $temp_out_sum = 0;
-                $hum_in_sum = 0;
-                $hum_out_sum = 0;
-                $uv_sum = 0;
-                $wind_gust_sum = 0;
-                $air_press_rel_sum = 0;
-                $air_press_abs_sum = 0;
-                $solar_radiation_sum = 0;
-                $dailyrainmm = 0;
-                foreach ($records as $key => $value) {
-                    $windspeedkmh += $value['windspeedkmh'];
-                    $winddir_sum += $value['winddir'];
-                    $rain_rate_sum += $value['rain_rate'];
-                    $temp_in_sum += $value['temp_in'];
-                    $temp_out_sum += $value['temp_out'];
-                    $hum_in_sum += $value['hum_in'];
-                    $hum_out_sum += $value['hum_out'];
-                    $uv_sum += $value['uv'];
-                    $wind_gust_sum += $value['wind_gust'];
-                    $air_press_rel_sum += $value['air_press_rel'];
-                    $air_press_abs_sum += $value['air_press_abs'];
-                    $solar_radiation_sum += $value['solar_radiation'];
-                    $dailyrainmm += $value['dailyrainmm'];
-                }
-                $data[$date]['Jam ke-' . $hour . ':00']['windspeedkmh'] = $windspeedkmh / $avarage;
-                $data[$date]['Jam ke-' . $hour . ':00']['winddir'] = $winddir_sum / $avarage;
-                $data[$date]['Jam ke-' . $hour . ':00']['rain_rate'] = $rain_rate_sum;
-                $data[$date]['Jam ke-' . $hour . ':00']['rain_today'] = $rain_today += $rain_rate_sum;
-                $data[$date]['Jam ke-' . $hour . ':00']['temp_in'] = $temp_in_sum / $avarage;
-                $data[$date]['Jam ke-' . $hour . ':00']['temp_out'] = $temp_out_sum / $avarage;
-                $data[$date]['Jam ke-' . $hour . ':00']['hum_in'] = $hum_in_sum / $avarage;
-                $data[$date]['Jam ke-' . $hour . ':00']['hum_out'] = $hum_out_sum / $avarage;
-                $data[$date]['Jam ke-' . $hour . ':00']['uv'] = $uv_sum / $avarage;
-                $data[$date]['Jam ke-' . $hour . ':00']['wind_gust'] = $wind_gust_sum / $avarage;
-                $data[$date]['Jam ke-' . $hour . ':00']['air_press_rel'] = $air_press_rel_sum / $avarage;
-                $data[$date]['Jam ke-' . $hour . ':00']['air_press_abs'] = $air_press_abs_sum / $avarage;
-                $data[$date]['Jam ke-' . $hour . ':00']['solar_radiation'] = $solar_radiation_sum / $avarage;
-                $data[$date]['Jam ke-' . $hour . ':00']['dailyrainmm'] = $dailyrainmm;
-            }
-        }
-        // dd($data);
-        return $data;
-    }
 
 
     public function getavaragebyfiltermonth($data)
@@ -603,58 +512,6 @@ class CalculationAws
         }
 
         return $newdata;
-    }
-
-    public function datamingguan($state)
-    {
-        // dd($state['year_month']);
-        // $test = '2024-10';
-        $data_mingguan = Weatherstationdata::where('idws', $this->selectedstation)
-            ->where('date', 'like', '%' . $state['year_month'] . '%')
-            ->orderBy('date', 'asc')
-            ->get()
-            ->groupBy(function ($item) {
-                $date = Carbon::parse($item->date);
-
-                // Move the start of the week to the nearest previous Sunday
-                $weekStart = $date->copy()->startOfWeek(Carbon::SUNDAY);
-
-                // Calculate the end of the week, which will be the following Saturday
-                $weekEnd = $weekStart->copy()->endOfWeek(Carbon::SATURDAY);
-
-                // Format output to identify each week uniquely
-                return sprintf(
-                    'Week %d (%s-%s %s)',
-                    $weekStart->weekOfMonth,
-                    $weekStart->format('d'),
-                    $weekEnd->format('d'),
-                    $weekStart->format('M')
-                );
-            });
-
-        $data_mingguan = json_decode(json_encode($data_mingguan), true);
-        // dd($data_mingguan);
-        $data_mingguan = $this->getavaragebyfiltermonth_revision($data_mingguan);
-        // dd($data_mingguan);
-        return $data_mingguan;
-    }
-
-    public function databulanan($state)
-    {
-        $data_bulanan['bulanan'] = Weatherstationdata::where('idws', $this->selectedstation)
-            ->where('date', 'like', '%' . $state['year_month'] . '%')
-            ->orderBy('date', 'asc')
-            ->get();
-
-        // dd($data_bulanan);
-
-
-        $data_bulanan = json_decode(json_encode($data_bulanan), true);
-        // dd($data_bulanan);
-        $data_bulanan = $this->getavaragebyfiltermonth_revision($data_bulanan);
-        // dd($data_bulanan, 'mamam');
-
-        return $data_bulanan;
     }
     public function getavaragebyfiltermonth_revision($data)
     {
@@ -800,7 +657,7 @@ class CalculationAws
                 })
                 ->map(function ($dayData) {
                     return [
-                        'date' => $dayData->first()->date,
+                        'date' => date('Y-m-d', strtotime($dayData->first()->date)),
                         'temp_out' => $dayData->avg('temp_out'),
                         'rain_rate' => $dayData->max('dailyrainmm'),
                         'windspeedkmh' => $dayData->avg('windspeedkmh'),
@@ -826,6 +683,8 @@ class CalculationAws
                 }
             }
 
+            // dd($seven_days_data);
+
             // 3. Get Monthly Data (grouped by day)
             $month_data = Weatherstationdata::where('idws', $station_id)
                 ->whereDate('date', '>=', Carbon::parse($selectedDate)->startOfMonth())
@@ -837,7 +696,7 @@ class CalculationAws
                 })
                 ->map(function ($dayData) {
                     return [
-                        'date' => $dayData->first()->date,
+                        'date' => date('Y-m-d', strtotime($dayData->first()->date)),
                         'temp_out' => $dayData->avg('temp_out'),
                         'rain_rate' => $dayData->max('dailyrainmm'),
                         'windspeedkmh' => $dayData->avg('windspeedkmh'),
@@ -877,7 +736,7 @@ class CalculationAws
                 $temp_data_month = $rain_data_month = $wind_data_month = $humidity_data_month = [[$timestamp, 0]];
             }
         } catch (\Exception $e) {
-            \Log::error('Error generating chart data: ' . $e->getMessage());
+            // \Log::error('Error generating chart data: ' . $e->getMessage());
             $timestamp = strtotime($selectedDate) * 1000;
             $default_point = [[$timestamp, 0]];
             $temp_data = $temp_data_7days = $temp_data_month = $default_point;

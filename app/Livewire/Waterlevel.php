@@ -55,10 +55,26 @@ class Waterlevel extends Component implements HasForms, HasTable
     // Add mount method to set default date
     public function mount()
     {
-        $this->selectedDate = date('Y-m-d');
+        // $this->selectedDate = date('Y-m-d');
         $this->form->fill();
+        $this->stations = $this->generateWilayah(3);
+        $this->selectedWilayah = 3;
+        $this->selectedStation = 81;
+        // $this->selectedDate = date('Y-m-d');
+        if (!$this->selectedDate) {
+            $latestRecord = ModelsWaterlevel::where('idwl', 81)
+                ->orderBy('datetime', 'desc')
+                ->first();
+            $this->selectedDate = $latestRecord ? Carbon::parse($latestRecord->datetime)->format('Y-m-d') : now()->format('Y-m-d');
+        }
+
+        // $this->dispatch('test');
+        $this->generateChartData(81);
+        $station = Waterlevellist::find($this->selectedStation);
+        $this->updateMapMarker($station);
         // $permission = permission();
         // dd($permission);
+
     }
 
     use InteractsWithTable;
@@ -66,6 +82,8 @@ class Waterlevel extends Component implements HasForms, HasTable
     public function render()
     {
         $wilayah = Wilayah::all();
+
+
         return view('livewire.waterlevel', [
             'wilayah' => $wilayah
         ]);
@@ -79,13 +97,7 @@ class Waterlevel extends Component implements HasForms, HasTable
             $this->selectedStation = null;
             $this->selectedWilayah = $wilayahId;
 
-            $data = Estate::where('wil', $wilayahId)->pluck('est');
-
-            $this->stations = Waterlevellist::where(function ($query) use ($data) {
-                foreach ($data as $estate) {
-                    $query->orWhere('location', 'like', $estate . '%');
-                }
-            })->get();
+            $this->stations = $this->generateWilayah($wilayahId);
         } finally {
             $this->isLoadingStations = false;
         }
@@ -96,9 +108,22 @@ class Waterlevel extends Component implements HasForms, HasTable
     {
         if ($this->selectedStation) {
             $this->generateChartData($this->selectedStation);
+            $this->onChangeStation($this->selectedStation);
         }
     }
 
+    private function generateWilayah($wilayahId)
+    {
+        $data = Estate::where('wil', $wilayahId)->pluck('est');
+
+        $stations = Waterlevellist::where(function ($query) use ($data) {
+            foreach ($data as $estate) {
+                $query->orWhere('location', 'like', $estate . '%');
+            }
+        })->get();
+
+        return $stations;
+    }
     public function generateChartData($stationId)
     {
         // Initialize empty arrays for all parameters
@@ -106,8 +131,12 @@ class Waterlevel extends Component implements HasForms, HasTable
         $level_data_7days = [];
         $level_data_month = [];
 
+
         try {
             // 1. Get Today's Data (grouped by hour)
+
+            // dd($date);
+
             $today_data = ModelsWaterlevel::where('idwl', $stationId)
                 ->whereDate('datetime', $this->selectedDate)
                 ->orderBy('datetime', 'asc')
@@ -125,7 +154,6 @@ class Waterlevel extends Component implements HasForms, HasTable
                         'batas_bawah' => $hourData->first()->waterlevellist->batas_bawah_air
                     ];
                 });
-
             // Process today's data
             foreach ($today_data as $hour => $data) {
                 $timestamp = strtotime($data['datetime']) * 1000;
@@ -234,7 +262,7 @@ class Waterlevel extends Component implements HasForms, HasTable
                 ];
             }
         } catch (\Exception $e) {
-            \Log::error('Error generating chart data: ' . $e->getMessage());
+            // \Log::error('Error generating chart data: ' . $e->getMessage());
             $timestamp = strtotime($this->selectedDate) * 1000;
             $default_point = [[$timestamp, 0]];
             $default_data = [
@@ -251,12 +279,6 @@ class Waterlevel extends Component implements HasForms, HasTable
         $this->today = $level_data;
         $this->week = $level_data_7days;
         $this->month = $level_data_month;
-
-        // dd([
-        //     'today' => $level_data,
-        //     'week' => $level_data_7days,
-        //     'month' => $level_data_month
-        // ]);
         $this->dispatch('updateChartData', [
             'today' => $level_data,
             'week' => $level_data_7days,
@@ -279,16 +301,6 @@ class Waterlevel extends Component implements HasForms, HasTable
 
                 // Generate chart data
                 $this->generateChartData($stationId);
-
-                // Process station data for current readings
-                $stationData = $this->processStationData($station, ModelsWaterlevel::where('idwl', $stationId)
-                    ->whereDate('datetime', $this->selectedDate)
-                    ->get());
-                // dd($coordinates);
-                // //     array:2 [▼ // app\Livewire\Waterlevel.php:287
-                // //     "lat" => 0.0
-                // //     "lon" => 0.0
-                // //   ]
                 if ($coordinates['lat'] == 0 && $coordinates['lon'] == 0) {
                     Notification::make()
                         ->title('Coordinates water level not found')
@@ -296,11 +308,7 @@ class Waterlevel extends Component implements HasForms, HasTable
                         ->danger()
                         ->send();
                 }
-                // Update map marker
-                $this->dispatch('updateMapMarker', [
-                    'coordinates' => $coordinates,
-                    'station' => $stationData
-                ]);
+                $this->updateMapMarker($station);
             }
         } finally {
             $this->isLoadingMapMarker = false;
@@ -311,6 +319,7 @@ class Waterlevel extends Component implements HasForms, HasTable
     {
         $stationData = [
             'location' => $station->location,
+            'datetime' => '-',
             'level_in' => 0,
             'level_out' => 0,
             'level_actual' => 0,
@@ -333,6 +342,7 @@ class Waterlevel extends Component implements HasForms, HasTable
 
             $latest = $waterlevel->first();
             if ($latest) {
+                $stationData['datetime'] = Carbon::parse($latest->datetime)->format('Y-m-d');
                 $stationData['level_in'] = $latest->lvl_in;
                 $stationData['level_out'] = $latest->lvl_out;
                 $stationData['level_actual'] = $latest->lvl_act;
@@ -487,18 +497,7 @@ class Waterlevel extends Component implements HasForms, HasTable
                 'lon' => $this->selectedLon,
             ]);
 
-            // After updating coordinates, refresh the map marker
-            $stationData = $this->processStationData($station, ModelsWaterlevel::where('idwl', $this->selectedStation)
-                ->whereDate('datetime', $this->selectedDate)
-                ->get());
-
-            $this->dispatch('updateMapMarker', [
-                'coordinates' => [
-                    'lat' => (float)$this->selectedLat,
-                    'lon' => (float)$this->selectedLon,
-                ],
-                'station' => $stationData
-            ]);
+            $this->updateMapMarker($station);
             Notification::make()
                 ->title('Coordinates updated successfully!')
                 ->success()
@@ -513,6 +512,21 @@ class Waterlevel extends Component implements HasForms, HasTable
                 ->danger()
                 ->send();
         }
+    }
+
+    private function updateMapMarker($station)
+    {
+        $stationData = $this->processStationData($station, ModelsWaterlevel::where('idwl', $this->selectedStation)
+            ->whereDate('datetime', $this->selectedDate)
+            ->get());
+
+        $this->dispatch('updateMapMarker', [
+            'coordinates' => [
+                'lat' => (float)$station->lat,
+                'lon' => (float)$station->lon,
+            ],
+            'station' => $stationData
+        ]);
     }
 
     #[On('set-coordinates')]

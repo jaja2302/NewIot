@@ -212,142 +212,405 @@
     </div>
 
 
-
+    @script
     <script type="module">
-        document.addEventListener('livewire:initialized', function() {
-            // Single map instance
-            let map = L.map('map', {
-                preferCanvas: true,
-            }).setView([-2.2745234, 111.61404248], 13);
+        let map = L.map('map', {
+            preferCanvas: true,
+        }).setView([-2.2745234, 111.61404248], 13);
 
-            // Add tile layer
-            L.tileLayer('http://{s}.google.com/vt?lyrs=s&x={x}&y={y}&z={z}', {
-                maxZoom: 20,
-                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        // Add tile layer
+        L.tileLayer('http://{s}.google.com/vt?lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+
+        let layerGroup = L.layerGroup().addTo(map);
+
+
+        // Add search control functionality
+        const searchControl = L.Control.geocoder({
+            defaultMarkGeocode: false
+        }).addTo(map);
+        let isUpdateMode = false;
+
+
+        // Handle search results
+        searchControl.on('markgeocode', function(e) {
+            const bbox = e.geocode.bbox;
+            const poly = L.polygon([
+                bbox.getSouthEast(),
+                bbox.getNorthEast(),
+                bbox.getNorthWest(),
+                bbox.getSouthWest()
+            ]);
+            map.fitBounds(poly.getBounds());
+
+            const latlng = e.geocode.center;
+            updateMarkerPosition(latlng);
+        });
+
+        // Handle map clicks
+        map.on('click', function(e) {
+            // Check if user is SuperAdmin and has selected both wilayah and station
+            const hasRequiredSelections = @json(SuperAdmin() && !empty($selectedWilayah) && !empty($selectedStation));
+
+            if (isUpdateMode && hasRequiredSelections) {
+                updateMarkerPosition(e.latlng);
+            }
+        });
+
+        let currentMarker = null;
+
+        function updateMarkerPosition(latlng) {
+            // Validate coordinates
+            if (!isValidLatLng(latlng.lat, latlng.lng)) {
+                console.warn('Invalid coordinates:', latlng);
+                return;
+            }
+
+            // Clear existing marker
+            if (currentMarker) {
+                map.removeLayer(currentMarker);
+            }
+
+            // Add new marker
+            currentMarker = L.marker(latlng, {
+                draggable: true
             }).addTo(map);
 
-            let layerGroup = L.layerGroup().addTo(map);
-
-
-            // Add search control functionality
-            const searchControl = L.Control.geocoder({
-                defaultMarkGeocode: false
-            }).addTo(map);
-            let isUpdateMode = false;
-
-
-            // Handle search results
-            searchControl.on('markgeocode', function(e) {
-                const bbox = e.geocode.bbox;
-                const poly = L.polygon([
-                    bbox.getSouthEast(),
-                    bbox.getNorthEast(),
-                    bbox.getNorthWest(),
-                    bbox.getSouthWest()
-                ]);
-                map.fitBounds(poly.getBounds());
-
-                const latlng = e.geocode.center;
-                updateMarkerPosition(latlng);
+            // Update coordinates in Livewire
+            @this.dispatch('set-coordinates', {
+                lat: latlng.lat,
+                lng: latlng.lng
             });
 
-            // Handle map clicks
-            map.on('click', function(e) {
-                // Check if user is SuperAdmin and has selected both wilayah and station
-                const hasRequiredSelections = @json(SuperAdmin() && !empty($selectedWilayah) && !empty($selectedStation));
-
-                if (isUpdateMode && hasRequiredSelections) {
-                    updateMarkerPosition(e.latlng);
-                }
-            });
-
-            let currentMarker = null;
-
-            function updateMarkerPosition(latlng) {
-                // Validate coordinates
-                if (!isValidLatLng(latlng.lat, latlng.lng)) {
-                    console.warn('Invalid coordinates:', latlng);
-                    return;
-                }
-
-                // Clear existing marker
-                if (currentMarker) {
-                    map.removeLayer(currentMarker);
-                }
-
-                // Add new marker
-                currentMarker = L.marker(latlng, {
-                    draggable: true
-                }).addTo(map);
-
-                // Update coordinates in Livewire
+            // Handle marker drag
+            currentMarker.on('dragend', function(event) {
+                const marker = event.target;
+                const position = marker.getLatLng();
                 @this.dispatch('set-coordinates', {
-                    lat: latlng.lat,
-                    lng: latlng.lng
+                    lat: position.lat,
+                    lng: position.lng
                 });
-
-                // Handle marker drag
-                currentMarker.on('dragend', function(event) {
-                    const marker = event.target;
-                    const position = marker.getLatLng();
-                    @this.dispatch('set-coordinates', {
-                        lat: position.lat,
-                        lng: position.lng
-                    });
-                });
-            }
-
-            // Add coordinate validation function
-            function isValidLatLng(lat, lng) {
-                return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
-            }
-
-            // Update the Livewire event listener to handle manual input
-            Livewire.on('set-coordinates', ({
-                lat,
-                lng
-            }) => {
-                if (lat && lng) {
-                    updateMarkerPosition(L.latLng(lat, lng));
-                    // If coordinates are valid, center the map on the new position
-                    map.setView([lat, lng], 15);
-                }
             });
+        }
 
-            // maps for station
-            Livewire.on('updateMapMarker', (eventData) => {
-                // console.log(eventData);
-                const data = Array.isArray(eventData) ? eventData[0] : eventData;
-                const coordinates = data.coordinates;
-                const station = data.station;
+        // Add coordinate validation function
+        function isValidLatLng(lat, lng) {
+            return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+        }
 
-                if (coordinates && coordinates.lat && coordinates.lon) {
-                    // Clear previous markers
-                    layerGroup.clearLayers();
+        // Update the Livewire event listener to handle manual input
 
-                    // Create marker with popup
-                    const marker = L.marker([coordinates.lat, coordinates.lon], {
-                        title: station.location
-                    }).bindPopup(`
+
+
+        $wire.on('set-coordinates', ({
+            lat,
+            lng
+        }) => {
+            if (lat && lng) {
+                updateMarkerPosition(L.latLng(lat, lng));
+                // If coordinates are valid, center the map on the new position
+                map.setView([lat, lng], 15);
+            }
+        });
+
+        // maps for station
+        $wire.on('updateMapMarker', (eventData) => {
+            // console.log(eventData);
+            const data = Array.isArray(eventData) ? eventData[0] : eventData;
+            const coordinates = data.coordinates;
+            const station = data.station;
+            // console.log(station);
+
+            if (coordinates && coordinates.lat && coordinates.lon) {
+                // Clear previous markers
+                layerGroup.clearLayers();
+
+                // Create marker with popup
+                const marker = L.marker([coordinates.lat, coordinates.lon], {
+                    title: station.location
+                }).bindPopup(`
+                        <div class="text-center">
+                        <b>Tanggal: ${station.datetime ? station.datetime : 'No Data'}</b><br>
                         <b>Water Station: ${station.location}</b><br>
-                        Level In Terakhir: ${station.level_in}<br>
-                        Level Out Terakhir: ${station.level_out}<br>
-                        Level Actual Terakhir: ${station.level_actual}<br>
-                        Rata rata Level In: ${station.level_in_avg}<br>
-                        Rata rata Level Out: ${station.level_out_avg}<br>
-                        Rata rata Level Actual: ${station.level_actual_avg}<br>
-                        Batas Atas Air: ${station.batas_atas_air}<br>
-                        Batas Bawah Air: ${station.batas_bawah_air} 
+                        Level In Terakhir: ${station.level_in ? station.level_in : 'No Data'}<br>
+                        Level Out Terakhir: ${station.level_out ? station.level_out : 'No Data'}<br>
+                        Level Actual Terakhir: ${station.level_actual ? station.level_actual : 'No Data'}<br>
+                        Rata rata Level In: ${station.level_in_avg ? station.level_in_avg : 'No Data'}<br>
+                        Rata rata Level Out: ${station.level_out_avg ? station.level_out_avg : 'No Data'}<br>
+                        Rata rata Level Actual: ${station.level_actual_avg ? station.level_actual_avg : 'No Data'}<br>
+                        Batas Atas Air: ${station.batas_atas_air ? station.batas_atas_air : 'No Data'}<br>
+                        Batas Bawah Air: ${station.batas_bawah_air ? station.batas_bawah_air : 'No Data'} 
+                        </div>
                     `);
 
-                    // Add marker to layer group
-                    layerGroup.addLayer(marker);
+                // Add marker to layer group
+                layerGroup.addLayer(marker);
 
-                    // Fit bounds with padding
-                    map.setView([coordinates.lat, coordinates.lon], 15);
-                    marker.openPopup();
+                // Fit bounds with padding
+                map.setView([coordinates.lat, coordinates.lon], 15);
+                marker.openPopup();
+            }
+        });
+        // for chart 
+        $wire.on('updateChartData', (eventData) => {
+            let currentPeriod = 'today'; // Default period
+            let chart = null;
+            // console.log(eventData);
+            // Chart options
+            const chartOptions = {
+                series: [{
+                        name: 'Level In',
+                        data: []
+                    },
+                    {
+                        name: 'Level Out',
+                        data: []
+                    },
+                    {
+                        name: 'Level Actual',
+                        data: []
+                    },
+                    {
+                        name: 'Batas Atas',
+                        data: []
+                    },
+                    {
+                        name: 'Batas Bawah',
+                        data: []
+                    }
+                ],
+                chart: {
+                    type: 'line',
+                    height: 400,
+                    animations: {
+                        enabled: true,
+                        easing: 'easeinout',
+                        speed: 800,
+                        animateGradually: {
+                            enabled: true,
+                            delay: 150
+                        },
+                        dynamicAnimation: {
+                            enabled: true,
+                            speed: 350
+                        }
+                    },
+                    toolbar: {
+                        show: true,
+                        tools: {
+                            download: true,
+                            selection: true,
+                            zoom: true,
+                            zoomin: true,
+                            zoomout: true,
+                            pan: true,
+                            reset: true
+                        },
+                        autoSelected: 'zoom'
+                    },
+                    dropShadow: {
+                        enabled: true,
+                        color: '#000',
+                        top: 18,
+                        left: 7,
+                        blur: 10,
+                        opacity: 0.2
+                    },
+                    background: 'transparent'
+                },
+                colors: ['#2563eb', '#16a34a', '#dc2626', '#ea580c', '#ca8a04'],
+                stroke: {
+                    curve: 'smooth',
+                    width: 3
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shade: 'dark',
+                        type: "vertical",
+                        shadeIntensity: 0.5,
+                        gradientToColors: undefined,
+                        inverseColors: true,
+                        opacityFrom: 0.8,
+                        opacityTo: 0.2,
+                        stops: [0, 100]
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                grid: {
+                    borderColor: '#e0e0e0',
+                    strokeDashArray: 5,
+                    xaxis: {
+                        lines: {
+                            show: true
+                        }
+                    },
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    },
+                    padding: {
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        left: 0
+                    },
+                },
+                markers: {
+                    size: 4,
+                    strokeColors: "#fff",
+                    strokeWidth: 2,
+                    hover: {
+                        size: 7,
+                    }
+                },
+                xaxis: {
+                    type: 'datetime',
+                    labels: {
+                        style: {
+                            colors: '#666',
+                            fontSize: '12px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 400,
+                        },
+                        datetimeFormatter: {
+                            year: 'yyyy',
+                            month: "MMM 'yy",
+                            day: 'dd MMM',
+                            hour: 'HH:mm'
+                        }
+                    },
+                    tooltip: {
+                        enabled: false
+                    }
+                },
+                yaxis: {
+                    title: {
+                        text: 'Water Level',
+                        style: {
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                        }
+                    },
+                    labels: {
+                        style: {
+                            colors: '#666',
+                            fontSize: '12px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 400,
+                        }
+                    }
+                },
+                tooltip: {
+                    shared: true,
+                    intersect: false,
+                    x: {
+                        format: 'dd MMM yyyy HH:mm'
+                    },
+                    y: {
+                        formatter: function(val) {
+                            return val.toFixed(2)
+                        }
+                    },
+                    theme: 'dark',
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                    },
+                    marker: {
+                        show: true,
+                    }
+                },
+                legend: {
+                    show: true,
+                    position: 'top',
+                    horizontalAlign: 'right',
+                    floating: true,
+                    offsetY: -25,
+                    offsetX: -5,
+                    markers: {
+                        width: 12,
+                        height: 12,
+                        strokeWidth: 0,
+                        strokeColor: '#fff',
+                        radius: 12,
+                        customHTML: undefined,
+                        onClick: undefined,
+                        offsetX: 0,
+                        offsetY: 0
+                    }
+                },
+                theme: {
+                    mode: 'light',
+                    palette: 'palette1',
+                    monochrome: {
+                        enabled: false,
+                        color: '#255aee',
+                        shadeTo: 'light',
+                        shadeIntensity: 0.65
+                    }
                 }
+            };
+
+            // Initialize chart
+            chart = new ApexCharts(document.querySelector("#container"), chartOptions);
+            chart.render();
+
+            // Function to update chart data
+            const updateChart = (period) => {
+                const data = eventData[0][period];
+                chart.updateSeries([{
+                        name: 'Level In',
+                        data: data.levelIn
+                    },
+                    {
+                        name: 'Level Out',
+                        data: data.levelOut
+                    },
+                    {
+                        name: 'Level Actual',
+                        data: data.levelActual
+                    },
+                    {
+                        name: 'Batas Atas',
+                        data: data.batasAtas
+                    },
+                    {
+                        name: 'Batas Bawah',
+                        data: data.batasBawah
+                    }
+                ]);
+            };
+
+            // Initial chart update
+            updateChart(currentPeriod);
+
+            // Add click handlers for period buttons
+            document.querySelectorAll('.period-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.period-btn').forEach(btn => {
+                        btn.classList.remove('bg-blue-500', 'text-white');
+                        btn.classList.add('bg-gray-200', 'text-gray-700');
+                    });
+
+                    // Add active class to clicked button
+                    e.target.classList.remove('bg-gray-200', 'text-gray-700');
+                    e.target.classList.add('bg-blue-500', 'text-white');
+
+                    // Update chart
+                    const period = e.target.dataset.period;
+                    currentPeriod = period;
+                    updateChart(period);
+                });
             });
         });
     </script>
+    @endscript
 </div>
