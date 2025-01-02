@@ -1,4 +1,5 @@
 // @ts-ignore
+// @ts-ignore
 import $ from 'jquery';
 window.$ = $;
 window.jQuery = $;
@@ -12,7 +13,13 @@ import lottie from 'lottie-web';
 import * as d3 from "d3";
 window.lottie = lottie;
 window.d3 = d3;
-
+// Initialize the accessibility module
+HighchartsAccessibility(Highcharts);
+Highcharts.setOptions({
+    accessibility: {
+        enabled: false
+    }
+});
 window.Highcharts = Highcharts;
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
@@ -21,7 +28,6 @@ import ApexCharts from 'apexcharts'
 window.ApexCharts = ApexCharts;
 import 'leaflet-control-geocoder';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
-
 function initializeScrollNavigation(upRoute, downRoute, options = {}) {
     // Adjusted default settings
     const config = {
@@ -506,3 +512,20 @@ function handleSwipe() {
         }
     }
 }
+
+
+// For the logout handler error, add this to your global scope:
+window.handleLogout = function() {
+    // Show loading screen before logout
+    if (window.showLoadingScreen) {
+        window.showLoadingScreen();
+    }
+    
+    // Find and submit the logout form
+    const logoutForm = document.getElementById('logout-form');
+    if (logoutForm) {
+        setTimeout(() => {
+            logoutForm.submit();
+        }, 500);
+    }
+};

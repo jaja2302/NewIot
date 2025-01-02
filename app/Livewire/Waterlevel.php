@@ -187,7 +187,7 @@ class Waterlevel extends Component implements HasForms, HasTable
 
             // Process 7 days data
             foreach ($seven_days_data as $day => $data) {
-                $timestamp = strtotime($data['datetime']) * 1000;
+                $timestamp = Carbon::parse($day)->startOfDay()->timestamp * 1000;
 
                 $level_data_7days['levelIn'][] = [$timestamp, round((float)$data['lvl_in'], 1)];
                 $level_data_7days['levelOut'][] = [$timestamp, round((float)$data['lvl_out'], 1)];
@@ -218,7 +218,7 @@ class Waterlevel extends Component implements HasForms, HasTable
 
             // Process monthly data
             foreach ($month_data as $day => $data) {
-                $timestamp = strtotime($data['datetime']) * 1000;
+                $timestamp = Carbon::parse($day)->startOfDay()->timestamp * 1000;
 
                 $level_data_month['levelIn'][] = [$timestamp, round((float)$data['lvl_in'], 1)];
                 $level_data_month['levelOut'][] = [$timestamp, round((float)$data['lvl_out'], 1)];
