@@ -555,7 +555,18 @@
                         shadeTo: 'light',
                         shadeIntensity: 0.65
                     }
-                }
+                },
+                responsive: [{
+                    breakpoint: 640,
+                    options: {
+                        chart: {
+                            height: 300 // Adjust height for mobile
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }]
             };
 
             // Initialize chart
