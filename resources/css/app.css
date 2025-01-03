@@ -876,3 +876,29 @@ body {
 .dark .login-background {
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
 }
+
+/* Mobile Weather Circle Styles */
+.weatherCircleSwiper .swiper-slide {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 350px !important; /* Increased height for better centering */
+}
+
+.weatherCircleSwiper .swiper-wrapper {
+    align-items: center !important;
+}
+
+/* Override any transform styles that might interfere */
+.weatherCircleSwiper .weather-card,
+.weatherCircleSwiper .weather-card:hover {
+    transform: none !important;
+}
+
+/* Ensure the circle container stays centered */
+.weatherCircleSwiper .flex.flex-col {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}

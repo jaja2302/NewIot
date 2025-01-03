@@ -47,73 +47,164 @@
             <div class="w-full lg:w-3/4 px-4">
                 <!-- Circle cards -->
                 <div class="weather-card mb-6 rounded-lg shadow-lg p-2 sm:p-4 md:p-6 bg-black text-white">
-
+                    <!-- desktop  -->
                     <div class="flex flex-wrap justify-center">
-                        <div class="flex flex-wrap justify-center w-full mb-4 sm:mb-6">
-                            <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
-                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-yellow-400 flex items-center justify-center">
-                                    <div class="text-center">
-                                        <div class="text-[10px] sm:text-xs text-yellow-300">Terasa Seperti</div>
-                                        <div class="text-lg sm:text-2xl md:text-3xl font-bold text-yellow-400">{{ number_format($heatIndex, 1) }}°</div>
-                                        <div class="text-[10px] sm:text-xs text-yellow-300">Aktual: {{ $weather_data['temperature']['current'] }}°C</div>
+                        <div class="hidden md:block">
+                            <div class="flex flex-wrap justify-center w-full mb-4 sm:mb-6">
+                                <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
+                                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-yellow-400 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-[10px] sm:text-xs text-yellow-300">Terasa Seperti</div>
+                                            <div class="text-lg sm:text-2xl md:text-3xl font-bold text-yellow-400">{{ number_format($heatIndex, 1) }}°</div>
+                                            <div class="text-[10px] sm:text-xs text-yellow-300">Aktual: {{ $weather_data['temperature']['current'] }}°C</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
+                                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-green-400 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-[10px] sm:text-xs text-green-300">Suhu</div>
+                                            <div class="text-lg sm:text-2xl md:text-3xl font-bold text-green-400">{{ $weather_data['temperature']['current'] }}°</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
+                                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-blue-400 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-[10px] sm:text-xs text-blue-300">Kecepatan Angin</div>
+                                            <div class="text-[10px] sm:text-2xl md:text- font-bold text-blue-400">{{ $weather_data['wind']['speed'] }}km/h</div>
+                                            <div class="text-[10px] sm:text-xs text-blue-300">Arah: {{ $weather_data['wind']['direction'] }}°</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
-                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-green-400 flex items-center justify-center">
-                                    <div class="text-center">
-                                        <div class="text-[10px] sm:text-xs text-green-300">Suhu</div>
-                                        <div class="text-lg sm:text-2xl md:text-3xl font-bold text-green-400">{{ $weather_data['temperature']['current'] }}°</div>
+
+                            <!-- Bottom row with 3 circles -->
+                            <div class="flex flex-wrap justify-center w-full">
+                                <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
+                                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-purple-400 flex items-center justify-center overflow-hidden">
+                                        <div class="absolute bottom-0 left-0 right-0 bg-purple-400/40 dark:bg-purple-300/40 transition-all duration-500" style="height: {{ $weather_data['temperature']['indoor'] }}%; transform-origin: bottom;">
+                                            <div class="absolute top-0 left-0 right-0 h-2 bg-purple-200/30 dark:bg-purple-100/30 animate-wave"></div>
+                                            <div class="absolute top-1 left-1 right-1 h-1 bg-purple-100/20 dark:bg-purple-50/20 animate-wave-delayed"></div>
+                                        </div>
+                                        <div class="text-center relative z-10">
+                                            <div class="text-[10px] sm:text-xs text-purple-300 dark:text-purple-200">Kelembapan<br><span>Dalam Ruangan</span></div>
+                                            <div class="text-lg sm:text-2xl md:text-3xl font-bold text-purple-400 dark:text-purple-300">{{ $weather_data['temperature']['indoor'] }}%</div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
-                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-blue-400 flex items-center justify-center">
-                                    <div class="text-center">
-                                        <div class="text-[10px] sm:text-xs text-blue-300">Kecepatan Angin</div>
-                                        <div class="text-[10px] sm:text-2xl md:text- font-bold text-blue-400">{{ $weather_data['wind']['speed'] }}km/h</div>
-                                        <div class="text-[10px] sm:text-xs text-blue-300">Arah: {{ $weather_data['wind']['direction'] }}°</div>
+                                <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
+                                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-orange-400 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-[10px] sm:text-xs text-orange-300 dark:text-orange-200">Hujan saat ini</div>
+                                            <div class="text-lg sm:text-2xl md:text-3xl font-bold text-orange-400 dark:text-orange-300">{{ $weather_data['rain']['rate'] }}</div>
+                                            <div class="text-[10px] sm:text-xs text-orange-300 dark:text-orange-200">mm/h</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
+                                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-teal-400 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-[10px] sm:text-xs text-teal-300 dark:text-teal-200">Tekanan Udara</div>
+                                            <div class="text-lg sm:text-2xl md:text-3xl font-bold text-teal-400 dark:text-teal-300"> {{ $weather_data['temperature']['pressure'] }} </div>
+                                            <div class="text-[10px] sm:text-xs text-teal-300 dark:text-teal-200">mb</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Bottom row with 3 circles -->
-                        <div class="flex flex-wrap justify-center w-full">
-                            <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
-                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-purple-400 flex items-center justify-center overflow-hidden">
-                                    <div class="absolute bottom-0 left-0 right-0 bg-purple-400/40 dark:bg-purple-300/40 transition-all duration-500" style="height: {{ $weather_data['temperature']['indoor'] }}%; transform-origin: bottom;">
-                                        <div class="absolute top-0 left-0 right-0 h-2 bg-purple-200/30 dark:bg-purple-100/30 animate-wave"></div>
-                                        <div class="absolute top-1 left-1 right-1 h-1 bg-purple-100/20 dark:bg-purple-50/20 animate-wave-delayed"></div>
-                                    </div>
-                                    <div class="text-center relative z-10">
-                                        <div class="text-[10px] sm:text-xs text-purple-300 dark:text-purple-200">Kelembapan<br><span>Dalam Ruangan</span></div>
-                                        <div class="text-lg sm:text-2xl md:text-3xl font-bold text-purple-400 dark:text-purple-300">{{ $weather_data['temperature']['indoor'] }}%</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
-                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-orange-400 flex items-center justify-center">
-                                    <div class="text-center">
-                                        <div class="text-[10px] sm:text-xs text-orange-300 dark:text-orange-200">Hujan saat ini</div>
-                                        <div class="text-lg sm:text-2xl md:text-3xl font-bold text-orange-400 dark:text-orange-300">{{ $weather_data['rain']['rate'] }}</div>
-                                        <div class="text-[10px] sm:text-xs text-orange-300 dark:text-orange-200">mm/h</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex flex-col items-center w-1/3 px-1 sm:px-2">
-                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 sm:border-8 border-teal-400 flex items-center justify-center">
-                                    <div class="text-center">
-                                        <div class="text-[10px] sm:text-xs text-teal-300 dark:text-teal-200">Tekanan Udara</div>
-                                        <div class="text-lg sm:text-2xl md:text-3xl font-bold text-teal-400 dark:text-teal-300"> {{ $weather_data['temperature']['pressure'] }} </div>
-                                        <div class="text-[10px] sm:text-xs text-teal-300 dark:text-teal-200">mb</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
+                    <!-- mobile  -->
+                    <div class="block md:hidden">
+                        <div class="swiper weatherCircleSwiper w-full">
+                            <div class="swiper-wrapper">
+                                <!-- Circle 1 - Feels Like -->
+                                <div class="swiper-slide flex items-center justify-center min-h-[350px]">
+                                    <div class="flex flex-col items-center">
+                                        <div class="relative w-32 h-32 rounded-full border-8 border-yellow-400 flex items-center justify-center">
+                                            <div class="text-center">
+                                                <div class="text-xs text-yellow-300">Terasa Seperti</div>
+                                                <div class="text-2xl font-bold text-yellow-400">{{ number_format($heatIndex, 1) }}°</div>
+                                                <div class="text-xs text-yellow-300">Aktual: {{ $weather_data['temperature']['current'] }}°C</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
+                                <!-- Circle 2 - Temperature -->
+                                <div class="swiper-slide flex items-center justify-center min-h-[350px]">
+                                    <div class="flex flex-col items-center">
+                                        <div class="relative w-32 h-32 rounded-full border-8 border-green-400 flex items-center justify-center">
+                                            <div class="text-center">
+                                                <div class="text-xs text-green-300">Suhu</div>
+                                                <div class="text-2xl font-bold text-green-400">{{ $weather_data['temperature']['current'] }}°</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Circle 3 - Wind -->
+                                <div class="swiper-slide flex items-center justify-center min-h-[350px]">
+                                    <div class="flex flex-col items-center">
+                                        <div class="relative w-32 h-32 rounded-full border-8 border-blue-400 flex items-center justify-center">
+                                            <div class="text-center">
+                                                <div class="text-xs text-blue-300">Kecepatan Angin</div>
+                                                <div class="text-2xl font-bold text-blue-400">{{ $weather_data['wind']['speed'] }}km/h</div>
+                                                <div class="text-xs text-blue-300">Arah: {{ $weather_data['wind']['direction'] }}°</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Circle 4 - Indoor Humidity -->
+                                <div class="swiper-slide flex items-center justify-center min-h-[350px]">
+                                    <div class="flex flex-col items-center">
+                                        <div class="relative w-32 h-32 rounded-full border-8 border-purple-400 flex items-center justify-center overflow-hidden">
+                                            <div class="absolute bottom-0 left-0 right-0 bg-purple-400/40 dark:bg-purple-300/40 transition-all duration-500" style="height: {{ $weather_data['temperature']['indoor'] }}%; transform-origin: bottom;">
+                                                <div class="absolute top-0 left-0 right-0 h-2 bg-purple-200/30 dark:bg-purple-100/30 animate-wave"></div>
+                                                <div class="absolute top-1 left-1 right-1 h-1 bg-purple-100/20 dark:bg-purple-50/20 animate-wave-delayed"></div>
+                                            </div>
+                                            <div class="text-center relative z-10">
+                                                <div class="text-xs text-purple-300 dark:text-purple-200">Kelembapan<br>Dalam Ruangan</div>
+                                                <div class="text-2xl font-bold text-purple-400 dark:text-purple-300">{{ $weather_data['temperature']['indoor'] }}%</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Circle 5 - Rain -->
+                                <div class="swiper-slide flex items-center justify-center min-h-[350px]">
+                                    <div class="flex flex-col items-center">
+                                        <div class="relative w-32 h-32 rounded-full border-8 border-orange-400 flex items-center justify-center">
+                                            <div class="text-center">
+                                                <div class="text-xs text-orange-300 dark:text-orange-200">Hujan saat ini</div>
+                                                <div class="text-2xl font-bold text-orange-400 dark:text-orange-300">{{ $weather_data['rain']['rate'] }}</div>
+                                                <div class="text-xs text-orange-300 dark:text-orange-200">mm/h</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Circle 6 - Pressure -->
+                                <div class="swiper-slide flex items-center justify-center min-h-[350px]">
+                                    <div class="flex flex-col items-center">
+                                        <div class="relative w-32 h-32 rounded-full border-8 border-teal-400 flex items-center justify-center">
+                                            <div class="text-center">
+                                                <div class="text-xs text-teal-300 dark:text-teal-200">Tekanan Udara</div>
+                                                <div class="text-2xl font-bold text-teal-400 dark:text-teal-300">{{ $weather_data['temperature']['pressure'] }}</div>
+                                                <div class="text-xs text-teal-300 dark:text-teal-200">mb</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-pagination mt-4"></div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                        </div>
+                    </div>
 
                 </div>
 
@@ -1193,6 +1284,32 @@
                 }
             `)
                 .appendTo('head');
+
+
+
+            const weatherCircleSwiper = new Swiper('.weatherCircleSwiper', {
+                slidesPerView: 1,
+                spaceBetween: 30,
+                centeredSlides: true,
+                loop: true,
+                watchSlidesProgress: true,
+                centerInsufficientSlides: true,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                },
+                effect: 'slide',
+                grabCursor: true,
+                touchEventsTarget: 'wrapper',
+            });
         });
 
         function initLottieAnimation(animationName) {

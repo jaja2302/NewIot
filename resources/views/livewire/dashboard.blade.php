@@ -1,4 +1,5 @@
 <div class="min-h-screen">
+
     <div class="container mx-auto px-4 py-6">
         <!-- City Search Input -->
         <div class="mb-4 relative">
@@ -56,77 +57,168 @@
                     <!-- Circle cards -->
                     <div class="weather-card mb-6 rounded-lg shadow-lg p-4 sm:p-6 bg-black text-white">
 
+                        <!-- desktop  -->
                         <div class="flex flex-wrap justify-center">
                             <div class="w-full text-center mb-4">
                                 <div class="text-lg sm:text-xl">{{ isset($weatherData['current']['time']) ? \Carbon\Carbon::parse($weatherData['current']['time'])->translatedFormat('l, d F Y') : 'N/A' }}</div>
                                 <div class="text-base sm:text-lg">{{ isset($weatherData['current']['time']) ? \Carbon\Carbon::parse($weatherData['current']['time'])->format('H:i') : 'N/A' }}</div>
                             </div>
+                            <div class="hidden md:block">
+                                <!-- Top row with 3 circles -->
+                                <div class="flex flex-wrap justify-center w-full mb-6">
+                                    <div class="flex flex-col items-center w-1/3 px-2">
+                                        <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-8 border-yellow-400 flex items-center justify-center">
+                                            <div class="text-center">
+                                                <div class="text-xs text-yellow-300 dark:text-yellow-200">Terasa Seperti</div>
+                                                <div class="text-2xl sm:text-3xl font-bold text-yellow-400 dark:text-yellow-300">{{ $weatherData['current']['apparent_temperature'] }}°</div>
+                                                <div class="text-xs text-yellow-300 dark:text-yellow-200">Aktual: {{ $weatherData['current']['temperature_2m'] }}°</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-center w-1/3 px-2">
+                                        <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-8 border-green-400 flex items-center justify-center">
+                                            <div class="text-center">
+                                                <div class="text-xs text-green-300 dark:text-green-200">Suhu</div>
+                                                <div class="text-2xl sm:text-3xl font-bold text-green-400 dark:text-green-300">{{ $weatherData['current']['temperature_2m'] }}°</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-center w-1/3 px-2">
+                                        <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-8 border-blue-400 flex items-center justify-center">
+                                            <div class="text-center">
+                                                <div class="text-xs text-blue-300 dark:text-blue-200">Kecepatan Angin</div>
+                                                <div class="text-2xl sm:text-3xl font-bold text-blue-400 dark:text-blue-300">{{ $weatherData['current']['wind_speed_10m'] }} m/s</div>
+                                                <div class="text-xs text-blue-300 dark:text-blue-200">Arah: {{ $weatherData['current']['wind_direction_10m'] }}°</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <!-- Top row with 3 circles -->
-                            <div class="flex flex-wrap justify-center w-full mb-6">
-                                <div class="flex flex-col items-center w-1/3 px-2">
-                                    <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-8 border-yellow-400 flex items-center justify-center">
-                                        <div class="text-center">
-                                            <div class="text-xs text-yellow-300 dark:text-yellow-200">Terasa Seperti</div>
-                                            <div class="text-2xl sm:text-3xl font-bold text-yellow-400 dark:text-yellow-300">{{ $weatherData['current']['apparent_temperature'] }}°</div>
-                                            <div class="text-xs text-yellow-300 dark:text-yellow-200">Aktual: {{ $weatherData['current']['temperature_2m'] }}°</div>
+                                <!-- Bottom row with 3 circles -->
+                                <div class="flex flex-wrap justify-center w-full">
+                                    <div class="flex flex-col items-center w-1/3 px-2">
+                                        <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-8 border-purple-400 flex items-center justify-center overflow-hidden">
+                                            <div class="absolute bottom-0 left-0 right-0 bg-purple-400/40 dark:bg-purple-300/40 transition-all duration-500" style="height: {{ $weatherData['current']['relative_humidity_2m'] }}%; transform-origin: bottom;">
+                                                <div class="absolute top-0 left-0 right-0 h-2 bg-purple-200/30 dark:bg-purple-100/30 animate-wave"></div>
+                                                <div class="absolute top-1 left-1 right-1 h-1 bg-purple-100/20 dark:bg-purple-50/20 animate-wave-delayed"></div>
+                                            </div>
+                                            <div class="text-center relative z-10">
+                                                <div class="text-xs text-purple-300 dark:text-purple-200">Kelembaban<br><span>Relatif</span></div>
+                                                <div class="text-2xl sm:text-3xl font-bold text-purple-400 dark:text-purple-300">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="flex flex-col items-center w-1/3 px-2">
-                                    <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-8 border-green-400 flex items-center justify-center">
-                                        <div class="text-center">
-                                            <div class="text-xs text-green-300 dark:text-green-200">Suhu</div>
-                                            <div class="text-2xl sm:text-3xl font-bold text-green-400 dark:text-green-300">{{ $weatherData['current']['temperature_2m'] }}°</div>
+                                    <div class="flex flex-col items-center w-1/3 px-2">
+                                        <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-8 border-orange-400 flex items-center justify-center">
+                                            <div class="text-center">
+                                                <div class="text-xs text-orange-300 dark:text-orange-200">Hujan/Hari</div>
+                                                <div class="text-2xl sm:text-3xl font-bold text-orange-400 dark:text-orange-300">{{ $weatherData['daily']['precipitation_sum'][0] ?? 'N/A' }}</div>
+                                                <div class="text-xs text-orange-300 dark:text-orange-200">mm</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="flex flex-col items-center w-1/3 px-2">
-                                    <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-8 border-blue-400 flex items-center justify-center">
-                                        <div class="text-center">
-                                            <div class="text-xs text-blue-300 dark:text-blue-200">Kecepatan Angin</div>
-                                            <div class="text-2xl sm:text-3xl font-bold text-blue-400 dark:text-blue-300">{{ $weatherData['current']['wind_speed_10m'] }} m/s</div>
-                                            <div class="text-xs text-blue-300 dark:text-blue-200">Arah: {{ $weatherData['current']['wind_direction_10m'] }}°</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Bottom row with 3 circles -->
-                            <div class="flex flex-wrap justify-center w-full">
-                                <div class="flex flex-col items-center w-1/3 px-2">
-                                    <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-8 border-purple-400 flex items-center justify-center overflow-hidden">
-                                        <div class="absolute bottom-0 left-0 right-0 bg-purple-400/40 dark:bg-purple-300/40 transition-all duration-500" style="height: {{ $weatherData['current']['relative_humidity_2m'] }}%; transform-origin: bottom;">
-                                            <div class="absolute top-0 left-0 right-0 h-2 bg-purple-200/30 dark:bg-purple-100/30 animate-wave"></div>
-                                            <div class="absolute top-1 left-1 right-1 h-1 bg-purple-100/20 dark:bg-purple-50/20 animate-wave-delayed"></div>
-                                        </div>
-                                        <div class="text-center relative z-10">
-                                            <div class="text-xs text-purple-300 dark:text-purple-200">Kelembaban<br><span>Relatif</span></div>
-                                            <div class="text-2xl sm:text-3xl font-bold text-purple-400 dark:text-purple-300">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col items-center w-1/3 px-2">
-                                    <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-8 border-orange-400 flex items-center justify-center">
-                                        <div class="text-center">
-                                            <div class="text-xs text-orange-300 dark:text-orange-200">Hujan/Hari</div>
-                                            <div class="text-2xl sm:text-3xl font-bold text-orange-400 dark:text-orange-300">{{ $weatherData['daily']['precipitation_sum'][0] ?? 'N/A' }}</div>
-                                            <div class="text-xs text-orange-300 dark:text-orange-200">mm</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col items-center w-1/3 px-2">
-                                    <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-8 border-teal-400 flex items-center justify-center">
-                                        <div class="text-center">
-                                            <div class="text-xs text-teal-300 dark:text-teal-200">Tekanan Udara</div>
-                                            <div class="text-2xl sm:text-3xl font-bold text-teal-400 dark:text-teal-300">{{ $weatherData['current']['pressure_msl'] ?? 'N/A' }}</div>
-                                            <div class="text-xs text-teal-300 dark:text-teal-200">hPa</div>
+                                    <div class="flex flex-col items-center w-1/3 px-2">
+                                        <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-8 border-teal-400 flex items-center justify-center">
+                                            <div class="text-center">
+                                                <div class="text-xs text-teal-300 dark:text-teal-200">Tekanan Udara</div>
+                                                <div class="text-2xl sm:text-3xl font-bold text-teal-400 dark:text-teal-300">{{ $weatherData['current']['pressure_msl'] ?? 'N/A' }}</div>
+                                                <div class="text-xs text-teal-300 dark:text-teal-200">hPa</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <!-- mobile  -->
+                        <div class="block md:hidden">
+                            <!-- Mobile Swiper -->
+                            <div class="swiper weatherCircleSwiper w-full flex items-center justify-center">
+                                <div class="swiper-wrapper">
+                                    <!-- Circle 1 - Feels Like -->
+                                    <div class="swiper-slide flex items-center justify-center min-h-[300px]">
+                                        <div class="flex flex-col items-center">
+                                            <div class="relative w-40 h-40 rounded-full border-8 border-yellow-400 flex items-center justify-center">
+                                                <div class="text-center">
+                                                    <div class="text-sm text-yellow-300 dark:text-yellow-200">Terasa Seperti</div>
+                                                    <div class="text-3xl font-bold text-yellow-400 dark:text-yellow-300">{{ $weatherData['current']['apparent_temperature'] }}°</div>
+                                                    <div class="text-sm text-yellow-300 dark:text-yellow-200">Aktual: {{ $weatherData['current']['temperature_2m'] }}°</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
+                                    <!-- Circle 2 - Temperature -->
+                                    <div class="swiper-slide flex items-center justify-center min-h-[300px]">
+                                        <div class="flex flex-col items-center">
+                                            <div class="relative w-40 h-40 rounded-full border-8 border-green-400 flex items-center justify-center">
+                                                <div class="text-center">
+                                                    <div class="text-sm text-green-300 dark:text-green-200">Suhu</div>
+                                                    <div class="text-3xl font-bold text-green-400 dark:text-green-300">{{ $weatherData['current']['temperature_2m'] }}°</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Circle 3 - Wind Speed -->
+                                    <div class="swiper-slide flex items-center justify-center min-h-[300px]">
+                                        <div class="flex flex-col items-center">
+                                            <div class="relative w-40 h-40 rounded-full border-8 border-blue-400 flex items-center justify-center">
+                                                <div class="text-center">
+                                                    <div class="text-sm text-blue-300 dark:text-blue-200">Kecepatan Angin</div>
+                                                    <div class="text-3xl font-bold text-blue-400 dark:text-blue-300">{{ $weatherData['current']['wind_speed_10m'] }} m/s</div>
+                                                    <div class="text-sm text-blue-300 dark:text-blue-200">Arah: {{ $weatherData['current']['wind_direction_10m'] }}°</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Circle 4 - Humidity -->
+                                    <div class="swiper-slide flex items-center justify-center min-h-[300px]">
+                                        <div class="flex flex-col items-center">
+                                            <div class="relative w-40 h-40 rounded-full border-8 border-purple-400 flex items-center justify-center overflow-hidden">
+                                                <div class="absolute bottom-0 left-0 right-0 bg-purple-400/40 dark:bg-purple-300/40 transition-all duration-500" style="height: {{ $weatherData['current']['relative_humidity_2m'] }}%; transform-origin: bottom;">
+                                                    <div class="absolute top-0 left-0 right-0 h-2 bg-purple-200/30 dark:bg-purple-100/30 animate-wave"></div>
+                                                    <div class="absolute top-1 left-1 right-1 h-1 bg-purple-100/20 dark:bg-purple-50/20 animate-wave-delayed"></div>
+                                                </div>
+                                                <div class="text-center relative z-10">
+                                                    <div class="text-sm text-purple-300 dark:text-purple-200">Kelembaban<br><span>Relatif</span></div>
+                                                    <div class="text-3xl font-bold text-purple-400 dark:text-purple-300">{{ $weatherData['current']['relative_humidity_2m'] }}%</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Circle 5 - Rain -->
+                                    <div class="swiper-slide flex items-center justify-center min-h-[300px]">
+                                        <div class="flex flex-col items-center">
+                                            <div class="relative w-40 h-40 rounded-full border-8 border-orange-400 flex items-center justify-center">
+                                                <div class="text-center">
+                                                    <div class="text-sm text-orange-300 dark:text-orange-200">Hujan/Hari</div>
+                                                    <div class="text-3xl font-bold text-orange-400 dark:text-orange-300">{{ $weatherData['daily']['precipitation_sum'][0] ?? 'N/A' }}</div>
+                                                    <div class="text-sm text-orange-300 dark:text-orange-200">mm</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Circle 6 - Pressure -->
+                                    <div class="swiper-slide flex items-center justify-center min-h-[300px]">
+                                        <div class="flex flex-col items-center">
+                                            <div class="relative w-40 h-40 rounded-full border-8 border-teal-400 flex items-center justify-center">
+                                                <div class="text-center">
+                                                    <div class="text-sm text-teal-300 dark:text-teal-200">Tekanan Udara</div>
+                                                    <div class="text-3xl font-bold text-teal-400 dark:text-teal-300">{{ $weatherData['current']['pressure_msl'] ?? 'N/A' }}</div>
+                                                    <div class="text-sm text-teal-300 dark:text-teal-200">hPa</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="swiper-pagination mt-4"></div>
+                                <div class="swiper-button-next"></div>
+                                <div class="swiper-button-prev"></div>
+                            </div>
+                        </div>
                         <!-- Sunrise Info -->
                         <div class="mt-6 relative">
                             <div class="sun-path">
@@ -497,6 +589,31 @@
             //     const lon = e.latlng.lng.toFixed(4);
             //     @this.updateLocation(lat, lon);
             // });
+
+            // Initialize Swiper for weather circles
+            const weatherCircleSwiper = new Swiper('.weatherCircleSwiper', {
+                slidesPerView: 1,
+                spaceBetween: 30,
+                centeredSlides: true,
+                loop: true,
+                watchSlidesProgress: true,
+                centerInsufficientSlides: true,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                },
+                effect: 'slide',
+                grabCursor: true,
+                touchEventsTarget: 'wrapper',
+            });
         });
 
         function initLottieAnimation(animationName) {
