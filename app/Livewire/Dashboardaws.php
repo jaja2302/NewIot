@@ -88,7 +88,7 @@ class Dashboardaws extends Component implements HasForms, HasTable
     {
         $this->calculationService = $calculationService;
         $this->selectedDate = Carbon::now('Asia/Jakarta')->format('Y-m-d');
-        // $this->selectedDate = '2024-12-16';
+        // $this->selectedDate = '2025-01-19';
         $list_station = DB::connection('mysql')->table('weather_station_list')->where('flags', 1)->get();
         $this->list_station = $list_station;
 

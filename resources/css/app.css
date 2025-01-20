@@ -821,10 +821,11 @@ body {
     border-radius: 2rem;
     box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 8px -4px rgba(0, 0, 0, 0.06);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    width: 100%;
-    max-width: 500px;
-    padding: 2.5rem;
-    position: relative; /* Ensure card stays above background */
+    width: 90%;
+    max-width: 400px;
+    padding: 2rem;
+    margin: 1rem auto;
+    position: relative;
     z-index: 1;
 }
 
@@ -840,8 +841,8 @@ body {
 
 /* Style the logo container */
 .login-card .logo-container {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     margin: 0 auto;
     background: white;
     border-radius: 50%;
@@ -901,4 +902,97 @@ body {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+}
+
+/* Memastikan container login dapat di-scroll pada mobile */
+body {
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+}
+
+/* Container untuk login page */
+.h-full.overflow-y-auto {
+    min-height: 100vh;
+    height: auto;
+    padding: 1rem 0;
+}
+
+/* Memperkecil logo pada mobile */
+@media (max-width: 640px) {
+    .login-card .logo-container {
+        width: 60px;
+        height: 60px;
+    }
+
+    .login-card {
+        padding: 1.5rem;
+    }
+}
+
+/* Mobile-friendly login styles */
+.login-background {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* Update container styles for better mobile scrolling */
+.h-full.overflow-y-auto {
+    position: relative;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Untuk iOS smooth scrolling */
+    padding: 2rem 1rem;
+    display: flex;
+    align-items: flex-start; /* Ubah dari center ke flex-start */
+    justify-content: center;
+}
+
+@media (max-width: 640px) {
+    .h-full.overflow-y-auto {
+        align-items: flex-start;
+        padding-top: 1rem;
+    }
+
+    .login-card {
+        margin: 1rem auto;
+        width: 85%; /* Sedikit lebih kecil di mobile */
+        max-width: 350px; /* Lebih kecil di mobile */
+        padding: 1.25rem;
+    }
+
+    /* Mengurangi ukuran teks di mobile */
+    .login-card h2 {
+        font-size: 1.75rem; /* Lebih kecil dari 2rem */
+    }
+
+    .login-card p {
+        font-size: 0.875rem; /* Lebih kecil dari 1rem */
+    }
+
+    /* Mengurangi ukuran input dan button di mobile */
+    .login-card input,
+    .login-card button {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+}
+
+/* Pastikan body dan html memungkinkan scrolling */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Tambahan untuk memastikan konten tidak tertutup */
+.relative.z-10 {
+    min-height: 100vh;
+    height: auto;
 }

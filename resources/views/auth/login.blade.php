@@ -2,8 +2,8 @@
     @section('title', 'Login')
 
     <div class="login-background"></div>
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="login-card">
+    <div class="min-h-screen h-full overflow-y-auto flex items-start justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="login-card w-full max-w-md my-8">
             <div>
                 <div class="logo-container">
                     <img src="{{ asset('/img/CBIpreview.png') }}" alt="Company Logo" class="w-full h-full object-contain">
