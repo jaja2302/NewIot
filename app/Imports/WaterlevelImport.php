@@ -77,6 +77,18 @@ class WaterlevelImport implements ToModel, WithStartRow, WithCustomCsvSettings
 
             $stationName = trim($row[1]);
 
+            // DESCRIBE water_level_new;
+
+
+
+            // id	int	NO	PRI	NULL	auto_increment	
+            // station_name	varchar(50)	NO		NULL		
+            // idwl	int	NO		NULL		
+            // level_blok	double	NO		NULL		
+            // level_parit	double	NO		NULL		
+            // sensor_distance	double	NO		NULL		
+            // datetime	datetime	NO		NULL		
+
             // Use the new parseDate method
             $formattedDate = $this->parseDate($row[2]);
 
@@ -91,6 +103,7 @@ class WaterlevelImport implements ToModel, WithStartRow, WithCustomCsvSettings
                 ]
             );
 
+            // dd($waterLevelList);
             $existingRecord = Waterlevel::where('idwl', $waterLevelList->id)
                 ->where('datetime', $formattedDate)
                 ->first();
@@ -102,10 +115,11 @@ class WaterlevelImport implements ToModel, WithStartRow, WithCustomCsvSettings
 
             $waterlevel = new Waterlevel([
                 'idwl' => $waterLevelList->id,
+                'station_name' => $row[1],
+                'level_blok' => $row[3],
+                'level_parit' => $row[4],
+                'sensor_distance' => $row[5],
                 'datetime' => $formattedDate,
-                'lvl_in' => $row[3],
-                'lvl_out' => 0,
-                'lvl_act' => 0,
             ]);
 
             DB::commit();

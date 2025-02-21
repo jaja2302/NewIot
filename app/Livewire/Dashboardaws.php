@@ -270,6 +270,7 @@ class Dashboardaws extends Component implements HasForms, HasTable
                                                         // dd($data_bulanan);
                                                         $data_mingguan = $this->datamingguan($state);
                                                         $data_harian = $this->dataharian($state);
+                                                        // dd($data_harian['12 January 2025']['data']['avarage']);
 
                                                         $data = array_merge(
                                                             [
@@ -684,7 +685,6 @@ class Dashboardaws extends Component implements HasForms, HasTable
     {
         // dd($data);
         foreach ($data as $key => &$value) {
-
             $data_count = count($value);
             $windspeedkmhp = 0;
             $winddir_sum = 0;
@@ -700,17 +700,17 @@ class Dashboardaws extends Component implements HasForms, HasTable
             $air_press_abs_sum = 0;
             $solar_radiation_sum = 0;
 
+            $lastValidDailyRainmm = 0; // Inisialisasi variabel untuk nilai terakhir yang valid
+
             foreach ($value as $key1 => $value1) {
-                // dd($value1);
                 $windspeedkmhp += $value1['windspeedkmh'] ?? 0;
                 $winddir_sum += $value1['winddir'] ?? 0;
                 $rain_rate_sum += $value1['rain_rate'] ?? 0;
-                if ($value1['rain_today'] == null) {
-                    $rain_today = 0;
-                } else {
-                    $rain_today = $value1['rain_today'];
-                }
+
+                // Pastikan nilai rain_today tidak null
+                $rain_today = $value1['rain_today'] ?? 0;
                 $rain_today_sum += $rain_today;
+
                 $temp_in_sum += $value1['temp_in'] ?? 0;
                 $temp_out_sum += $value1['temp_out'] ?? 0;
                 $hum_in_sum += $value1['hum_in'] ?? 0;
@@ -720,8 +720,13 @@ class Dashboardaws extends Component implements HasForms, HasTable
                 $air_press_rel_sum += $value1['air_press_rel'] ?? 0;
                 $air_press_abs_sum += $value1['air_press_abs'] ?? 0;
                 $solar_radiation_sum += $value1['solar_radiation'] ?? 0;
+
+                // Ambil nilai terakhir yang bukan nol
+                if ($value1['dailyrainmm'] > 0) {
+                    $lastValidDailyRainmm = $value1['dailyrainmm'];
+                }
+
                 $dailyRainIn = $value1['dailyRainIn'];
-                $dailyrainmm = $value1['dailyrainmm'];
                 $raintodaymm = $value1['raintodaymm'];
                 $totalrainmm = $value1['totalrainmm'];
                 $weeklyrainmm = $value1['weeklyrainmm'];
@@ -730,30 +735,35 @@ class Dashboardaws extends Component implements HasForms, HasTable
                 $maxdailygust = $value1['maxdailygust'];
                 $iddata = $value1['id'];
             }
-            $value['avarage']['id'] = $iddata;
-            $value['avarage']['date'] = 'Avarage';
-            $value['avarage']['windspeedkmh'] = round($windspeedkmhp / $data_count, 3);
-            $value['avarage']['winddir'] = round($winddir_sum / $data_count, 3);
-            $value['avarage']['rain_rate'] = round($dailyrainmm, 3);
-            $value['avarage']['rain_today'] = round($rain_today_sum / $data_count, 3);
-            $value['avarage']['temp_in'] = round($temp_in_sum / $data_count, 3);
-            $value['avarage']['temp_out'] = round($temp_out_sum / $data_count, 3);
-            $value['avarage']['hum_in'] = round($hum_in_sum / $data_count, 3);
-            $value['avarage']['hum_out'] = round($hum_out_sum / $data_count, 3);
-            $value['avarage']['uv'] = round($uv_sum / $data_count, 3);
-            $value['avarage']['wind_gust'] = round($wind_gust_sum / $data_count, 3);
-            $value['avarage']['air_press_rel'] = round($air_press_rel_sum / $data_count, 3);
-            $value['avarage']['air_press_abs'] = round($air_press_abs_sum / $data_count, 3);
-            $value['avarage']['solar_radiation'] = round($solar_radiation_sum / $data_count, 3);
-            $value['avarage']['dailyRainIn'] = $dailyRainIn;
-            $value['avarage']['dailyrainmm'] = $dailyrainmm;
-            $value['avarage']['raintodaymm'] = $raintodaymm;
-            $value['avarage']['totalrainmm'] = $totalrainmm;
-            $value['avarage']['weeklyrainmm'] = $weeklyrainmm;
-            $value['avarage']['monthlyrainmm'] = $monthlyrainmm;
-            $value['avarage']['yearlyrainmm'] = $yearlyrainmm;
-            $value['avarage']['maxdailygust'] = $maxdailygust;
+
+            // Gunakan nilai terakhir yang valid untuk dailyrainmm
+            $value['avarage'] = [
+                'id' => $iddata,
+                'date' => 'Avarage',
+                'windspeedkmh' => round($windspeedkmhp / $data_count, 3),
+                'winddir' => round($winddir_sum / $data_count, 3),
+                'rain_rate' => round($lastValidDailyRainmm, 3),
+                'rain_today' => round($rain_today_sum / $data_count, 3),
+                'temp_in' => round($temp_in_sum / $data_count, 3),
+                'temp_out' => round($temp_out_sum / $data_count, 3),
+                'hum_in' => round($hum_in_sum / $data_count, 3),
+                'hum_out' => round($hum_out_sum / $data_count, 3),
+                'uv' => round($uv_sum / $data_count, 3),
+                'wind_gust' => round($wind_gust_sum / $data_count, 3),
+                'air_press_rel' => round($air_press_rel_sum / $data_count, 3),
+                'air_press_abs' => round($air_press_abs_sum / $data_count, 3),
+                'solar_radiation' => round($solar_radiation_sum / $data_count, 3),
+                'dailyRainIn' => $dailyRainIn,
+                'dailyrainmm' => $lastValidDailyRainmm, // Gunakan nilai terakhir yang valid
+                'raintodaymm' => $raintodaymm,
+                'totalrainmm' => $totalrainmm,
+                'weeklyrainmm' => $weeklyrainmm,
+                'monthlyrainmm' => $monthlyrainmm,
+                'yearlyrainmm' => $yearlyrainmm,
+                'maxdailygust' => $maxdailygust
+            ];
         }
+
 
         $newdata = [];
         foreach ($data as $key => $value) {

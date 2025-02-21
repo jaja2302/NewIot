@@ -46,106 +46,106 @@
         <div class="flex flex-wrap -mx-4">
             <div class="w-full lg:w-3/4 px-4">
                 <!-- Weather Cards Grid -->
-                <div class="weather-card mb-6 rounded-lg shadow-lg p-6 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+                <div class="weather-card mb-6 rounded-lg shadow-lg p-6 bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white">
                     <!-- Desktop Layout -->
                     <div class="hidden md:grid md:grid-cols-3 gap-4">
                         <!-- Temperature Card -->
-                        <div class="bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl p-4 border border-green-500/20 backdrop-blur-sm">
+                        <div class="bg-gradient-to-br from-green-500/10 to-green-600/10 dark:from-green-500/20 dark:to-green-600/20 rounded-xl p-4 border border-green-500/20">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="flex items-center">
-                                    <i class="fas fa-temperature-high text-green-400 text-xl mr-2"></i>
-                                    <h3 class="text-lg font-semibold text-green-400">Temperature</h3>
+                                    <i class="fas fa-temperature-high text-green-600 dark:text-green-400 text-xl mr-2"></i>
+                                    <h3 class="text-lg font-semibold text-green-600 dark:text-green-400">Temperature</h3>
                                 </div>
-                                <span class="text-xs text-green-400 bg-green-400/20 px-2 py-1 rounded-full">Real-time</span>
+                                <span class="text-xs text-green-600 dark:text-green-400 bg-green-500/10 dark:bg-green-400/20 px-2 py-1 rounded-full">Real-time</span>
                             </div>
                             <div class="flex justify-between items-end">
                                 <div>
-                                    <div class="text-3xl font-bold text-green-400">{{ $weather_data['temperature']['current'] }}°C</div>
-                                    <div class="text-sm text-green-300">Feels like: {{ number_format($heatIndex, 1) }}°C</div>
+                                    <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ $weather_data['temperature']['current'] }}°C</div>
+                                    <div class="text-sm text-green-500 dark:text-green-300">Feels like: {{ number_format($heatIndex, 1) }}°C</div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-sm text-green-300">Min: {{ $weather_data['temperature']['min'] }}°C</div>
-                                    <div class="text-sm text-green-300">Max: {{ $weather_data['temperature']['max'] }}°C</div>
+                                    <div class="text-sm text-green-500 dark:text-green-300">Min: {{ $weather_data['temperature']['min'] }}°C</div>
+                                    <div class="text-sm text-green-500 dark:text-green-300">Max: {{ $weather_data['temperature']['max'] }}°C</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Wind Card -->
-                        <div class="bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl p-4 border border-blue-500/20">
+                        <div class="bg-gradient-to-br from-blue-500/10 to-blue-600/10 dark:from-blue-500/20 dark:to-blue-600/20 rounded-xl p-4 border border-blue-500/20">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="flex items-center">
-                                    <i class="fas fa-wind text-blue-400 text-xl mr-2"></i>
-                                    <h3 class="text-lg font-semibold text-blue-400">Kecepatan Angin</h3>
+                                    <i class="fas fa-wind text-blue-600 dark:text-blue-400 text-xl mr-2"></i>
+                                    <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400">Kecepatan Angin</h3>
                                 </div>
-                                <span class="text-xs text-blue-400 bg-blue-400/20 px-2 py-1 rounded-full">{{ $weather_data['wind']['direction'] }}°</span>
+                                <span class="text-xs text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-400/20 px-2 py-1 rounded-full">{{ $weather_data['wind']['direction'] }}°</span>
                             </div>
                             <div class="flex justify-between items-end">
                                 <div>
-                                    <div class="text-3xl font-bold text-blue-400">{{ $weather_data['wind']['speed'] }}</div>
-                                    <div class="text-sm text-blue-300">km/h</div>
+                                    <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ $weather_data['wind']['speed'] }}</div>
+                                    <div class="text-sm text-blue-500 dark:text-blue-300">km/h</div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-sm text-blue-300">Gust: {{ $weather_data['wind']['gust'] }} km/h</div>
+                                    <div class="text-sm text-blue-500 dark:text-blue-300">Gust: {{ $weather_data['wind']['gust'] }} km/h</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Humidity Card -->
-                        <div class="bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-xl p-4 border border-purple-500/20">
+                        <div class="bg-gradient-to-br from-purple-500/10 to-purple-600/10 dark:from-purple-500/20 dark:to-purple-600/20 rounded-xl p-4 border border-purple-500/20">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="flex items-center">
-                                    <i class="fas fa-tint text-purple-400 text-xl mr-2"></i>
-                                    <h3 class="text-lg font-semibold text-purple-400">Kelembapan Udara</h3>
+                                    <i class="fas fa-tint text-purple-600 dark:text-purple-400 text-xl mr-2"></i>
+                                    <h3 class="text-lg font-semibold text-purple-600 dark:text-purple-400">Kelembapan Udara</h3>
                                 </div>
-                                <span class="text-xs text-purple-400 bg-purple-400/20 px-2 py-1 rounded-full">Indoor</span>
+                                <span class="text-xs text-purple-600 dark:text-purple-400 bg-purple-500/10 dark:bg-purple-400/20 px-2 py-1 rounded-full">Indoor</span>
                             </div>
                             <div class="flex justify-between items-end">
                                 <div>
-                                    <div class="text-3xl font-bold text-purple-400">{{ $weather_data['temperature']['indoor'] }}%</div>
-                                    <div class="text-sm text-purple-300">Kelembapan Udara</div>
+                                    <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ $weather_data['temperature']['indoor'] }}%</div>
+                                    <div class="text-sm text-purple-500 dark:text-purple-300">Kelembapan Udara</div>
                                 </div>
                                 <div class="relative w-16 h-16">
-                                    <div class="absolute inset-0 rounded-full border-4 border-purple-400/30"></div>
-                                    <div class="absolute inset-0 rounded-full border-4 border-purple-400"
+                                    <div class="absolute inset-0 rounded-full border-4 border-purple-500/30 dark:border-purple-400/30"></div>
+                                    <div class="absolute inset-0 rounded-full border-4 border-purple-500 dark:border-purple-400"
                                         style="clip-path: polygon(0 {{ 100 - $weather_data['temperature']['indoor'] }}%, 100% {{ 100 - $weather_data['temperature']['indoor'] }}%, 100% 100%, 0% 100%);"></div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Rainfall Card -->
-                        <div class="bg-gradient-to-br from-orange-500/20 to-orange-600/20 rounded-xl p-4 border border-orange-500/20">
+                        <div class="bg-gradient-to-br from-orange-500/10 to-orange-600/10 dark:from-orange-500/20 dark:to-orange-600/20 rounded-xl p-4 border border-orange-500/20">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="flex items-center">
-                                    <i class="fas fa-cloud-rain text-orange-400 text-xl mr-2"></i>
-                                    <h3 class="text-lg font-semibold text-orange-400">Curah Hujan</h3>
+                                    <i class="fas fa-cloud-rain text-orange-600 dark:text-orange-400 text-xl mr-2"></i>
+                                    <h3 class="text-lg font-semibold text-orange-600 dark:text-orange-400">Curah Hujan</h3>
                                 </div>
-                                <span class="text-xs text-orange-400 bg-orange-400/20 px-2 py-1 rounded-full">Current</span>
+                                <span class="text-xs text-orange-600 dark:text-orange-400 bg-orange-500/10 dark:bg-orange-400/20 px-2 py-1 rounded-full">Current</span>
                             </div>
                             <div class="flex justify-between items-end">
                                 <div>
-                                    <div class="text-3xl font-bold text-orange-400">{{ $weather_data['rain']['rate'] }}</div>
-                                    <div class="text-sm text-orange-300">mm/h</div>
+                                    <div class="text-3xl font-bold text-orange-600 dark:text-orange-400">{{ $weather_data['rain']['rate'] }}</div>
+                                    <div class="text-sm text-orange-500 dark:text-orange-300">mm/h</div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-sm text-orange-300">Today: {{ $weather_data['rain']['today'] }} mm</div>
-                                    <div class="text-sm text-orange-300">Week: {{ $weather_data['rain']['weekly'] }} mm</div>
+                                    <div class="text-sm text-orange-500 dark:text-orange-300">Today: {{ $weather_data['rain']['today'] }} mm</div>
+                                    <div class="text-sm text-orange-500 dark:text-orange-300">Week: {{ $weather_data['rain']['weekly'] }} mm</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Pressure Card -->
-                        <div class="bg-gradient-to-br from-teal-500/20 to-teal-600/20 rounded-xl p-4 border border-teal-500/20">
+                        <div class="bg-gradient-to-br from-teal-500/10 to-teal-600/10 dark:from-teal-500/20 dark:to-teal-600/20 rounded-xl p-4 border border-teal-500/20">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="flex items-center">
-                                    <i class="fas fa-compress-alt text-teal-400 text-xl mr-2"></i>
-                                    <h3 class="text-lg font-semibold text-teal-400">Tekanan Udara</h3>
+                                    <i class="fas fa-compress-alt text-teal-600 dark:text-teal-400 text-xl mr-2"></i>
+                                    <h3 class="text-lg font-semibold text-teal-600 dark:text-teal-400">Tekanan Udara</h3>
                                 </div>
-                                <span class="text-xs text-teal-400 bg-teal-400/20 px-2 py-1 rounded-full">Barometric</span>
+                                <span class="text-xs text-teal-600 dark:text-teal-400 bg-teal-500/10 dark:bg-teal-400/20 px-2 py-1 rounded-full">Barometric</span>
                             </div>
                             <div class="flex justify-between items-end">
                                 <div>
-                                    <div class="text-3xl font-bold text-teal-400">{{ $weather_data['temperature']['pressure'] }}</div>
-                                    <div class="text-sm text-teal-300">mb</div>
+                                    <div class="text-3xl font-bold text-teal-600 dark:text-teal-400">{{ $weather_data['temperature']['pressure'] }}</div>
+                                    <div class="text-sm text-teal-500 dark:text-teal-300">mb</div>
                                 </div>
                                 <!-- <div class="text-right">
                                     <div class="text-sm text-teal-300">Trend: {{ $weather_data['temperature']['pressure_trend'] ?? 'Stable' }}</div>

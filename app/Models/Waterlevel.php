@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Waterlevel extends Model
 {
     //
-    protected $table = 'water_level';
+    protected $table = 'water_level_new';
     protected $guarded = ['id'];
     public $timestamps = false;
 

@@ -52,306 +52,85 @@ class Waterlevel extends Component implements HasForms, HasTable
     public $selectedLat;
     public $selectedLon;
 
+    // Add new property for search
+    public $searchEstate = '';
+    public $filteredEstates = [];
+
+
+    // Add new method to handle search
+    public function updatedSearchEstate($value)
+    {
+        if (empty($value)) {
+            $this->filteredEstates = [];
+            return;
+        }
+
+        // Search in Estate table
+        $estates = Estate::where('est', 'like', "%{$value}%")->get();
+
+        // dd($estates);
+        $this->filteredEstates = [];
+        foreach ($estates as $estate) {
+            // Find matching water level stations
+            $stations = Waterlevellist::where('status', 1)
+                ->where('location', 'like', "%{$estate->est}%")
+                ->get();
+
+            foreach ($stations as $station) {
+                // Get latest water level data for each station
+                $latestData = ModelsWaterlevel::where('idwl', $station->id)
+                    ->latest('datetime')
+                    ->first();
+
+                if ($latestData) {
+                    $this->filteredEstates[] = [
+                        'id' => $station->id,
+                        'name' => $station->location,
+                        'level_blok' => $latestData->level_blok ?? 0,
+                        'level_parit' => $latestData->level_parit ?? 0,
+                        'sensor_distance' => $latestData->sensor_distance ?? 0,
+                        'datetime' => $latestData->datetime,
+                        'is_active' => false
+                    ];
+                }
+            }
+        }
+    }
+
+    public function selectEstate($stationId)
+    {
+        // Update active state
+        foreach ($this->filteredEstates as &$estate) {
+            $estate['is_active'] = ($estate['id'] == $stationId);
+        }
+
+        // Update selected station and trigger data loading
+        $this->selectedStation = $stationId;
+        $this->onChangeStation($stationId);
+    }
+
+
+
     // Add mount method to set default date
     public function mount()
     {
-        // $this->selectedDate = date('Y-m-d');
         $this->form->fill();
-        $this->stations = $this->generateWilayah(3);
-        $this->selectedWilayah = 3;
-        $this->selectedStation = 81;
-        // $this->selectedDate = date('Y-m-d');
-        if (!$this->selectedDate) {
-            $latestRecord = ModelsWaterlevel::where('idwl', 81)
-                ->orderBy('datetime', 'desc')
-                ->first();
-            $this->selectedDate = $latestRecord ? Carbon::parse($latestRecord->datetime)->format('Y-m-d') : now()->format('Y-m-d');
-        }
-
-        // $this->dispatch('test');
-        $this->generateChartData(81);
-        $station = Waterlevellist::find($this->selectedStation);
-        $this->updateMapMarker($station);
-        // $permission = permission();
-        // dd($permission);
-
     }
 
     use InteractsWithTable;
     use InteractsWithForms;
+
     public function render()
     {
-        $wilayah = Wilayah::all();
-
+        $Estate = Estate::all();
 
         return view('livewire.waterlevel', [
-            'wilayah' => $wilayah
+            'Estate' => $Estate,
+            'filteredEstates' => $this->filteredEstates
         ]);
     }
 
-    public function updateSelectedStation($wilayahId)
-    {
-        $this->isLoadingStations = true;
-
-        try {
-            $this->selectedStation = null;
-            $this->selectedWilayah = $wilayahId;
-
-            $this->stations = $this->generateWilayah($wilayahId);
-        } finally {
-            $this->isLoadingStations = false;
-        }
-    }
-
-    // Add a watcher for date changes
-    public function updatedSelectedDate($value)
-    {
-        if ($this->selectedStation) {
-            $this->generateChartData($this->selectedStation);
-            $this->onChangeStation($this->selectedStation);
-        }
-    }
-
-    private function generateWilayah($wilayahId)
-    {
-        $data = Estate::where('wil', $wilayahId)->pluck('est');
-
-        $stations = Waterlevellist::where(function ($query) use ($data) {
-            foreach ($data as $estate) {
-                $query->orWhere('location', 'like', $estate . '%');
-            }
-        })->get();
-
-        return $stations;
-    }
-    public function generateChartData($stationId)
-    {
-        // Initialize empty arrays for all parameters
-        $level_data = [];
-        $level_data_7days = [];
-        $level_data_month = [];
-
-
-        try {
-            // 1. Get Today's Data (grouped by hour)
-
-            // dd($date);
-
-            $today_data = ModelsWaterlevel::where('idwl', $stationId)
-                ->whereDate('datetime', $this->selectedDate)
-                ->orderBy('datetime', 'asc')
-                ->get()
-                ->groupBy(function ($item) {
-                    return Carbon::parse($item->datetime)->format('H:00');
-                })
-                ->map(function ($hourData) {
-                    return [
-                        'datetime' => $hourData->first()->datetime,
-                        'lvl_in' => $hourData->avg('lvl_in'),
-                        'lvl_out' => $hourData->avg('lvl_out'),
-                        'lvl_act' => $hourData->avg('lvl_act'),
-                        'batas_atas' => $hourData->first()->waterlevellist->batas_atas_air,
-                        'batas_bawah' => $hourData->first()->waterlevellist->batas_bawah_air
-                    ];
-                });
-            // Process today's data
-            foreach ($today_data as $hour => $data) {
-                $timestamp = strtotime($data['datetime']) * 1000;
-
-                $level_data['levelIn'][] = [$timestamp, round((float)$data['lvl_in'], 1)];
-                $level_data['levelOut'][] = [$timestamp, round((float)$data['lvl_out'], 1)];
-                $level_data['levelActual'][] = [$timestamp, round((float)$data['lvl_act'], 1)];
-                $level_data['batasAtas'][] = [$timestamp, round((float)$data['batas_atas'], 1)];
-                $level_data['batasBawah'][] = [$timestamp, round((float)$data['batas_bawah'], 1)];
-            }
-
-            // 2. Get Last 7 Days Data (grouped by day)
-            $seven_days_data = ModelsWaterlevel::where('idwl', $stationId)
-                ->whereDate('datetime', '>=', Carbon::parse($this->selectedDate)->subDays(7))
-                ->whereDate('datetime', '<=', $this->selectedDate)
-                ->orderBy('datetime', 'asc')
-                ->get()
-                ->groupBy(function ($item) {
-                    return Carbon::parse($item->datetime)->format('Y-m-d');
-                })
-                ->map(function ($dayData) {
-                    return [
-                        'datetime' => $dayData->first()->datetime,
-                        'lvl_in' => $dayData->avg('lvl_in'),
-                        'lvl_out' => $dayData->avg('lvl_out'),
-                        'lvl_act' => $dayData->avg('lvl_act'),
-                        'batas_atas' => $dayData->first()->waterlevellist->batas_atas_air,
-                        'batas_bawah' => $dayData->first()->waterlevellist->batas_bawah_air
-                    ];
-                });
-
-            // Process 7 days data
-            foreach ($seven_days_data as $day => $data) {
-                $timestamp = Carbon::parse($day)->startOfDay()->timestamp * 1000;
-
-                $level_data_7days['levelIn'][] = [$timestamp, round((float)$data['lvl_in'], 1)];
-                $level_data_7days['levelOut'][] = [$timestamp, round((float)$data['lvl_out'], 1)];
-                $level_data_7days['levelActual'][] = [$timestamp, round((float)$data['lvl_act'], 1)];
-                $level_data_7days['batasAtas'][] = [$timestamp, round((float)$data['batas_atas'], 1)];
-                $level_data_7days['batasBawah'][] = [$timestamp, round((float)$data['batas_bawah'], 1)];
-            }
-
-            // 3. Get Monthly Data (grouped by day)
-            $month_data = ModelsWaterlevel::where('idwl', $stationId)
-                ->whereDate('datetime', '>=', Carbon::parse($this->selectedDate)->startOfMonth())
-                ->whereDate('datetime', '<=', Carbon::parse($this->selectedDate)->endOfMonth())
-                ->orderBy('datetime', 'asc')
-                ->get()
-                ->groupBy(function ($item) {
-                    return Carbon::parse($item->datetime)->format('Y-m-d');
-                })
-                ->map(function ($dayData) {
-                    return [
-                        'datetime' => $dayData->first()->datetime,
-                        'lvl_in' => $dayData->avg('lvl_in'),
-                        'lvl_out' => $dayData->avg('lvl_out'),
-                        'lvl_act' => $dayData->avg('lvl_act'),
-                        'batas_atas' => $dayData->first()->waterlevellist->batas_atas_air,
-                        'batas_bawah' => $dayData->first()->waterlevellist->batas_bawah_air
-                    ];
-                });
-
-            // Process monthly data
-            foreach ($month_data as $day => $data) {
-                $timestamp = Carbon::parse($day)->startOfDay()->timestamp * 1000;
-
-                $level_data_month['levelIn'][] = [$timestamp, round((float)$data['lvl_in'], 1)];
-                $level_data_month['levelOut'][] = [$timestamp, round((float)$data['lvl_out'], 1)];
-                $level_data_month['levelActual'][] = [$timestamp, round((float)$data['lvl_act'], 1)];
-                $level_data_month['batasAtas'][] = [$timestamp, round((float)$data['batas_atas'], 1)];
-                $level_data_month['batasBawah'][] = [$timestamp, round((float)$data['batas_bawah'], 1)];
-            }
-
-            // Add default points if no data found
-            if (empty($level_data)) {
-                $timestamp = strtotime($this->selectedDate) * 1000;
-                $default_point = [[$timestamp, 0]];
-                $level_data = [
-                    'levelIn' => $default_point,
-                    'levelOut' => $default_point,
-                    'levelActual' => $default_point,
-                    'batasAtas' => $default_point,
-                    'batasBawah' => $default_point
-                ];
-            }
-            if (empty($level_data_7days)) {
-                $timestamp = strtotime($this->selectedDate) * 1000;
-                $default_point = [[$timestamp, 0]];
-                $level_data_7days = [
-                    'levelIn' => $default_point,
-                    'levelOut' => $default_point,
-                    'levelActual' => $default_point,
-                    'batasAtas' => $default_point,
-                    'batasBawah' => $default_point
-                ];
-            }
-            if (empty($level_data_month)) {
-                $timestamp = strtotime($this->selectedDate) * 1000;
-                $default_point = [[$timestamp, 0]];
-                $level_data_month = [
-                    'levelIn' => $default_point,
-                    'levelOut' => $default_point,
-                    'levelActual' => $default_point,
-                    'batasAtas' => $default_point,
-                    'batasBawah' => $default_point
-                ];
-            }
-        } catch (\Exception $e) {
-            // \Log::error('Error generating chart data: ' . $e->getMessage());
-            $timestamp = strtotime($this->selectedDate) * 1000;
-            $default_point = [[$timestamp, 0]];
-            $default_data = [
-                'levelIn' => $default_point,
-                'levelOut' => $default_point,
-                'levelActual' => $default_point,
-                'batasAtas' => $default_point,
-                'batasBawah' => $default_point
-            ];
-            $level_data = $level_data_7days = $level_data_month = $default_data;
-        }
-
-
-        $this->today = $level_data;
-        $this->week = $level_data_7days;
-        $this->month = $level_data_month;
-        $this->dispatch('updateChartData', [
-            'today' => $level_data,
-            'week' => $level_data_7days,
-            'month' => $level_data_month
-        ]);
-    }
-
-    public function onChangeStation($stationId)
-    {
-        if (!$stationId) return;
-        $this->isLoadingMapMarker = true;
-
-        try {
-            $station = Waterlevellist::find($stationId);
-            if ($station) {
-                $coordinates = [
-                    'lat' => (float)$station->lat,
-                    'lon' => (float)$station->lon,
-                ];
-
-                // Generate chart data
-                $this->generateChartData($stationId);
-                if ($coordinates['lat'] == 0 && $coordinates['lon'] == 0) {
-                    Notification::make()
-                        ->title('Coordinates water level not found')
-                        ->body('Please update coordinates')
-                        ->danger()
-                        ->send();
-                }
-                $this->updateMapMarker($station);
-            }
-        } finally {
-            $this->isLoadingMapMarker = false;
-        }
-    }
-
-    private function processStationData($station, $waterlevel)
-    {
-        $stationData = [
-            'location' => $station->location,
-            'datetime' => '-',
-            'level_in' => 0,
-            'level_out' => 0,
-            'level_actual' => 0,
-            'level_in_avg' => 0,
-            'level_out_avg' => 0,
-            'level_actual_avg' => 0,
-            'batas_atas_air' => $station->batas_atas_air,
-            'batas_bawah_air' => $station->batas_bawah_air,
-        ];
-
-        if (!$waterlevel->isEmpty()) {
-            $sumlvl_in = $waterlevel->sum('lvl_in');
-            $sumlvl_out = $waterlevel->sum('lvl_out');
-            $sumlvl_act = $waterlevel->sum('lvl_act');
-            $count = $waterlevel->count();
-
-            $stationData['level_in_avg'] = round($sumlvl_in / $count, 2);
-            $stationData['level_out_avg'] = round($sumlvl_out / $count, 2);
-            $stationData['level_actual_avg'] = round($sumlvl_act / $count, 2);
-
-            $latest = $waterlevel->first();
-            if ($latest) {
-                $stationData['datetime'] = Carbon::parse($latest->datetime)->format('Y-m-d');
-                $stationData['level_in'] = $latest->lvl_in;
-                $stationData['level_out'] = $latest->lvl_out;
-                $stationData['level_actual'] = $latest->lvl_act;
-            }
-        }
-
-        return $stationData;
-    }
-
+    //  tabel 
     public function table(Table $table): Table
     {
         return $table
@@ -368,9 +147,9 @@ class Waterlevel extends Component implements HasForms, HasTable
             ->columns([
                 TextColumn::make('waterlevellist.location')->label('Station'),
                 TextColumn::make('datetime')->label('Date'),
-                TextColumn::make('lvl_in')->label('In'),
-                TextColumn::make('lvl_out')->label('Out'),
-                TextColumn::make('lvl_act')->label('Actual'),
+                TextColumn::make('level_blok')->label('Level Blok'),
+                TextColumn::make('level_parit')->label('Level Parit'),
+                TextColumn::make('sensor_distance')->label('Sensor Distance'),
             ])
             ->filters([
                 // ...
@@ -396,6 +175,7 @@ class Waterlevel extends Component implements HasForms, HasTable
     }
 
 
+    // untuk import data excel 
     public function form(Form $form): Form
     {
         return $form
@@ -461,8 +241,99 @@ class Waterlevel extends Component implements HasForms, HasTable
             // \Log::error('Import error: ' . $e->getMessage());
         }
     }
+    // maps station 
+    public function updateSelectedStation($wilayahId)
+    {
+        $this->isLoadingStations = true;
 
-    // Add this function to handle coordinate updates
+        try {
+            $this->selectedStation = null;
+            $this->selectedWilayah = $wilayahId;
+        } finally {
+            $this->isLoadingStations = false;
+        }
+    }
+
+    // Add a watcher for date changes
+    public function updatedSelectedDate($value)
+    {
+        if ($this->selectedStation) {
+            $this->onChangeStation($this->selectedStation);
+        }
+    }
+
+
+    public function onChangeStation($stationId)
+    {
+        if (!$stationId) return;
+        $this->isLoadingMapMarker = true;
+
+        try {
+            $station = Waterlevellist::find($stationId);
+            if ($station) {
+                $coordinates = [
+                    'lat' => (float)$station->lat,
+                    'lon' => (float)$station->lon,
+                ];
+                if ($coordinates['lat'] == 0 && $coordinates['lon'] == 0) {
+                    Notification::make()
+                        ->title('Coordinates water level not found')
+                        ->body('Please update coordinates')
+                        ->danger()
+                        ->send();
+                }
+                $this->updateMapMarker($station);
+            }
+        } finally {
+            $this->isLoadingMapMarker = false;
+        }
+    }
+
+    #[On('set-coordinates')]
+    public function setCoordinates($lat, $lng)
+    {
+        $this->selectedLat = $lat;
+        $this->selectedLon = $lng;
+    }
+
+    private function processStationData($station, $waterlevel)
+    {
+        $stationData = [
+            'location' => $station->location ?? 1,
+            'datetime' => '-',
+            'level_blok' => 0,
+            'level_parit' => 0,
+            'sensor_distance' => 0,
+            'level_blok_avg' => 0,
+            'level_parit_avg' => 0,
+            'sensor_distance_avg' => 0,
+            'batas_atas_air' => $station->batas_atas_air ?? 0,
+            'batas_bawah_air' => $station->batas_bawah_air ?? 0,
+        ];
+
+        if (!$waterlevel->isEmpty()) {
+            $sum_level_blok = $waterlevel->sum('level_blok');
+            $sum_level_parit = $waterlevel->sum('level_parit');
+            $sum_sensor_distance = $waterlevel->sum('sensor_distance');
+            $count = $waterlevel->count();
+
+            $stationData['level_blok_avg'] = round($sum_level_blok / $count, 2);
+            $stationData['level_parit_avg'] = round($sum_level_parit / $count, 2);
+            $stationData['sensor_distance_avg'] = round($sum_sensor_distance / $count, 2);
+
+            $latest = $waterlevel->first();
+            if ($latest) {
+                $stationData['datetime'] = Carbon::parse($latest->datetime)->format('Y-m-d');
+                $stationData['level_blok'] = $latest->level_blok;
+                $stationData['level_parit'] = $latest->level_parit;
+                $stationData['sensor_distance'] = $latest->sensor_distance;
+            }
+        }
+
+        return $stationData;
+    }
+
+    // untuk mengupdate titik lokasi water level 
     public function updateStationCoordinates()
     {
         // Check if user is SuperAdmin
@@ -522,17 +393,10 @@ class Waterlevel extends Component implements HasForms, HasTable
 
         $this->dispatch('updateMapMarker', [
             'coordinates' => [
-                'lat' => (float)$station->lat,
-                'lon' => (float)$station->lon,
+                'lat' => $station->lat ?? 0,
+                'lon' => $station->lon ?? 0,
             ],
             'station' => $stationData
         ]);
-    }
-
-    #[On('set-coordinates')]
-    public function setCoordinates($lat, $lng)
-    {
-        $this->selectedLat = $lat;
-        $this->selectedLon = $lng;
     }
 }
