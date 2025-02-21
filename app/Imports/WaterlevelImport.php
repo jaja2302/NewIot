@@ -62,34 +62,11 @@ class WaterlevelImport implements ToModel, WithStartRow, WithCustomCsvSettings
         DB::beginTransaction();
 
         try {
-            // \Log::info('Processing row:', [
-            //     'row_number' => $this->getCurrentRowNumber(),
-            //     'station_id' => $row[0] ?? 'empty',
-            //     'station_name' => $row[1] ?? 'empty',
-            //     'datetime' => $row[2] ?? 'empty',
-            //     'water_level' => $row[3] ?? 'empty',
-            //     'raw_data' => $row
-            // ]);
-
             if (empty($row[1])) {
                 return null;
             }
 
             $stationName = trim($row[1]);
-
-            // DESCRIBE water_level_new;
-
-
-
-            // id	int	NO	PRI	NULL	auto_increment	
-            // station_name	varchar(50)	NO		NULL		
-            // idwl	int	NO		NULL		
-            // level_blok	double	NO		NULL		
-            // level_parit	double	NO		NULL		
-            // sensor_distance	double	NO		NULL		
-            // datetime	datetime	NO		NULL		
-
-            // Use the new parseDate method
             $formattedDate = $this->parseDate($row[2]);
 
             $waterLevelList = Waterlevellist::firstOrCreate(

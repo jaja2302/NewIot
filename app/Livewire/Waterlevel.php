@@ -56,6 +56,10 @@ class Waterlevel extends Component implements HasForms, HasTable
     public $searchEstate = '';
     public $filteredEstates = [];
 
+    // Add new properties for chart data
+    public $chartData = [];
+    public $chartPeriod = 'today'; // today, week, month
+    public $chartType = 'blok'; // blok, parit, sensor, rekap
 
     // Add new method to handle search
     public function updatedSearchEstate($value)
@@ -109,12 +113,20 @@ class Waterlevel extends Component implements HasForms, HasTable
         $this->onChangeStation($stationId);
     }
 
-
-
-    // Add mount method to set default date
+    // Update mount method to ensure default state
     public function mount()
     {
         $this->form->fill();
+
+        // Set default values if not already set
+        $this->chartPeriod = $this->chartPeriod ?: 'today';
+        $this->chartType = $this->chartType ?: 'blok';
+
+        // Dispatch initial state
+        $this->dispatch('initChartState', [
+            'period' => $this->chartPeriod,
+            'type' => $this->chartType
+        ]);
     }
 
     use InteractsWithTable;
@@ -283,6 +295,9 @@ class Waterlevel extends Component implements HasForms, HasTable
                         ->send();
                 }
                 $this->updateMapMarker($station);
+
+                // Update chart when station changes
+                $this->updateChart();
             }
         } finally {
             $this->isLoadingMapMarker = false;
@@ -397,6 +412,103 @@ class Waterlevel extends Component implements HasForms, HasTable
                 'lon' => $station->lon ?? 0,
             ],
             'station' => $stationData
+        ]);
+    }
+
+    // Add method to fetch chart data
+    public function getChartData()
+    {
+        if (!$this->selectedStation) {
+            return [
+                'series' => []
+            ];
+        }
+
+        $query = ModelsWaterlevel::query()
+            ->where('idwl', $this->selectedStation)
+            ->orderBy('datetime', 'asc');
+
+        // Set date range based on period
+        switch ($this->chartPeriod) {
+            case 'today':
+                $query->whereDate('datetime', Carbon::today());
+                break;
+            case 'week':
+                $query->whereBetween('datetime', [
+                    Carbon::now()->startOfWeek(),
+                    Carbon::now()->endOfWeek()
+                ]);
+                break;
+            case 'month':
+                $query->whereMonth('datetime', Carbon::now()->month)
+                    ->whereYear('datetime', Carbon::now()->year);
+                break;
+        }
+
+        $data = $query->get();
+
+        $series = [];
+
+        // Only add series if they should be visible
+        if ($this->chartType === 'blok' || $this->chartType === 'rekap') {
+            $series[] = [
+                'name' => 'Level Blok',
+                'data' => $data->map(function ($item) {
+                    return [
+                        'x' => Carbon::parse($item->datetime)->format('Y-m-d H:i:s'),
+                        'y' => (float) $item->level_blok
+                    ];
+                })->toArray()
+            ];
+        }
+
+        if ($this->chartType === 'parit' || $this->chartType === 'rekap') {
+            $series[] = [
+                'name' => 'Level Parit',
+                'data' => $data->map(function ($item) {
+                    return [
+                        'x' => Carbon::parse($item->datetime)->format('Y-m-d H:i:s'),
+                        'y' => (float) $item->level_parit
+                    ];
+                })->toArray()
+            ];
+        }
+
+        if ($this->chartType === 'sensor' || $this->chartType === 'rekap') {
+            $series[] = [
+                'name' => 'Sensor Distance',
+                'data' => $data->map(function ($item) {
+                    return [
+                        'x' => Carbon::parse($item->datetime)->format('Y-m-d H:i:s'),
+                        'y' => (float) $item->sensor_distance
+                    ];
+                })->toArray()
+            ];
+        }
+
+        return [
+            'series' => $series
+        ];
+    }
+
+    // Update the updateChart method to handle null values better
+    public function updateChart($period = null, $type = null)
+    {
+        // Only update if value is provided
+        if ($period !== null) {
+            $this->chartPeriod = $period;
+        }
+        if ($type !== null) {
+            $this->chartType = $type;
+        }
+
+        $this->chartData = $this->getChartData();
+
+        // Always send the current state
+        $this->dispatch('updateChart', [
+            'data' => $this->chartData,
+            'period' => $this->chartPeriod,
+            'type' => $this->chartType
         ]);
     }
 }

@@ -47,9 +47,61 @@
 
         <!-- Chart Card Section -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8 mt-8">
-            <div class="h-64">
-                <canvas id="waterLevelChart"></canvas>
+            <!-- Temperature Chart -->
+            <div class="mt-4 weather-card bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative">
+                <!-- Header Section -->
+                <div class="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-chart-line text-blue-500"></i>
+                        <h2 class="font-semibold text-gray-800 dark:text-white">Data Riwayat {{ $selectedStation }}</h2>
+                    </div>
+
+                    <!-- Toggle Buttons Container -->
+                    <div wire:ignore class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:gap-2 w-full sm:w-auto">
+                        <!-- Data Period Toggles -->
+                        <div class="flex flex-wrap gap-2 sm:mr-4">
+                            <button id="todayButton"
+                                class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-blue-500 text-white">
+                                <i class="fas fa-calendar-day mr-1"></i>Hari Ini
+                            </button>
+                            <button id="weekButton"
+                                class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-gray-200 text-gray-700">
+                                <i class="fas fa-calendar-week mr-1"></i>Minggu Ini
+                            </button>
+                            <button id="monthButton"
+                                class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-gray-200 text-gray-700">
+                                <i class="fas fa-calendar-alt mr-1"></i>Bulan Ini
+                            </button>
+                        </div>
+
+                        <!-- Data Type Toggles -->
+                        <div wire:ignore class="grid grid-cols-2 sm:flex gap-2">
+                            <button id="blokButton"
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-blue-500 text-white">
+                                <i class="fas fa-water mr-1"></i>Level Blok
+                            </button>
+                            <button id="paritButton"
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-gray-200 text-gray-700">
+                                <i class="fas fa-stream mr-1"></i>Level Parit
+                            </button>
+                            <button id="sensorButton"
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-gray-200 text-gray-700">
+                                <i class="fas fa-ruler-vertical mr-1"></i>Sensor Distance
+                            </button>
+                            <button id="rekapButton"
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-gray-200 text-gray-700">
+                                <i class="fas fa-chart-bar mr-1"></i>Rekap
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Container -->
+                <div wire:ignore class="h-[300px] sm:h-[400px]">
+                    <div id="combinedChart" class="w-full h-full"></div>
+                </div>
             </div>
+
         </div>
 
         <!-- Bottom Section with Cards and Map -->
@@ -372,20 +424,25 @@
                 marker.openPopup();
             }
         });
+
+
         // untuk futur search 
         // Search functionality
-        document.getElementById('estateSearch').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            document.querySelectorAll('.estate-item').forEach(item => {
-                const estateName = item.querySelector('p').textContent.toLowerCase();
-                if (estateName.includes(searchTerm)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
+        // Tambahkan pengecekan elemen sebelum menambahkan event listener
+        const estateSearchElement = document.getElementById('estateSearch');
+        if (estateSearchElement) {
+            estateSearchElement.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                document.querySelectorAll('.estate-item').forEach(item => {
+                    const estateName = item.querySelector('p').textContent.toLowerCase();
+                    if (estateName.includes(searchTerm)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
             });
-        });
-
+        }
         // Toggle active state
         function toggleEstate(estateId) {
             document.querySelectorAll('.estate-item').forEach(item => {
@@ -413,6 +470,258 @@
                 }
             });
         }
+
+        // Initialize variables
+        let chart;
+        let currentView = 'blok';
+        let currentPeriod = 'today';
+
+        // Define style configurations for each view type
+        const styleConfigs = {
+            blok: {
+                colors: ['#3B82F6'], // Blue
+                gradient: {
+                    shade: 'dark',
+                    type: "vertical",
+                    shadeIntensity: 0.5,
+                    gradientToColors: ['#2563eb'],
+                    inverseColors: true,
+                    opacityFrom: 0.8,
+                    opacityTo: 0.2,
+                    stops: [0, 100]
+                }
+            },
+            parit: {
+                colors: ['#10B981'], // Green
+                gradient: {
+                    shade: 'dark',
+                    type: "vertical",
+                    shadeIntensity: 0.5,
+                    gradientToColors: ['#059669'],
+                    inverseColors: true,
+                    opacityFrom: 0.8,
+                    opacityTo: 0.2,
+                    stops: [0, 100]
+                }
+            },
+            sensor: {
+                colors: ['#F59E0B'], // Orange
+                gradient: {
+                    shade: 'dark',
+                    type: "vertical",
+                    shadeIntensity: 0.5,
+                    gradientToColors: ['#D97706'],
+                    inverseColors: true,
+                    opacityFrom: 0.8,
+                    opacityTo: 0.2,
+                    stops: [0, 100]
+                }
+            },
+            rekap: {
+                colors: ['#3B82F6', '#10B981', '#F59E0B'],
+                gradient: {
+                    shade: 'dark',
+                    type: "vertical",
+                    shadeIntensity: 0.5,
+                    opacityFrom: 0.8,
+                    opacityTo: 0.2,
+                    stops: [0, 100]
+                }
+            }
+        };
+
+        // Chart options
+        const chartOptions = {
+            chart: {
+                type: 'area',
+                height: '100%',
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    dynamicAnimation: {
+                        speed: 1000
+                    }
+                },
+                toolbar: {
+                    show: true
+                },
+                zoom: {
+                    enabled: true
+                }
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 2
+            },
+            xaxis: {
+                type: 'datetime',
+                labels: {
+                    datetimeUTC: false,
+                    format: 'dd MMM HH:mm'
+                },
+                title: {
+                    text: 'Waktu'
+                }
+            },
+            yaxis: {
+                title: {
+                    text: 'Level (cm)'
+                },
+                labels: {
+                    formatter: (value) => value.toFixed(2)
+                }
+            },
+            tooltip: {
+                x: {
+                    format: 'dd MMM yyyy HH:mm'
+                },
+                y: {
+                    formatter: (value) => `${value.toFixed(2)} cm`
+                }
+            },
+            legend: {
+                position: 'top',
+                horizontalAlign: 'center'
+            },
+            grid: {
+                borderColor: '#f1f1f1'
+            },
+            noData: {
+                text: 'No Data...'
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shade: 'dark',
+                    type: "vertical",
+                    shadeIntensity: 0.5,
+                    opacityFrom: 0.8,
+                    opacityTo: 0.2,
+                    stops: [0, 100]
+                }
+            }
+        };
+
+        function updateChart(data, type = currentView, period = currentPeriod) {
+            currentView = type;
+            currentPeriod = period;
+
+            // Update button states
+            updateButtonStates();
+
+            // Update chart options with new style config
+            const newOptions = {
+                ...chartOptions,
+                colors: styleConfigs[type].colors,
+                fill: {
+                    ...chartOptions.fill,
+                    gradient: styleConfigs[type].gradient
+                },
+                series: data.series
+            };
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new ApexCharts(document.querySelector("#combinedChart"), newOptions);
+            chart.render();
+        }
+
+        function updateButtonStates() {
+            // Update period buttons
+            ['today', 'week', 'month'].forEach(period => {
+                const button = document.getElementById(`${period}Button`);
+                if (button) {
+                    if (period === currentPeriod) {
+                        button.classList.add('bg-blue-500', 'text-white');
+                        button.classList.remove('bg-gray-200', 'text-gray-700');
+                    } else {
+                        button.classList.remove('bg-blue-500', 'text-white');
+                        button.classList.add('bg-gray-200', 'text-gray-700');
+                    }
+                }
+            });
+
+            // Update type buttons
+            ['blok', 'parit', 'sensor', 'rekap'].forEach(type => {
+                const button = document.getElementById(`${type}Button`);
+                if (button) {
+                    if (type === currentView) {
+                        button.classList.add('bg-blue-500', 'text-white');
+                        button.classList.remove('bg-gray-200', 'text-gray-700');
+                    } else {
+                        button.classList.remove('bg-blue-500', 'text-white');
+                        button.classList.add('bg-gray-200', 'text-gray-700');
+                    }
+                }
+            });
+        }
+
+        // Button click handlers
+        document.getElementById('todayButton').addEventListener('click', () => {
+            currentPeriod = 'today';
+            updateButtonStates();
+            $wire.updateChart('today', currentView);
+        });
+
+        document.getElementById('weekButton').addEventListener('click', () => {
+            currentPeriod = 'week';
+            updateButtonStates();
+            $wire.updateChart('week', currentView);
+        });
+
+        document.getElementById('monthButton').addEventListener('click', () => {
+            currentPeriod = 'month';
+            updateButtonStates();
+            $wire.updateChart('month', currentView);
+        });
+
+        document.getElementById('blokButton').addEventListener('click', () => {
+            currentView = 'blok';
+            updateButtonStates();
+            $wire.updateChart(currentPeriod, 'blok');
+        });
+
+        document.getElementById('paritButton').addEventListener('click', () => {
+            currentView = 'parit';
+            updateButtonStates();
+            $wire.updateChart(currentPeriod, 'parit');
+        });
+
+        document.getElementById('sensorButton').addEventListener('click', () => {
+            currentView = 'sensor';
+            updateButtonStates();
+            $wire.updateChart(currentPeriod, 'sensor');
+        });
+
+        document.getElementById('rekapButton').addEventListener('click', () => {
+            currentView = 'rekap';
+            updateButtonStates();
+            $wire.updateChart(currentPeriod, 'rekap');
+        });
+
+        // Listen for chart updates from Livewire
+        $wire.on('updateChart', (response) => {
+            if (Array.isArray(response)) {
+                response = response[0];
+            }
+            updateChart(response.data, response.type, response.period);
+        });
+
+        // Listen for initial state
+        $wire.on('initChartState', (state) => {
+            if (Array.isArray(state)) {
+                state = state[0];
+            }
+            currentView = state.type;
+            currentPeriod = state.period;
+            updateButtonStates();
+        });
     </script>
     @endscript
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+@endpush
