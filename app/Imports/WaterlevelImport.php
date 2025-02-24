@@ -11,8 +11,17 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 
+use function Laravel\Prompts\error;
+
 class WaterlevelImport implements ToModel, WithStartRow, WithCustomCsvSettings
 {
+    private $waterStationId;
+
+    public function __construct($waterStationId)
+    {
+        $this->waterStationId = $waterStationId;
+    }
+
     public function startRow(): int
     {
         return 2; // Start from second row to skip header
@@ -66,21 +75,23 @@ class WaterlevelImport implements ToModel, WithStartRow, WithCustomCsvSettings
                 return null;
             }
 
-            $stationName = trim($row[1]);
+            // Get the station from the passed ID instead of the CSV
+            $waterLevelList = Waterlevellist::findOrFail($this->waterStationId);
+            $stationName = $waterLevelList->location;
+            $stationNameInExcel = trim($row[1]); // Trim untuk menghindari spasi yang tidak diinginkan
+
+            // Validasi kecocokan nama station
+            if (strtolower($stationName) !== strtolower($stationNameInExcel)) {
+                throw new \Exception(
+                    "Station name mismatch. Selected station: '{$stationName}', " .
+                        "Excel station: '{$stationNameInExcel}'. " .
+                        "Please make sure the station names match exactly."
+                );
+            }
+
             $formattedDate = $this->parseDate($row[2]);
 
-            $waterLevelList = Waterlevellist::firstOrCreate(
-                ['location' => $stationName],
-                [
-                    'location' => $stationName,
-                    'lat' => 0,
-                    'lon' => 0,
-                    'batas_atas_air' => 0,
-                    'batas_bawah_air' => 0
-                ]
-            );
-
-            // dd($waterLevelList);
+            // Remove the firstOrCreate since we already have the station
             $existingRecord = Waterlevel::where('idwl', $waterLevelList->id)
                 ->where('datetime', $formattedDate)
                 ->first();
@@ -92,7 +103,7 @@ class WaterlevelImport implements ToModel, WithStartRow, WithCustomCsvSettings
 
             $waterlevel = new Waterlevel([
                 'idwl' => $waterLevelList->id,
-                'station_name' => $row[1],
+                'station_name' => $stationName,
                 'level_blok' => $row[3],
                 'level_parit' => $row[4],
                 'sensor_distance' => $row[5],
@@ -105,10 +116,10 @@ class WaterlevelImport implements ToModel, WithStartRow, WithCustomCsvSettings
             DB::rollBack();
             \Log::error('Error processing row:', [
                 'row_number' => $this->getCurrentRowNumber(),
-                'station_id' => $row[0] ?? 'empty',
-                'station_name' => $row[1] ?? 'empty',
+                'station_id' => $this->waterStationId,
+                'station_name' => $stationName ?? 'unknown',
+                'station_name_in_excel' => $stationNameInExcel ?? 'unknown',
                 'datetime' => $row[2] ?? 'empty',
-                'water_level' => $row[3] ?? 'empty',
                 'raw_data' => $row,
                 'error' => $e->getMessage()
             ]);

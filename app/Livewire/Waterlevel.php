@@ -25,7 +25,9 @@ use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
 use App\Imports\WaterlevelImport;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Storage;
 
 class Waterlevel extends Component implements HasForms, HasTable
 {
@@ -35,6 +37,7 @@ class Waterlevel extends Component implements HasForms, HasTable
     public $today = [];
     public $week =  [];
     public $month =  [];
+    public $stationGalery =  [];
     public $weatherstation;
     public $latlon;
 
@@ -61,6 +64,13 @@ class Waterlevel extends Component implements HasForms, HasTable
     public $chartPeriod = 'today'; // today, week, month
     public $chartType = 'blok'; // blok, parit, sensor, rekap
 
+    // Add this property to store gallery images
+    public $galleryImages = [];
+
+    // Add these properties at the top of the class
+    public $selectedImage = null;
+    public $imageToDelete = null;
+
     // Add new method to handle search
     public function updatedSearchEstate($value)
     {
@@ -81,6 +91,7 @@ class Waterlevel extends Component implements HasForms, HasTable
                 ->get();
 
             foreach ($stations as $station) {
+
                 // Get latest water level data for each station
                 $latestData = ModelsWaterlevel::where('idwl', $station->id)
                     ->latest('datetime')
@@ -111,6 +122,7 @@ class Waterlevel extends Component implements HasForms, HasTable
         // Update selected station and trigger data loading
         $this->selectedStation = $stationId;
         $this->onChangeStation($stationId);
+        $this->updateGalery($stationId);
     }
 
     // Update mount method to ensure default state
@@ -121,6 +133,7 @@ class Waterlevel extends Component implements HasForms, HasTable
         // Set default values if not already set
         $this->chartPeriod = $this->chartPeriod ?: 'today';
         $this->chartType = $this->chartType ?: 'blok';
+        $this->stationGalery = [];
 
         // Dispatch initial state
         $this->dispatch('initChartState', [
@@ -192,6 +205,9 @@ class Waterlevel extends Component implements HasForms, HasTable
     {
         return $form
             ->schema([
+                Select::make('WaterStation')
+                    ->required()
+                    ->options(Waterlevellist::where('status', 1)->pluck('location', 'id')),
                 FileUpload::make('file')
                     ->acceptedFileTypes(['text/csv', 'application/csv'])
                     ->storeFiles(false)
@@ -200,21 +216,17 @@ class Waterlevel extends Component implements HasForms, HasTable
             ])
             ->statePath('data');
     }
+
     public function saveForm(): void
     {
         $data = $this->form->getState();
 
         try {
-            // Show loading notification
-            Notification::make()
-                ->title('Uploading...')
-                ->info()
-                ->send();
-
             // Get initial count
             $initialCount = ModelsWaterlevel::count();
 
-            Excel::import(new WaterlevelImport, $data['file']);
+            // Pass the WaterStation ID to the import constructor
+            Excel::import(new WaterlevelImport($data['WaterStation']), $data['file']);
 
             // Get final count
             $finalCount = ModelsWaterlevel::count();
@@ -313,12 +325,14 @@ class Waterlevel extends Component implements HasForms, HasTable
 
     private function processStationData($station, $waterlevel)
     {
+
+        // dd($station, $waterlevel);
         $stationData = [
             'location' => $station->location ?? 1,
             'datetime' => '-',
-            'level_blok' => 0,
-            'level_parit' => 0,
-            'sensor_distance' => 0,
+            'level_blok' => $station->level_blok ?? 0,
+            'level_parit' => $station->level_parit ?? 0,
+            'sensor_distance' => $station->sensor_distance ?? 0,
             'level_blok_avg' => 0,
             'level_parit_avg' => 0,
             'sensor_distance_avg' => 0,
@@ -351,6 +365,8 @@ class Waterlevel extends Component implements HasForms, HasTable
     // untuk mengupdate titik lokasi water level 
     public function updateStationCoordinates()
     {
+
+        // dd($this->selectedStation);
         // Check if user is SuperAdmin
         if (!SuperAdmin()) {
             Notification::make()
@@ -362,7 +378,7 @@ class Waterlevel extends Component implements HasForms, HasTable
         }
 
         // Check if wilayah and station are selected
-        if (empty($this->selectedWilayah) || empty($this->selectedStation)) {
+        if (empty($this->selectedStation)) {
             Notification::make()
                 ->title('Validation Error')
                 ->body('Please select both Wilayah and Station before updating coordinates.')
@@ -402,16 +418,25 @@ class Waterlevel extends Component implements HasForms, HasTable
 
     private function updateMapMarker($station)
     {
-        $stationData = $this->processStationData($station, ModelsWaterlevel::where('idwl', $this->selectedStation)
-            ->whereDate('datetime', $this->selectedDate)
-            ->get());
+        // dd($this->selectedDate);
+
+        $selectedDate = $this->selectedDate ?? Carbon::now()->subDays(30);
+
+        $stationData = $this->processStationData(
+            $station,
+            ModelsWaterlevel::where('idwl', $this->selectedStation)
+                ->whereDate('datetime', '>=', $selectedDate)
+                ->get()
+        );
+
+        // dd($stationData);
 
         $this->dispatch('updateMapMarker', [
             'coordinates' => [
                 'lat' => $station->lat ?? 0,
                 'lon' => $station->lon ?? 0,
             ],
-            'station' => $stationData
+            'station' => $stationData,
         ]);
     }
 
@@ -510,5 +535,66 @@ class Waterlevel extends Component implements HasForms, HasTable
             'period' => $this->chartPeriod,
             'type' => $this->chartType
         ]);
+    }
+
+    // untuk galery
+    public function updateGalery($stationId)
+    {
+        $station = Waterlevellist::find($stationId);
+        if ($station && !empty($station->foto_lokasi)) {
+            $decodedImages = json_decode($station->foto_lokasi, true);
+            $this->galleryImages = is_array($decodedImages) ? array_filter($decodedImages) : [];
+        } else {
+            $this->galleryImages = [];
+        }
+    }
+
+    // Add method to handle image deletion
+    public function deleteImage()
+    {
+        if (!$this->imageToDelete || !$this->selectedStation) {
+            return;
+        }
+
+        try {
+            $station = Waterlevellist::find($this->selectedStation);
+            if (!$station) {
+                return;
+            }
+
+            $images = json_decode($station->foto_lokasi, true) ?? [];
+            $images = array_filter($images, fn($img) => $img !== $this->imageToDelete);
+
+            // Update the database
+            $station->update([
+                'foto_lokasi' => json_encode(array_values($images))
+            ]);
+
+            // Delete the actual file
+            if (Storage::disk('public')->exists($this->imageToDelete)) {
+                Storage::disk('public')->delete($this->imageToDelete);
+            }
+
+            // Update the gallery
+            $this->updateGalery($this->selectedStation);
+
+            // Show success notification
+            Notification::make()
+                ->title('Image deleted successfully')
+                ->success()
+                ->send();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Error deleting image')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+
+        // Reset the imageToDelete property
+        $this->imageToDelete = null;
+
+        // Close the modal
+        $this->dispatch('close-modal', id: 'delete-confirmation');
     }
 }

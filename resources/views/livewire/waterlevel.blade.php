@@ -2,48 +2,51 @@
     <div class="container mx-auto px-4 py-6">
 
         <!-- Search Bar Container -->
-        <div class="max-w-4xl mx-auto px-4 pt-4 mb-8">
-            <div class="bg-gray-50 rounded-full shadow flex items-center px-4 py-2.5 transition-all duration-200 hover:shadow-lg">
-                <input
-                    wire:model.live="searchEstate"
-                    type="text"
-                    placeholder="Search estate..."
-                    class="w-full bg-transparent focus:outline-none">
-                <div class="ml-auto">
-                    <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </div>
-            </div>
-
-            <!-- Date Subtitle -->
-            <p class="text-center text-gray-500 text-sm my-4">Level Air (update : {{ now()->format('d F Y') }})</p>
-
-            <!-- Estate List Container -->
-            <div class="grid grid-cols-5 gap-4 mb-8">
-                @forelse($filteredEstates as $estate)
-                <button
-                    wire:click="selectEstate({{ $estate['id'] }})"
-                    class="text-left focus:outline-none estate-item {{ $estate['is_active'] ? 'active' : '' }}">
-                    <div class="@if($estate['is_active']) bg-blue-50 border-2 border-blue-500 @else bg-white @endif rounded-xl p-4 transition-all duration-200 hover:bg-gray-50">
-                        <p class="text-sm @if($estate['is_active']) text-blue-700 @else text-gray-500 @endif mb-1">
-                            {{ $estate['name'] }}
-                        </p>
-                        <p class="text-xl font-bold @if($estate['is_active']) text-blue-900 @else text-gray-900 @endif">
-                            {{ number_format($estate['level_blok'], 2) }}<span class="text-sm font-normal ml-1">cm</span>
-                        </p>
+        <div class="max-w-4xl mx-auto px-6 pt-8 mb-12">
+            <!-- Centered Search Section -->
+            <div class="flex flex-col items-center mb-8">
+                <div class="w-full max-w-2xl">
+                    <div class="relative">
+                        <input
+                            wire:model.live="searchEstate"
+                            type="text"
+                            placeholder="Search estate..."
+                            class="w-full bg-white rounded-full py-3 pl-6 pr-12 focus:outline-none shadow-sm hover:shadow-md transition-all duration-300 ease-in-out">
+                        <div class="absolute right-4 top-1/2 transform -translate-y-1/2">
+                            <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
                     </div>
-                </button>
-                @empty
-                @if($searchEstate)
-                <div class="col-span-5 text-center text-gray-500">
+                </div>
+
+                <!-- Search Results (No Results) -->
+                @if($searchEstate && empty($filteredEstates))
+                <div class="mt-4 text-center text-gray-500">
                     No estates found matching "{{ $searchEstate }}"
                 </div>
                 @endif
+            </div>
+
+            <!-- Date Subtitle -->
+            <p class="text-center text-gray-500 text-sm mb-8">
+                Level Air (update: {{ now()->format('d F Y') }})
+            </p>
+
+            <!-- Estate List Container -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                @forelse($filteredEstates as $estate)
+                <button wire:click="selectEstate({{ $estate['id'] }})" class="focus:outline-none">
+                    <x-utils.card :estate="$estate" />
+                </button>
+                @empty
                 @endforelse
             </div>
+
         </div>
+
+
 
         <!-- Chart Card Section -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8 mt-8">
@@ -110,25 +113,25 @@
             <h2 class="text-lg font-medium mb-4">Lokasi Titik Water Level</h2>
 
             <!-- Main Grid: 2 Columns -->
-            <div class="grid grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Left Column: Location, Map and Gallery -->
                 <div class="space-y-4">
                     <!-- Location Info Card -->
-                    <div class="bg-blue-50 rounded-lg p-4">
+                    <div class="bg-blue-50 rounded-lg p-4 shadow-sm">
                         <div class="flex items-center justify-between">
                             <!-- Location Info -->
-                            <div class="space-y-2">
+                            <div class="space-y-2 flex-1">
                                 <div class="flex items-center space-x-2">
                                     <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     </svg>
-                                    <span class="text-sm text-gray-700">-2.2745234, 111.61404248</span>
+                                    <span class="text-sm text-gray-700 break-all" id="latlonmapsdiv" wire:ignore>-</span>
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <svg class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                                     </svg>
-                                    <span class="text-sm text-gray-700">Natal Baru Estate, PT MBAL</span>
+                                    <span class="text-sm text-gray-700 break-all" id="namaestatediv" wire:ignore>-</span>
                                 </div>
                             </div>
                             @if (SuperAdmin())
@@ -137,8 +140,7 @@
                                     @if (SuperAdmin())
                                     <x-filament::button
                                         icon="heroicon-o-map-pin"
-                                        class="bg-indigo-500 text-white rounded-lg px-4 py-2 text-sm hover:bg-indigo-600"
-                                        :disabled="!$selectedWilayah || !$selectedStation">
+                                        class="bg-indigo-500 text-white rounded-lg px-4 py-2 text-sm hover:bg-indigo-600">
                                         Update Maps
                                     </x-filament::button>
                                     @endif
@@ -151,9 +153,9 @@
                                 </x-slot>
                                 <form wire:submit="updateStationCoordinates">
                                     <div class="space-y-4">
-                                        @if (!$selectedWilayah || !$selectedStation)
+                                        @if (!$selectedStation)
                                         <div class="p-4 bg-yellow-50 text-yellow-700 rounded-lg">
-                                            Please select both Wilayah and Station before updating coordinates.
+                                            Please select Station before updating coordinates.
                                         </div>
                                         @endif
 
@@ -191,7 +193,7 @@
                                         <div
                                             <x-filament::button
                                             type="submit"
-                                            :disabled="!$selectedWilayah || !$selectedStation">
+                                            :disabled="!$selectedStation">
                                             Save Coordinates
                                             </x-filament::button>
                                         </div>
@@ -204,41 +206,174 @@
 
                     <!-- Map Section -->
                     <div class="relative">
-                        <div wire:ignore id="map" class="w-full rounded-lg z-10" style="min-height: 400px;"></div>
+                        <div wire:ignore id="map" class="w-full rounded-lg z-10 shadow-sm" style="min-height: 300px; @screen lg { min-height: 400px; }"></div>
                     </div>
 
                     <!-- Photo Gallery Section -->
-                    <div class="bg-blue-50 rounded-lg p-4">
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-sm p-6 space-y-6">
+                        <!-- Header Section -->
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <h2 class="text-xl font-semibold text-gray-800">Photo Gallery</h2>
+                        </div>
                         <!-- Upload Button -->
-                        <div class="mb-4 flex">
-                            <button class="bg-indigo-500 text-white rounded-lg px-4 py-2 text-sm hover:bg-indigo-600 ml-auto">
-                                Upload foto
-                            </button>
-                        </div>
+                        <x-filament::modal :close-by-clicking-away="false" id="importGalery" width="5xl">
+                            <x-slot name="trigger">
+                                <x-filament::button
+                                    icon="heroicon-o-arrow-up-tray"
+                                    class="bg-indigo-600 text-white rounded-lg px-5 py-2.5 text-sm font-medium transition-colors hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                    Import Images
+                                </x-filament::button>
+                            </x-slot>
+                            <x-slot name="heading">
+                                Gallery TPH
+                            </x-slot>
+                            <x-slot name="description">
+                                Insert new images for gallery waterlevel
+                            </x-slot>
+                            @if($selectedStation)
+                            @livewire('add-galery-water-level', ['selectedStation' => $selectedStation])
+                            @else
+                            <div class="text-center py-4 text-gray-500">
+                                <span>Please select water station first</span>
+                            </div>
+                            @endif
+                        </x-filament::modal>
+                        <div>
+                            <!-- Gallery Grid -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                @foreach($galleryImages as $image)
+                                <div class="group relative aspect-square rounded-lg overflow-hidden bg-gray-100 hover:shadow-lg transition-all duration-300">
+                                    <!-- Image -->
+                                    <img
+                                        src="{{ asset('storage/' . $image) }}"
+                                        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                        alt="Gallery image">
 
-                        <!-- Gallery Grid -->
-                        <div class="grid grid-cols-5 gap-2">
-                            <div class="aspect-square bg-gray-100 rounded"></div>
-                            <div class="aspect-square bg-gray-100 rounded"></div>
-                            <div class="aspect-square bg-gray-100 rounded"></div>
-                            <div class="aspect-square bg-gray-100 rounded"></div>
-                            <div class="aspect-square bg-gray-100 rounded"></div>
-                        </div>
+                                    <!-- Hover Overlay -->
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 sm:group-hover:bg-opacity-40 bg-opacity-40 sm:bg-opacity-0 transition-all duration-300 flex items-center justify-center">
+                                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <!-- View Button -->
+                                            <button
+                                                wire:click="$set('selectedImage', '{{ $image }}')"
+                                                @click="$dispatch('open-modal', 'image-modal')"
+                                                class="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </button>
 
-                        <!-- Gallery Navigation Dots -->
-                        <div class="flex justify-center space-x-1 mt-4">
-                            <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
-                            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                                            <!-- Delete Button -->
+                                            <button
+                                                wire:click="$set('imageToDelete', '{{ $image }}')"
+                                                @click="$dispatch('open-modal', 'delete-confirmation')"
+                                                class="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+
+                            <!-- Empty State -->
+                            @if(count($galleryImages) === 0)
+                            <div class="text-center py-12">
+                                <div class="bg-gray-50 rounded-lg p-6 inline-block">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <h3 class="mt-2 text-sm font-medium text-gray-900">No images</h3>
+                                    <p class="mt-1 text-sm text-gray-500">Get started by uploading your first image.</p>
+                                </div>
+                            </div>
+                            @endif
+
+                            <!-- Image Modal -->
+                            <div
+                                x-data="{ 
+                                    show: false,
+                                    image: null
+                                }"
+                                x-show="show"
+                                x-on:open-modal.window="if ($event.detail === 'image-modal') { show = true }"
+                                x-on:close-modal.window="if ($event.detail === 'image-modal') { show = false }"
+                                x-on:keydown.escape.window="show = false"
+                                class="fixed inset-0 z-50 overflow-y-auto px-4"
+                                style="display: none;">
+                                <!-- Background overlay -->
+                                <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity"></div>
+
+                                <!-- Modal content -->
+                                <div class="flex min-h-screen items-center justify-center">
+                                    <div class="relative max-w-4xl w-full mx-auto">
+                                        <!-- Close button -->
+                                        <button
+                                            @click="show = false"
+                                            class="absolute -top-4 -right-4 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 z-10">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Image container -->
+                                        <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+                                            <img
+                                                src="{{ $selectedImage ? asset('storage/' . $selectedImage) : '' }}"
+                                                class="w-full h-auto max-h-[80vh] object-contain"
+                                                alt="Selected image">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Delete Confirmation Modal -->
+                            <div
+                                x-data="{ show: false }"
+                                x-show="show"
+                                x-on:open-modal.window="if ($event.detail === 'delete-confirmation') { show = true }"
+                                x-on:close-modal.window="if ($event.detail === 'delete-confirmation') { show = false }"
+                                x-on:keydown.escape.window="show = false"
+                                class="fixed inset-0 z-50 overflow-y-auto"
+                                style="display: none;">
+                                <!-- Background overlay -->
+                                <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity"></div>
+
+                                <!-- Modal content -->
+                                <div class="flex min-h-screen items-center justify-center p-4">
+                                    <div class="relative bg-white rounded-lg max-w-md w-full p-6">
+                                        <h2 class="text-lg font-medium text-gray-900">
+                                            Delete Image
+                                        </h2>
+                                        <p class="mt-2 text-sm text-gray-600">
+                                            Are you sure you want to delete this image? This action cannot be undone.
+                                        </p>
+                                        <div class="mt-6 flex justify-end space-x-3">
+                                            <button
+                                                @click="show = false"
+                                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                                                Cancel
+                                            </button>
+                                            <button
+                                                wire:click="deleteImage"
+                                                @click="show = false"
+                                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                                Delete Image
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Right Column: Table Card -->
-                <div class="bg-white rounded-lg shadow">
+                <div class="bg-white rounded-lg shadow mt-6 lg:mt-0">
                     <div class="p-6">
-                        <div class="mb-4 flex">
+                        <div class="mb-4 flex flex-col sm:flex-row gap-4">
                             @if (SuperAdmin())
                             <x-filament::modal :close-by-clicking-away="false" id="waterlevel-modal">
                                 <x-slot name="trigger">
@@ -270,10 +405,10 @@
                             </x-filament::modal>
                             @endif
                         </div>
-                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center flex-wrap">
                             <i class="fas fa-table mr-2 text-blue-500"></i>Recent Measurements
                         </h2>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto -mx-6 px-6">
                             {{ $this->table }}
                         </div>
                     </div>
@@ -388,11 +523,9 @@
 
         // maps for station
         $wire.on('updateMapMarker', (eventData) => {
-            // console.log(eventData);
             const data = Array.isArray(eventData) ? eventData[0] : eventData;
             const coordinates = data.coordinates;
             const station = data.station;
-            // console.log(station);
 
             if (coordinates && coordinates.lat && coordinates.lon) {
                 // Clear previous markers
@@ -402,19 +535,14 @@
                 const marker = L.marker([coordinates.lat, coordinates.lon], {
                     title: station.location
                 }).bindPopup(`
-                        <div class="text-center">
-                        <b>Tanggal: ${station.datetime ? station.datetime : 'No Data'}</b><br>
-                        <b>Water Station: ${station.location}</b><br>
-                        Level In Terakhir: ${station.level_in ? station.level_in : 'No Data'}<br>
-                        Level Out Terakhir: ${station.level_out ? station.level_out : 'No Data'}<br>
-                        Level Actual Terakhir: ${station.level_actual ? station.level_actual : 'No Data'}<br>
-                        Rata rata Level In: ${station.level_in_avg ? station.level_in_avg : 'No Data'}<br>
-                        Rata rata Level Out: ${station.level_out_avg ? station.level_out_avg : 'No Data'}<br>
-                        Rata rata Level Actual: ${station.level_actual_avg ? station.level_actual_avg : 'No Data'}<br>
-                        Batas Atas Air: ${station.batas_atas_air ? station.batas_atas_air : 'No Data'}<br>
-                        Batas Bawah Air: ${station.batas_bawah_air ? station.batas_bawah_air : 'No Data'} 
-                        </div>
-                    `);
+                <div class="text-center">
+                <b>Tanggal: ${station.datetime ? station.datetime : 'No Data'}</b><br>
+                <b>Water Station: ${station.location}</b><br>
+                Level Blok: ${station.level_blok ? station.level_blok : 'No Data'}<br>
+                Level Parit: ${station.level_parit ? station.level_parit : 'No Data'}<br>
+                Sensor Distance: ${station.sensor_distance ? station.sensor_distance : 'No Data'}<br>
+                </div>
+            `);
 
                 // Add marker to layer group
                 layerGroup.addLayer(marker);
@@ -423,7 +551,18 @@
                 map.setView([coordinates.lat, coordinates.lon], 15);
                 marker.openPopup();
             }
+
+            // Mendapatkan elemen dengan ID yang benar
+            let latlon = document.getElementById('latlonmapsdiv');
+            let nameestate = document.getElementById('namaestatediv');
+
+            // Mengatur nilai yang sesuai
+            if (latlon && nameestate) {
+                latlon.innerText = `${coordinates.lat}, ${coordinates.lon}`;
+                nameestate.innerText = station.location;
+            }
         });
+
 
 
         // untuk futur search 
@@ -721,7 +860,3 @@
     </script>
     @endscript
 </div>
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-@endpush
