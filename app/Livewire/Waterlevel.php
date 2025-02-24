@@ -75,6 +75,7 @@ class Waterlevel extends Component implements HasForms, HasTable
     // Add these properties
     public $dateType = 'single';
     public $startDate = null;
+    public $startDateForGraph = null;
     public $endDate = null;
 
     // Add new method to handle search
@@ -417,22 +418,6 @@ class Waterlevel extends Component implements HasForms, HasTable
         }
     }
 
-    private function getFilteredQuery()
-    {
-        $query = ModelsWaterlevel::query()
-            ->where('idwl', $this->selectedStation);
-
-        // Apply date filtering
-        if ($this->startDate) {
-            $query->whereDate('datetime', '>=', $this->startDate);
-
-            if ($this->endDate) {
-                $query->whereDate('datetime', '<=', $this->endDate);
-            }
-        }
-
-        return $query;
-    }
 
     private function updateMapMarker($station)
     {
@@ -453,6 +438,28 @@ class Waterlevel extends Component implements HasForms, HasTable
         ]);
     }
 
+    private function getFilteredQuery()
+    {
+        $query = ModelsWaterlevel::query()
+            ->where('idwl', $this->selectedStation);
+
+        // Apply date filtering
+
+        if ($this->startDate && $this->endDate == null) {
+            $query->whereDate('datetime', 'like', '%' . $this->startDate . '%');
+        }
+
+
+        if ($this->startDate) {
+            $query->whereDate('datetime', '>=', $this->startDate);
+
+            if ($this->endDate) {
+                $query->whereDate('datetime', '<=', $this->endDate);
+            }
+        }
+
+        return $query;
+    }
     // Add method to fetch chart data
     public function getChartData()
     {
@@ -463,42 +470,58 @@ class Waterlevel extends Component implements HasForms, HasTable
         $query = $this->getFilteredQuery()->orderBy('datetime', 'asc');
         $data = $query->get();
 
+        // Group and aggregate data based on period
+        if ($this->chartPeriod === 'today') {
+            // Group by hour for today's view
+            $aggregatedData = $data->groupBy(function ($item) {
+                return Carbon::parse($item->datetime)->format('Y-m-d H:00:00');
+            });
+        } else {
+            // Group by day for week and month views
+            $aggregatedData = $data->groupBy(function ($item) {
+                return Carbon::parse($item->datetime)->format('Y-m-d');
+            });
+        }
+
+        // Calculate averages and fill missing periods
+        $processedData = $this->processAggregatedData($aggregatedData);
+
         $series = [];
 
-        // Only add series if they should be visible
+        // Add series based on chart type
         if ($this->chartType === 'blok' || $this->chartType === 'rekap') {
             $series[] = [
                 'name' => 'Level Blok',
-                'data' => $data->map(function ($item) {
+                'data' => $processedData->map(function ($item) {
                     return [
-                        'x' => Carbon::parse($item->datetime)->format('Y-m-d H:i:s'),
-                        'y' => (float) $item->level_blok
+                        'x' => $item['datetime'],
+                        'y' => round($item['level_blok'], 2)
                     ];
-                })->toArray()
+                })->values()->toArray()
             ];
         }
 
         if ($this->chartType === 'parit' || $this->chartType === 'rekap') {
             $series[] = [
                 'name' => 'Level Parit',
-                'data' => $data->map(function ($item) {
+                'data' => $processedData->map(function ($item) {
                     return [
-                        'x' => Carbon::parse($item->datetime)->format('Y-m-d H:i:s'),
-                        'y' => (float) $item->level_parit
+                        'x' => $item['datetime'],
+                        'y' => round($item['level_parit'], 2)
                     ];
-                })->toArray()
+                })->values()->toArray()
             ];
         }
 
         if ($this->chartType === 'sensor' || $this->chartType === 'rekap') {
             $series[] = [
                 'name' => 'Sensor Distance',
-                'data' => $data->map(function ($item) {
+                'data' => $processedData->map(function ($item) {
                     return [
-                        'x' => Carbon::parse($item->datetime)->format('Y-m-d H:i:s'),
-                        'y' => (float) $item->sensor_distance
+                        'x' => $item['datetime'],
+                        'y' => round($item['sensor_distance'], 2)
                     ];
-                })->toArray()
+                })->values()->toArray()
             ];
         }
 
@@ -507,20 +530,81 @@ class Waterlevel extends Component implements HasForms, HasTable
         ];
     }
 
+    // Update the processAggregatedData method
+    private function processAggregatedData($aggregatedData)
+    {
+        $processedData = collect();
+
+        if ($this->chartPeriod === 'today') {
+            // Use filtered date instead of today
+            $targetDate = $this->startDate ? Carbon::parse($this->startDate) : Carbon::today();
+            $startTime = $targetDate->copy()->startOfDay();
+            $endTime = $targetDate->copy()->addDay()->startOfDay();
+
+            while ($startTime < $endTime) {
+                $timeKey = $startTime->format('Y-m-d H:00:00');
+                $hourData = $aggregatedData->get($timeKey, collect());
+
+                $processedData->push([
+                    'datetime' => $timeKey,
+                    'level_blok' => $hourData->avg('level_blok') ?? 0,
+                    'level_parit' => $hourData->avg('level_parit') ?? 0,
+                    'sensor_distance' => $hourData->avg('sensor_distance') ?? 0
+                ]);
+
+                $startTime->addHour();
+            }
+        } else {
+            // For week and month views, use the filtered date range if available
+            if ($this->startDate && $this->endDate) {
+                $startDate = Carbon::parse($this->startDate);
+                $endDate = Carbon::parse($this->endDate);
+            } else {
+                // Fallback to current week/month if no date filter
+                $startDate = $this->chartPeriod === 'week'
+                    ? Carbon::now()->startOfWeek()
+                    : Carbon::now()->startOfMonth();
+                $endDate = $this->chartPeriod === 'week'
+                    ? Carbon::now()->endOfWeek()
+                    : Carbon::now()->endOfMonth();
+            }
+
+            while ($startDate <= $endDate) {
+                $dateKey = $startDate->format('Y-m-d');
+                $dayData = $aggregatedData->get($dateKey, collect());
+
+                $processedData->push([
+                    'datetime' => $dateKey,
+                    'level_blok' => $dayData->avg('level_blok') ?? 0,
+                    'level_parit' => $dayData->avg('level_parit') ?? 0,
+                    'sensor_distance' => $dayData->avg('sensor_distance') ?? 0
+                ]);
+
+                $startDate->addDay();
+            }
+        }
+
+        return $processedData;
+    }
+
     // Update the updateChart method to handle null values better
     public function updateChart($period = null, $type = null)
     {
-        // Only update if value is provided
+        // Update period if provided
         if ($period !== null) {
             $this->chartPeriod = $period;
+            // Update date filters when period changes
+            $this->updateDateFilters($period);
         }
+
+        // Update type if provided
         if ($type !== null) {
             $this->chartType = $type;
         }
 
         $this->chartData = $this->getChartData();
 
-        // Always send the current state
+        // Dispatch event with current state
         $this->dispatch('updateChart', [
             'data' => $this->chartData,
             'period' => $this->chartPeriod,
@@ -618,7 +702,7 @@ class Waterlevel extends Component implements HasForms, HasTable
             'startDate' => 'required|date',
             'endDate' => 'nullable|date|after_or_equal:startDate',
         ]);
-
+        $this->startDateForGraph = $this->startDate;
         $this->refreshAllComponents();
     }
 
@@ -626,6 +710,7 @@ class Waterlevel extends Component implements HasForms, HasTable
     {
         $this->startDate = null;
         $this->endDate = null;
+        $this->startDateForGraph = null;
         $this->refreshAllComponents();
     }
 
@@ -690,7 +775,25 @@ class Waterlevel extends Component implements HasForms, HasTable
                 ->send();
         }
     }
+    private function updateDateFilters($period)
+    {
 
+
+        switch ($period) {
+            case 'today':
+                $this->startDate = $this->startDateForGraph;
+                $this->endDate = null;
+                break;
+
+            case 'week':
+                $this->setCurrentWeek();
+                break;
+
+            case 'month':
+                $this->setCurrentMonth();
+                break;
+        }
+    }
     // Add these methods for quick date selection
     public function setLastWeek()
     {
@@ -706,19 +809,19 @@ class Waterlevel extends Component implements HasForms, HasTable
         // $this->refreshAllComponents();
     }
 
-    // Optional: Add method for current week/month if needed
+    // Add these methods to set the current week and month
     public function setCurrentWeek()
     {
         $this->startDate = Carbon::now()->startOfWeek()->format('Y-m-d');
         $this->endDate = Carbon::now()->endOfWeek()->format('Y-m-d');
-        // $this->refreshAllComponents();
+        $this->updateChart(); // Ensure the chart updates after setting the dates
     }
 
     public function setCurrentMonth()
     {
         $this->startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
         $this->endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
-        // $this->refreshAllComponents();
+        $this->updateChart(); // Ensure the chart updates after setting the dates
     }
 
 
@@ -737,9 +840,10 @@ class Waterlevel extends Component implements HasForms, HasTable
             }
 
             // Get the filtered data
-            $query = $this->getFilteredQuery();
+            $query = $this->getFilteredQuery()->orderBy('datetime', 'asc');
             $data = $query->get();
 
+            // dd($data);
             if ($data->isEmpty()) {
                 throw new \Exception('No data available for the selected period');
             }
@@ -750,20 +854,35 @@ class Waterlevel extends Component implements HasForms, HasTable
             // Get station name
             $stationName = Waterlevellist::find($this->selectedStation)->location ?? 'Unknown Station';
 
-            // Create PDF
+            // Group and aggregate data based on period
+            if ($this->chartPeriod === 'today') {
+                $aggregatedData = $data->groupBy(function ($item) {
+                    return Carbon::parse($item->datetime)->format('Y-m-d H:00:00');
+                });
+            } else {
+                $aggregatedData = $data->groupBy(function ($item) {
+                    return Carbon::parse($item->datetime)->format('Y-m-d');
+                });
+            }
+
+            // Process the aggregated data
+            $processedData = $this->processAggregatedData($aggregatedData);
+
+            // Create PDF with aggregated data
             $pdf = PDF::loadView('exports.pdf.water-level-report', [
                 'imagePath' => $imagePath,
-                'data' => $data,
+                'data' => $processedData,
                 'station' => $stationName,
                 'startDate' => $this->startDate ? Carbon::parse($this->startDate)->format('d M Y') : Carbon::now()->format('d M Y'),
-                'endDate' => $this->endDate ? Carbon::parse($this->endDate)->format('d M Y') : null
+                'endDate' => $this->endDate ? Carbon::parse($this->endDate)->format('d M Y') : null,
+                'period' => $this->chartPeriod
             ]);
 
             // Set paper
             $pdf->setPaper('a4', 'landscape');
 
             // Generate filename
-            $filename = "water-level-report-" . now()->format('Y-m-d-His') . ".pdf";
+            $filename = "water-level-report" . ' ' . $stationName . ' ' . now()->format('Y-m-d') . ' untuk' . $this->chartPeriod . ".pdf";
 
             // Return the PDF for download
             return response()->streamDownload(

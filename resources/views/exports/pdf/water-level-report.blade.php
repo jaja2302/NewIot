@@ -82,10 +82,14 @@
         <tbody>
             @foreach($data as $item)
             <tr>
-                <td>{{ \Carbon\Carbon::parse($item->datetime)->format('d M Y H:i:s') }}</td>
-                <td>{{ number_format($item->level_blok, 2) }}</td>
-                <td>{{ number_format($item->level_parit, 2) }}</td>
-                <td>{{ number_format($item->sensor_distance, 2) }}</td>
+                @if($period ==='Today')
+                <td>{{ \Carbon\Carbon::parse($item['datetime'])->format('d M Y H:i:s') }}</td>
+                @else
+                <td>{{ \Carbon\Carbon::parse($item['datetime'])->format('d M Y') }}</td>
+                @endif
+                <td>{{ number_format($item['level_blok'], 2) }}</td>
+                <td>{{ number_format($item['level_parit'], 2) }}</td>
+                <td>{{ number_format($item['sensor_distance'], 2) }}</td>
             </tr>
             @endforeach
         </tbody>

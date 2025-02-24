@@ -80,35 +80,36 @@
                 @endif
 
                 <!-- Results Section -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <!-- Results Header -->
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg font-semibold text-gray-900">Estate List</h2>
-                        <span class="text-sm text-gray-500">{{ count($filteredEstates) }} results found</span>
-                    </div>
 
-                    <!-- No Results Message -->
-                    @if($searchEstate && empty($filteredEstates))
-                    <div class="text-center py-12">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">No results found</h3>
-                        <p class="mt-1 text-sm text-gray-500">No estates found matching "{{ $searchEstate }}"</p>
-                    </div>
-                    @else
-                    <!-- Estate Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                        @foreach($filteredEstates as $estate)
-                        <button
-                            wire:click="selectEstate({{ $estate['id'] }})"
-                            class="group hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-lg">
-                            <x-utils.card :estate="$estate" />
-                        </button>
-                        @endforeach
-                    </div>
-                    @endif
+                @if($searchEstate && empty($filteredEstates))
+                <!-- Results Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Estate List</h2>
+                    <span class="text-sm text-gray-500">{{ count($filteredEstates) }} results found</span>
                 </div>
+
+                <!-- No Results Message -->
+
+                <div class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No results found</h3>
+                    <p class="mt-1 text-sm text-gray-500">No estates found matching "{{ $searchEstate }}"</p>
+                </div>
+                @else
+                <!-- Estate Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                    @foreach($filteredEstates as $estate)
+                    <button
+                        wire:click="selectEstate({{ $estate['id'] }})"
+                        class="group hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-lg">
+                        <x-utils.card :estate="$estate" />
+                    </button>
+                    @endforeach
+                </div>
+                @endif
+
             </div>
         </div>
 
@@ -287,6 +288,7 @@
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <h2 class="text-xl font-semibold text-gray-800">Photo Gallery</h2>
                         </div>
+                        @if (SuperAdmin())
                         <!-- Upload Button -->
                         <x-filament::modal :close-by-clicking-away="false" id="importGalery" width="5xl">
                             <x-slot name="trigger">
@@ -310,6 +312,7 @@
                             </div>
                             @endif
                         </x-filament::modal>
+                        @endif
                         <div>
                             <!-- Gallery Grid -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
