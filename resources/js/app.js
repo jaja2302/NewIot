@@ -30,6 +30,8 @@ import 'leaflet-control-geocoder';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import jsPDF from "jspdf";
 window.jsPDF = jsPDF
+import moment from 'moment-timezone';
+window.moment = moment
 function initializeScrollNavigation(upRoute, downRoute, options = {}) {
     // Adjusted default settings
     const config = {

@@ -39,7 +39,7 @@
     .title {
         font-size: 1.3em;
         font-weight: 600;
-        margin-top: 1em;
+        margin-top: 0.5em;
         line-height: 1.2;
         width: 100%;
         text-align: center;
@@ -48,6 +48,7 @@
     .bottom-section {
         width: 100%;
         text-align: center;
+        margin-bottom: 1em;
     }
 
     .row1 {
@@ -58,7 +59,7 @@
     .item {
         display: flex;
         flex-direction: column;
-        gap: 0.3em;
+        gap: 0.5em;
         align-items: center;
     }
 
@@ -67,8 +68,22 @@
         font-weight: 600;
     }
 
-    .regular-text {
-        font-size: 1em;
+    .value-container {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    .number-text {
+        font-size: 3em;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    .unit-text {
+        font-size: 0.9em;
+        margin-left: 0.3em;
+        margin-bottom: 0.5em;
         opacity: 0.9;
     }
 
@@ -111,8 +126,11 @@
         <div class="bottom-section">
             <div class="row row1">
                 <div class="item">
-                    <span class="big-text">🌊 Level Parit</span>
-                    <span class="regular-text">{{ (int)$estate['level_parit'] }} CM</span>
+                    <span class="big-text">Level Parit</span>
+                    <div class="value-container">
+                        <span class="number-text">{{ (int)$estate['level_parit'] }}</span>
+                        <span class="unit-text">cm</span>
+                    </div>
                 </div>
             </div>
         </div>

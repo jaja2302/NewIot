@@ -771,7 +771,14 @@
                 type: 'datetime',
                 labels: {
                     datetimeUTC: false,
-                    format: 'dd MMM HH:mm'
+                    formatter: function(value, timestamp, opts) {
+                        // Gunakan format berbeda berdasarkan currentPeriod
+                        if (currentPeriod === 'today') {
+                            return moment(new Date(timestamp)).format('DD MMM HH:mm')
+                        } else {
+                            return moment(new Date(timestamp)).format('DD MMM YYYY')
+                        }
+                    }
                 },
                 title: {
                     text: 'Waktu'
@@ -787,7 +794,14 @@
             },
             tooltip: {
                 x: {
-                    format: 'dd MMM yyyy HH:mm'
+                    formatter: function(value, opts) {
+                        // Gunakan format berbeda berdasarkan currentPeriod
+                        if (currentPeriod === 'today') {
+                            return moment(new Date(value)).format('DD MMM YYYY HH:mm')
+                        } else {
+                            return moment(new Date(value)).format('DD MMM YYYY')
+                        }
+                    }
                 },
                 y: {
                     formatter: (value) => `${value.toFixed(2)} cm`
@@ -819,7 +833,7 @@
         function updateChart(data, type = currentView, period = currentPeriod) {
             currentView = type;
             currentPeriod = period;
-            console.log(data);
+            // console.log(data);
 
             // Update button states
             updateButtonStates();
