@@ -28,7 +28,8 @@ import ApexCharts from 'apexcharts'
 window.ApexCharts = ApexCharts;
 import 'leaflet-control-geocoder';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
-
+import jsPDF from "jspdf";
+window.jsPDF = jsPDF
 function initializeScrollNavigation(upRoute, downRoute, options = {}) {
     // Adjusted default settings
     const config = {
@@ -484,37 +485,6 @@ $(function() {
 
     return animation;
 };
-
-// let touchStartX = 0;
-// let touchEndX = 0;
-
-// document.addEventListener('touchstart', e => {
-//     touchStartX = e.changedTouches[0].screenX;
-// });
-
-// document.addEventListener('touchend', e => {
-//     touchEndX = e.changedTouches[0].screenX;
-//     handleSwipe();
-// });
-
-// function handleSwipe() {
-//     const swipeDistance = touchEndX - touchStartX;
-//     if (Math.abs(swipeDistance) > 100) { // Min swipe distance
-//         if (swipeDistance > 0) {
-//             // Swipe right - open menu
-//             if (navbar.classList.contains('hidden')) {
-//                 toggleSidebar();
-//             }
-//         } else {
-//             // Swipe left - close menu
-//             if (!navbar.classList.contains('hidden')) {
-//                 hideSidebar();
-//             }
-//         }
-//     }
-// }
-
-
 // For the logout handler error, add this to your global scope:
 window.handleLogout = function() {
     // Show loading screen before logout

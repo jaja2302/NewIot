@@ -28,6 +28,7 @@ use App\Imports\WaterlevelImport;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class Waterlevel extends Component implements HasForms, HasTable
 {
@@ -70,6 +71,11 @@ class Waterlevel extends Component implements HasForms, HasTable
     // Add these properties at the top of the class
     public $selectedImage = null;
     public $imageToDelete = null;
+
+    // Add these properties
+    public $dateType = 'single';
+    public $startDate = null;
+    public $endDate = null;
 
     // Add new method to handle search
     public function updatedSearchEstate($value)
@@ -151,7 +157,9 @@ class Waterlevel extends Component implements HasForms, HasTable
 
         return view('livewire.waterlevel', [
             'Estate' => $Estate,
-            'filteredEstates' => $this->filteredEstates
+            'filteredEstates' => $this->filteredEstates,
+            'startDate' => $this->startDate,
+            'endDate' => $this->endDate
         ]);
     }
 
@@ -160,14 +168,10 @@ class Waterlevel extends Component implements HasForms, HasTable
     {
         return $table
             ->query(function () {
-                $data = [];
-                if ($this->selectedStation) {
-                    // dd($this->selectedStation, $this->selectedDate);
-                    $data = ModelsWaterlevel::query()->where('idwl', $this->selectedStation)->where('datetime', 'like', '%' . $this->selectedDate . '%');
-                    // dd($data, $this->selectedStation, $this->selectedDate);
-                    return $data;
+                if (!$this->selectedStation) {
+                    return ModelsWaterlevel::query()->where('idwl', 0);
                 }
-                return ModelsWaterlevel::query()->where('idwl', $this->selectedStation);
+                return $this->getFilteredQuery();
             })
             ->columns([
                 TextColumn::make('waterlevellist.location')->label('Station'),
@@ -306,10 +310,7 @@ class Waterlevel extends Component implements HasForms, HasTable
                         ->danger()
                         ->send();
                 }
-                $this->updateMapMarker($station);
-
-                // Update chart when station changes
-                $this->updateChart();
+                $this->refreshAllComponents();
             }
         } finally {
             $this->isLoadingMapMarker = false;
@@ -399,7 +400,7 @@ class Waterlevel extends Component implements HasForms, HasTable
                 'lon' => $this->selectedLon,
             ]);
 
-            $this->updateMapMarker($station);
+            $this->refreshAllComponents();
             Notification::make()
                 ->title('Coordinates updated successfully!')
                 ->success()
@@ -416,20 +417,32 @@ class Waterlevel extends Component implements HasForms, HasTable
         }
     }
 
+    private function getFilteredQuery()
+    {
+        $query = ModelsWaterlevel::query()
+            ->where('idwl', $this->selectedStation);
+
+        // Apply date filtering
+        if ($this->startDate) {
+            $query->whereDate('datetime', '>=', $this->startDate);
+
+            if ($this->endDate) {
+                $query->whereDate('datetime', '<=', $this->endDate);
+            }
+        }
+
+        return $query;
+    }
+
     private function updateMapMarker($station)
     {
-        // dd($this->selectedDate);
-
-        $selectedDate = $this->selectedDate ?? Carbon::now()->subDays(30);
+        $query = $this->getFilteredQuery();
+        $waterlevel = $query->get();
 
         $stationData = $this->processStationData(
             $station,
-            ModelsWaterlevel::where('idwl', $this->selectedStation)
-                ->whereDate('datetime', '>=', $selectedDate)
-                ->get()
+            $waterlevel
         );
-
-        // dd($stationData);
 
         $this->dispatch('updateMapMarker', [
             'coordinates' => [
@@ -444,32 +457,10 @@ class Waterlevel extends Component implements HasForms, HasTable
     public function getChartData()
     {
         if (!$this->selectedStation) {
-            return [
-                'series' => []
-            ];
+            return ['series' => []];
         }
 
-        $query = ModelsWaterlevel::query()
-            ->where('idwl', $this->selectedStation)
-            ->orderBy('datetime', 'asc');
-
-        // Set date range based on period
-        switch ($this->chartPeriod) {
-            case 'today':
-                $query->whereDate('datetime', Carbon::today());
-                break;
-            case 'week':
-                $query->whereBetween('datetime', [
-                    Carbon::now()->startOfWeek(),
-                    Carbon::now()->endOfWeek()
-                ]);
-                break;
-            case 'month':
-                $query->whereMonth('datetime', Carbon::now()->month)
-                    ->whereYear('datetime', Carbon::now()->year);
-                break;
-        }
-
+        $query = $this->getFilteredQuery()->orderBy('datetime', 'asc');
         $data = $query->get();
 
         $series = [];
@@ -596,5 +587,209 @@ class Waterlevel extends Component implements HasForms, HasTable
 
         // Close the modal
         $this->dispatch('close-modal', id: 'delete-confirmation');
+    }
+
+    // Update the event handler
+    #[On('dateFilterChanged')]
+    public function handleDateFilter($data)
+    {
+        // Extract data from the event payload
+        $type = $data['type'] ?? null;
+
+        if ($type === 'single') {
+            $this->startDate = $data['date'] ?? null;
+            $this->endDate = null;
+        } else if ($type === 'range') {
+            $this->startDate = $data['startDate'] ?? null;
+            $this->endDate = $data['endDate'] ?? null;
+        } else {
+            // Clear filter case
+            $this->startDate = null;
+            $this->endDate = null;
+        }
+
+        $this->refreshAllComponents();
+    }
+
+    // Add these methods
+    public function applyDateFilter()
+    {
+        $this->validate([
+            'startDate' => 'required|date',
+            'endDate' => 'nullable|date|after_or_equal:startDate',
+        ]);
+
+        $this->refreshAllComponents();
+    }
+
+    public function clearDateFilter()
+    {
+        $this->startDate = null;
+        $this->endDate = null;
+        $this->refreshAllComponents();
+    }
+
+    // Add this method to refresh all components
+    private function refreshAllComponents()
+    {
+        if (!$this->selectedStation) {
+            return;
+        }
+        $this->dispatch('showLoadingScreen');
+
+        try {
+            $station = Waterlevellist::find($this->selectedStation);
+            if (!$station) {
+                return;
+            }
+
+            // Get filtered data
+            $query = $this->getFilteredQuery();
+            $data = $query->get();
+
+            // If no data found, reset chart and map
+            if ($data->isEmpty()) {
+                // Reset chart
+                $this->dispatch('updateChart', [
+                    'data' => ['series' => []],
+                    'period' => $this->chartPeriod,
+                    'type' => $this->chartType
+                ]);
+
+                // Reset map marker
+                $this->dispatch('updateMapMarker', [
+                    'coordinates' => [
+                        'lat' => $station->lat ?? 0,
+                        'lon' => $station->lon ?? 0,
+                    ],
+                    'station' => [
+                        'location' => $station->location,
+                        'datetime' => '-',
+                        'level_blok' => 0,
+                        'level_parit' => 0,
+                        'sensor_distance' => 0,
+                        'level_blok_avg' => 0,
+                        'level_parit_avg' => 0,
+                        'sensor_distance_avg' => 0,
+                    ]
+                ]);
+            } else {
+                // Update map marker
+                $this->updateMapMarker($station);
+                // Update chart
+                $this->updateChart();
+            }
+            $this->dispatch('hideLoadingScreen');
+        } catch (\Exception $e) {
+            $this->dispatch('hideLoadingScreen');
+            // Handle any errors
+            Notification::make()
+                ->title('Error refreshing data')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
+    // Add these methods for quick date selection
+    public function setLastWeek()
+    {
+        $this->startDate = Carbon::now()->subWeek()->startOfWeek()->format('Y-m-d');
+        $this->endDate = Carbon::now()->subWeek()->endOfWeek()->format('Y-m-d');
+        // $this->refreshAllComponents();
+    }
+
+    public function setLastMonth()
+    {
+        $this->startDate = Carbon::now()->subMonth()->startOfMonth()->format('Y-m-d');
+        $this->endDate = Carbon::now()->subMonth()->endOfMonth()->format('Y-m-d');
+        // $this->refreshAllComponents();
+    }
+
+    // Optional: Add method for current week/month if needed
+    public function setCurrentWeek()
+    {
+        $this->startDate = Carbon::now()->startOfWeek()->format('Y-m-d');
+        $this->endDate = Carbon::now()->endOfWeek()->format('Y-m-d');
+        // $this->refreshAllComponents();
+    }
+
+    public function setCurrentMonth()
+    {
+        $this->startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $this->endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
+        // $this->refreshAllComponents();
+    }
+
+
+
+    #[On('GeneratePDF')]
+    public function GeneratePDF($dataURI)
+    {
+        try {
+            // Get the filtered data
+            $query = $this->getFilteredQuery();
+            $data = $query->get();
+
+            // Save the chart image and get the path
+            $imagePath = $this->saveBase64Image($dataURI);
+
+            // Get station name
+            $stationName = Waterlevellist::find($this->selectedStation)->location ?? 'Unknown Station';
+
+            // Create PDF
+            $pdf = PDF::loadView('exports.pdf.water-level-report', [
+                'imagePath' => $imagePath, // Pass the image path instead of raw data
+                'data' => $data,
+                'station' => $stationName,
+                'startDate' => $this->startDate ? Carbon::parse($this->startDate)->format('d M Y') : Carbon::now()->format('d M Y'),
+                'endDate' => $this->endDate ? Carbon::parse($this->endDate)->format('d M Y') : null
+            ]);
+
+            // Set paper
+            $pdf->setPaper('a4', 'landscape');
+
+            // Generate filename
+            $filename = "water-level-report-" . now()->format('Y-m-d-His') . ".pdf";
+
+            // Return the PDF for download
+            return response()->streamDownload(
+                function () use ($pdf) {
+                    echo $pdf->output();
+                },
+                $filename,
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+                ]
+            );
+        } catch (\Exception $e) {
+            // Handle any errors
+            Notification::make()
+                ->title('Error generating PDF')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
+    private function saveBase64Image($base64String)
+    {
+        try {
+            // Extract the base64 data
+            list($type, $data) = explode(';', $base64String);
+            list(, $data) = explode(',', $data);
+
+            // Generate unique filename
+            $filename = 'chart_' . time() . '.png';
+            $path = 'images/' . $filename;
+
+            // Save the image
+            Storage::disk('public')->put($path, base64_decode($data));
+
+            return $path;
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to save image: ' . $e->getMessage());
+        }
     }
 }

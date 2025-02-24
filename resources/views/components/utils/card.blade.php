@@ -1,12 +1,16 @@
 <style>
     /* From Uiverse.io by MikeAndrewDesigner */
     .e-card {
-        margin: 100px auto;
+        /* Hilangkan margin auto dan sesuaikan ukuran */
+        margin: 0;
+        /* Ubah dari margin: 100px auto */
         background: transparent;
         box-shadow: 0px 8px 28px -9px rgba(0, 0, 0, 0.45);
         position: relative;
-        width: 240px;
-        height: 330px;
+        width: 100%;
+        /* Ubah dari width: 240px agar responsif */
+        height: 280px;
+        /* Sesuaikan height agar lebih compact */
         border-radius: 16px;
         overflow: hidden;
     }
@@ -23,12 +27,6 @@
         background: linear-gradient(744deg, #af40ff, #5b42f3 60%, #00ddeb);
     }
 
-    .icon {
-        width: 3em;
-        margin-top: -1em;
-        padding-bottom: 1em;
-    }
-
     .infotop {
         text-align: center;
         position: absolute;
@@ -42,13 +40,22 @@
     }
 
     .title {
-        font-size: 1.5em;
+        font-size: 1.3em;
+        /* Sedikit lebih kecil */
         font-weight: 600;
-        margin-top: 2em;
+        margin-top: 1em;
+        /* Kurangi margin top */
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
     }
 
     .bottom-section {
         align-self: flex-end;
+        width: 100%;
     }
 
     .row1 {
@@ -71,14 +78,7 @@
         opacity: 0.9;
     }
 
-    .name {
-        font-size: 14px;
-        font-weight: 100;
-        position: relative;
-        top: 1em;
-        text-transform: lowercase;
-    }
-
+    /* Animation settings - tetap sama */
     .wave:nth-child(2),
     .wave:nth-child(3) {
         top: 210px;
@@ -119,14 +119,47 @@
             transform: rotate(360deg);
         }
     }
+
+    /* Tambahan untuk status level air */
+    .water-level-status {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-danger {
+        background-color: rgba(254, 226, 226, 0.9);
+        color: rgb(185, 28, 28);
+    }
+
+    .status-warning {
+        background-color: rgba(254, 243, 199, 0.9);
+        color: rgb(161, 98, 7);
+    }
+
+    .status-safe {
+        background-color: rgba(209, 250, 229, 0.9);
+        color: rgb(6, 95, 70);
+    }
 </style>
 
 <div class="e-card playing">
-    <div class="image"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
 
-    <div class="wave"></div>
-    <div class="wave"></div>
-    <div class="wave"></div>
+    @php
+    $levelStatus = $estate['level_parit'] > 80 ? 'danger' : ($estate['level_parit'] > 50 ? 'warning' : 'safe');
+    $statusText = $levelStatus === 'danger' ? 'Danger' : ($levelStatus === 'warning' ? 'Warning' : 'Safe');
+    @endphp
+
+    <div class="water-level-status status-{{ $levelStatus }}">
+        {{ $statusText }}
+    </div>
 
     <div class="infotop">
         <span class="title">{{ $estate['name'] }}</span>

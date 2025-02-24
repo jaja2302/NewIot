@@ -1,49 +1,115 @@
 <div class="min-h-screen">
     <div class="container mx-auto px-4 py-6">
 
-        <!-- Search Bar Container -->
-        <div class="max-w-4xl mx-auto px-6 pt-8 mb-12">
-            <!-- Centered Search Section -->
-            <div class="flex flex-col items-center mb-8">
-                <div class="w-full max-w-2xl">
-                    <div class="relative">
-                        <input
-                            wire:model.live="searchEstate"
-                            type="text"
-                            placeholder="Search estate..."
-                            class="w-full bg-white rounded-full py-3 pl-6 pr-12 focus:outline-none shadow-sm hover:shadow-md transition-all duration-300 ease-in-out">
-                        <div class="absolute right-4 top-1/2 transform -translate-y-1/2">
-                            <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </svg>
+        <!-- Main Container with Background -->
+        <div class="mx-auto">
+            <!-- Search and Filter Container -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Header Section -->
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Water Level Monitoring</h1>
+                    <p class="text-gray-500">Last update: {{ now()->format('d F Y') }}</p>
+                </div>
+
+                <!-- Search and Filter Grid -->
+                <div class="grid md:grid-cols-3 gap-6 mb-8">
+                    <!-- Search Bar -->
+                    <div class="md:col-span-2">
+                        <div class="relative">
+                            <input
+                                wire:model.live="searchEstate"
+                                type="text"
+                                placeholder="Search estate by name or location..."
+                                class="w-full bg-white rounded-lg py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-200 shadow-sm hover:border-blue-300 transition-all duration-300">
+                            <div class="absolute left-4 top-1/2 transform -translate-y-1/2">
+                                <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Date Filters -->
+                    <div class="relative group">
+                        <button class="w-full bg-white rounded-lg py-4 px-6 text-left shadow-sm border border-gray-200 hover:border-blue-300 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-700">{{ $startDate ? 'Filtered Date' : 'Select Date Range' }}</span>
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </button>
+
+                        <!-- Date Range Picker Dropdown -->
+                        <div class="absolute right-0 mt-2 w-96 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                            <x-utils.date-range
+                                :start-date="$startDate"
+                                :end-date="$endDate"
+                                class="shadow-xl border-0" />
                         </div>
                     </div>
                 </div>
 
-                <!-- Search Results (No Results) -->
-                @if($searchEstate && empty($filteredEstates))
-                <div class="mt-4 text-center text-gray-500">
-                    No estates found matching "{{ $searchEstate }}"
+                <!-- Active Filters Display -->
+                @if($searchEstate || $startDate || $endDate)
+                <div class="flex flex-wrap items-center gap-3 mb-6 p-4 bg-blue-50 rounded-lg">
+                    <span class="text-sm font-medium text-blue-700">Active Filters:</span>
+                    @if($searchEstate)
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                        Search: {{ $searchEstate }}
+                        <button wire:click="$set('searchEstate', '')" class="ml-2 hover:text-blue-600">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </span>
+                    @endif
+                    @if($startDate || $endDate)
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                        Date: {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }}
+                        {{ $endDate ? ' - ' . \Carbon\Carbon::parse($endDate)->format('d M Y') : '' }}
+                        <button wire:click="clearDateFilter" class="ml-2 hover:text-blue-600">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </span>
+                    @endif
                 </div>
                 @endif
+
+                <!-- Results Section -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <!-- Results Header -->
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-semibold text-gray-900">Estate List</h2>
+                        <span class="text-sm text-gray-500">{{ count($filteredEstates) }} results found</span>
+                    </div>
+
+                    <!-- No Results Message -->
+                    @if($searchEstate && empty($filteredEstates))
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No results found</h3>
+                        <p class="mt-1 text-sm text-gray-500">No estates found matching "{{ $searchEstate }}"</p>
+                    </div>
+                    @else
+                    <!-- Estate Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                        @foreach($filteredEstates as $estate)
+                        <button
+                            wire:click="selectEstate({{ $estate['id'] }})"
+                            class="group hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-lg">
+                            <x-utils.card :estate="$estate" />
+                        </button>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
             </div>
-
-            <!-- Date Subtitle -->
-            <p class="text-center text-gray-500 text-sm mb-8">
-                Level Air (update: {{ now()->format('d F Y') }})
-            </p>
-
-            <!-- Estate List Container -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                @forelse($filteredEstates as $estate)
-                <button wire:click="selectEstate({{ $estate['id'] }})" class="focus:outline-none">
-                    <x-utils.card :estate="$estate" />
-                </button>
-                @empty
-                @endforelse
-            </div>
-
         </div>
 
 
@@ -94,6 +160,12 @@
                             <button id="rekapButton"
                                 class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-gray-200 text-gray-700">
                                 <i class="fas fa-chart-bar mr-1"></i>Rekap
+                            </button>
+
+                            <!-- Tombol Download -->
+                            <button id="downloadChartButton"
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-green-500 text-white hover:bg-green-600">
+                                <i class="fas fa-download mr-1"></i>Download Chart
                             </button>
                         </div>
                     </div>
@@ -744,6 +816,7 @@
         function updateChart(data, type = currentView, period = currentPeriod) {
             currentView = type;
             currentPeriod = period;
+            console.log(data);
 
             // Update button states
             updateButtonStates();
@@ -857,6 +930,66 @@
             currentPeriod = state.period;
             updateButtonStates();
         });
+
+
+
+
+        Livewire.on('showLoadingScreen', () => {
+            showLoadingScreen();
+        });
+
+        Livewire.on('hideLoadingScreen', () => {
+            hideLoadingScreen();
+        });
+
+
+        // Tambahkan di bagian JavaScript
+
+        // Fungsi untuk download chart
+        async function downloadChart() {
+            if (!chart) return;
+
+            try {
+                const {
+                    imgURI
+                } = await chart.dataURI();
+
+                // Show loading indicator
+                showLoadingScreen();
+
+                // Call the Livewire method and handle the response
+                const response = await $wire.GeneratePDF(imgURI);
+
+                // Create a blob from the response
+                const blob = new Blob([response], {
+                    type: 'application/pdf'
+                });
+                const url = window.URL.createObjectURL(blob);
+
+                // Create temporary link and trigger download
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `water-level-report-${new Date().toISOString()}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Clean up
+                window.URL.revokeObjectURL(url);
+                hideLoadingScreen();
+            } catch (error) {
+                console.error('Error downloading chart:', error);
+                hideLoadingScreen();
+                // Show error notification
+                Livewire.dispatch('notify', {
+                    type: 'error',
+                    message: 'Failed to generate PDF report'
+                });
+            }
+        }
+
+        // Tambahkan event listener untuk tombol download
+        document.getElementById('downloadChartButton').addEventListener('click', downloadChart);
     </script>
     @endscript
 </div>
