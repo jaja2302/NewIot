@@ -727,9 +727,22 @@ class Waterlevel extends Component implements HasForms, HasTable
     public function GeneratePDF($dataURI)
     {
         try {
+            if (!$this->selectedStation) {
+                throw new \Exception('Please select a station first');
+            }
+
+            // Validate data URI
+            if (!str_starts_with($dataURI, 'data:image/')) {
+                throw new \Exception('Invalid chart data');
+            }
+
             // Get the filtered data
             $query = $this->getFilteredQuery();
             $data = $query->get();
+
+            if ($data->isEmpty()) {
+                throw new \Exception('No data available for the selected period');
+            }
 
             // Save the chart image and get the path
             $imagePath = $this->saveBase64Image($dataURI);
@@ -739,7 +752,7 @@ class Waterlevel extends Component implements HasForms, HasTable
 
             // Create PDF
             $pdf = PDF::loadView('exports.pdf.water-level-report', [
-                'imagePath' => $imagePath, // Pass the image path instead of raw data
+                'imagePath' => $imagePath,
                 'data' => $data,
                 'station' => $stationName,
                 'startDate' => $this->startDate ? Carbon::parse($this->startDate)->format('d M Y') : Carbon::now()->format('d M Y'),
@@ -760,7 +773,10 @@ class Waterlevel extends Component implements HasForms, HasTable
                 $filename,
                 [
                     'Content-Type' => 'application/pdf',
-                    'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                    'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                    'Pragma' => 'no-cache',
+                    'Expires' => '0'
                 ]
             );
         } catch (\Exception $e) {
@@ -770,6 +786,8 @@ class Waterlevel extends Component implements HasForms, HasTable
                 ->body($e->getMessage())
                 ->danger()
                 ->send();
+
+            return response()->json(['error' => $e->getMessage()], 422);
         }
     }
 
@@ -781,15 +799,17 @@ class Waterlevel extends Component implements HasForms, HasTable
             list(, $data) = explode(',', $data);
 
             // Generate unique filename
-            $filename = 'chart_' . time() . '.png';
+            $filename = 'chart_' . uniqid() . '_' . time() . '.png';
             $path = 'images/' . $filename;
 
             // Save the image
-            Storage::disk('public')->put($path, base64_decode($data));
+            if (!Storage::disk('public')->put($path, base64_decode($data))) {
+                throw new \Exception('Failed to save image to storage');
+            }
 
             return $path;
         } catch (\Exception $e) {
-            throw new \Exception('Failed to save image: ' . $e->getMessage());
+            throw new \Exception('Failed to save chart image: ' . $e->getMessage());
         }
     }
 }

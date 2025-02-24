@@ -165,7 +165,7 @@
                             <!-- Tombol Download -->
                             <button id="downloadChartButton"
                                 class="px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out bg-green-500 text-white hover:bg-green-600">
-                                <i class="fas fa-download mr-1"></i>Download Chart
+                                <i class="fas fa-download mr-1"></i>Download PDF
                             </button>
                         </div>
                     </div>
@@ -947,49 +947,58 @@
 
         // Fungsi untuk download chart
         async function downloadChart() {
-            if (!chart) return;
+            if (!chart) {
+                Livewire.dispatch('notify', {
+                    type: 'error',
+                    message: 'Chart not ready. Please wait and try again.'
+                });
+                return;
+            }
 
             try {
-                const {
-                    imgURI
-                } = await chart.dataURI();
-
                 // Show loading indicator
                 showLoadingScreen();
 
-                // Call the Livewire method and handle the response
-                const response = await $wire.GeneratePDF(imgURI);
+                // Get chart image
+                const {
+                    imgURI
+                } = await chart.dataURI();
+                if (!imgURI) {
+                    throw new Error('Failed to generate chart image');
+                }
 
-                // Create a blob from the response
-                const blob = new Blob([response], {
-                    type: 'application/pdf'
-                });
-                const url = window.URL.createObjectURL(blob);
+                // Call the Livewire method to generate and download PDF
+                await $wire.GeneratePDF(imgURI);
 
-                // Create temporary link and trigger download
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `water-level-report-${new Date().toISOString()}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                // Clean up
-                window.URL.revokeObjectURL(url);
-                hideLoadingScreen();
             } catch (error) {
                 console.error('Error downloading chart:', error);
-                hideLoadingScreen();
-                // Show error notification
                 Livewire.dispatch('notify', {
                     type: 'error',
-                    message: 'Failed to generate PDF report'
+                    message: error.message || 'Failed to generate PDF report'
                 });
+            } finally {
+                hideLoadingScreen();
             }
         }
 
-        // Tambahkan event listener untuk tombol download
-        document.getElementById('downloadChartButton').addEventListener('click', downloadChart);
+        // Add event listener with debounce
+        const downloadButton = document.getElementById('downloadChartButton');
+        if (downloadButton) {
+            let isProcessing = false;
+            downloadButton.addEventListener('click', async () => {
+                if (isProcessing) return;
+
+                isProcessing = true;
+                downloadButton.disabled = true;
+
+                try {
+                    await downloadChart();
+                } finally {
+                    isProcessing = false;
+                    downloadButton.disabled = false;
+                }
+            });
+        }
     </script>
     @endscript
 </div>

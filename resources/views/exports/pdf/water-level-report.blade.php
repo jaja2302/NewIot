@@ -60,7 +60,13 @@
     </div>
 
     <div class="chart-container">
-        <img src="{{ public_path('storage/' . $imagePath) }}" alt="Chart" style="max-width: 100%; height: auto;">
+        @php
+        $imagePath = public_path('storage/' . $imagePath);
+        if (!file_exists($imagePath)) {
+        throw new \Exception('Chart image not found');
+        }
+        @endphp
+        <img src="{{ $imagePath }}" alt="Chart" style="max-width: 100%; height: auto;">
     </div>
 
     <h2>Data Details</h2>
